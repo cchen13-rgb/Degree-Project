@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hangman</title>
+<link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="design.css">
+<link rel="stylesheet" href="hangman.css">
+</head>
+<body>
+
+<div id="particles"></div>
+
+<header class="topbar">
+  <div class="logo">HELLO WORLD</div>
+  <label class="switch">
+    <input type="checkbox" id="modeToggle">
+    <span class="slider"></span>
+  </label>
+</header>
+
+<main class="hm-page">
+  <div class="hm-window">
+
+    <!-- Title bar -->
+    <div class="hm-titlebar">
+      <span class="hm-titlebar-text">HANGMAN.EXE</span>
+      <div class="hm-titlebar-btns">
+        <span>_</span><span>□</span><span>×</span>
+      </div>
+    </div>
+
+    <div class="hm-body">
+
+      <!-- LEFT: crane image -->
+      <div class="hm-left">
+        <div class="hm-crane-frame">
+          <img id="craneImg" src="Hangman/Crane Default.png" alt="Hangman" draggable="false"/>
+        </div>
+      </div>
+
+      <!-- RIGHT panel -->
+      <div class="hm-right">
+
+        <!-- Hint panel -->
+        <div class="hm-hint-panel">
+          <div class="hm-hint-title">Hangman</div>
+          <div class="hm-hint-body" id="hintText">lovingly woven, sturdier than a web</div>
+        </div>
+
+        <!-- Nag message -->
+        <div class="hm-nag-panel">
+          <span class="hm-nag-cursor">▶</span>
+          <span class="hm-nag" id="nagMsg">guess a letter.</span>
+        </div>
+
+        <!-- Word display + wrong letters -->
+        <div class="hm-word-area">
+          <div class="hm-word" id="wordDisplay"></div>
+          <div class="hm-wrong-label" id="wrongLabel"></div>
+          <div class="hm-wrong-letters" id="wrongLetters"></div>
+        </div>
+
+        <!-- Keyboard -->
+        <div class="hm-keyboard" id="keyboard"></div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="hangman.js"></script>
+</body>
+</html>

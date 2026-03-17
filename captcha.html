@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verification</title>
+<link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="design.css">
+<link rel="stylesheet" href="captchadesign.css">
+</head>
+
+<body>
+
+<div id="particles"></div>
+
+<header class="topbar">
+  <div class="logo">HELLO WORLD</div>
+  <label class="switch">
+    <input type="checkbox" id="modeToggle">
+    <span class="slider"></span>
+  </label>
+</header>
+
+<main class="captcha-page">
+
+  <div class="captcha-card">
+
+    <div class="captcha-header">
+      <p class="captcha-sub">Select all squares with</p>
+      <h1 class="captcha-title">human</h1>
+    </div>
+
+    <div class="captcha-grid" id="captchaGrid"></div>
+
+    <div class="captcha-footer">
+      <div class="captcha-lives" id="captchaLives"></div>
+      <button class="captcha-verify" id="verifyBtn">Verify</button>
+    </div>
+
+  </div>
+
+  <div class="captcha-feedback" id="captchaFeedback"></div>
+
+</main>
+
+
+<!-- Only captcha.js — do NOT include function.js here -->
+<script src="captcha.js"></script>
+
+</body>
+</html>

@@ -1,31 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Entrance</title>
-
-<link rel="stylesheet" href="design.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Entrance</title>
+  <link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="design.css">
 </head>
 
-<body>
+<body class="portal-page">
 
+<!-- Particles -->
 <div id="particles"></div>
 
 <div class="entrance">
 
-    <p class="location">You are here<span class="dots"></span></p>
+  <svg class="portal-text" viewBox="0 0 600 300">
+    <defs>
+      <path id="archPath" d="M80 180 A300 300 0 0 1 520 180"/>
+    </defs>
+    <text class="curveText">
+      <textPath href="#archPath" startOffset="50%" text-anchor="middle" lengthAdjust="spacingAndGlyphs">
+        Hello World
+      </textPath>
+    </text>
+  </svg>
 
-    <div id="door" class="door"></div>
+  <div id="door" class="door"></div>
 
-    <p class="enter">CLICK TO ENTER</p>
+  <div class="enter">CLICK TO ENTER</div>
 
 </div>
 
+<script src="js/gsap.js"></script>
+<script src="js/ScrambleTextPlugin.js"></script>
+<script src="js/ScrollTrigger.js"></script>
+<script>gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);</script>
 <script src="function.js"></script>
 
 </body>
-
 </html>

@@ -1,0 +1,304 @@
+/* ================= CAPTCHA PAGE ================= */
+
+.captcha-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* ================= CARD ================= */
+
+.captcha-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff8f8;
+  border: 1px solid rgba(93, 20, 30, 0.15);
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(93, 20, 30, 0.12);
+  position: relative;
+}
+
+body.dark .captcha-card {
+  background: #0a0000;
+  border-color: rgba(181, 0, 8, 0.3);
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* ================= HEADER ================= */
+
+.captcha-header {
+  background: #7a1a22;
+  padding: 24px 28px 20px 28px;
+}
+
+body.dark .captcha-header {
+  background: #b50008;
+}
+
+.captcha-sub {
+  font-family: "Switzer", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+}
+
+.captcha-title {
+  font-family: "Gambarino", serif;
+  font-size: 52px;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+/* ================= GRID ================= */
+
+.captcha-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  background: rgba(93, 20, 30, 0.12);
+  padding: 3px;
+}
+
+body.dark .captcha-grid {
+  background: rgba(181, 0, 8, 0.2);
+}
+
+/* ================= TILE ================= */
+
+.captcha-tile {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  cursor: pointer;
+  outline: none;
+}
+
+.captcha-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.2s ease;
+  pointer-events: none;
+}
+
+/* Selected state */
+.captcha-tile.selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(122, 26, 34, 0.45);
+  border: 3px solid #fff;
+  pointer-events: none;
+}
+
+body.dark .captcha-tile.selected::after {
+  background: rgba(181, 0, 8, 0.5);
+  border-color: #fff;
+}
+
+/* Checkmark on selected */
+.captcha-tile.selected::before {
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 700;
+  z-index: 2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+.captcha-tile:hover img {
+  filter: brightness(1.08);
+}
+
+.captcha-tile.selected:hover img {
+  filter: brightness(0.95);
+}
+
+/* ================= FOOTER ================= */
+
+.captcha-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(93, 20, 30, 0.1);
+  background: #fff8f8;
+}
+
+body.dark .captcha-footer {
+  background: #0a0000;
+  border-top-color: rgba(181, 0, 8, 0.2);
+}
+
+/* ================= LIVES / HEARTS ================= */
+
+.captcha-lives {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.captcha-heart {
+  width: 28px;
+  height: 28px;
+  position: relative;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.captcha-heart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.captcha-heart.lost {
+  opacity: 0.2;
+  transform: scale(0.8);
+}
+
+/* ================= VERIFY BUTTON ================= */
+
+.captcha-verify {
+  font-family: "Switzer", sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 28px;
+  background: none;
+  border: 2px solid #3d0d14;
+  color: #3d0d14;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+}
+
+.captcha-verify:hover {
+  background: #3d0d14;
+  color: #fff;
+  transform: scale(1.04);
+}
+
+body.dark .captcha-verify {
+  border-color: #b50008;
+  color: #b50008;
+}
+
+body.dark .captcha-verify:hover {
+  background: #b50008;
+  color: #0a0000;
+}
+
+/* ================= FEEDBACK OVERLAY ================= */
+
+.captcha-feedback {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.captcha-feedback.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.captcha-feedback-box {
+  background: #fff8f8;
+  border: 1px solid rgba(93, 20, 30, 0.2);
+  padding: 40px 52px;
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 8px 48px rgba(93, 20, 30, 0.15);
+}
+
+body.dark .captcha-feedback-box {
+  background: #0a0000;
+  border-color: rgba(181, 0, 8, 0.3);
+}
+
+.captcha-feedback-box h2 {
+  font-family: "Gambarino", serif;
+  font-size: 40px;
+  color: #3d0d14;
+  margin: 0 0 12px 0;
+}
+
+body.dark .captcha-feedback-box h2 {
+  color: #b50008;
+}
+
+.captcha-feedback-box p {
+  font-family: "Switzer", sans-serif;
+  font-size: 12px;
+  color: #3d0d14;
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+  margin: 0 0 24px 0;
+}
+
+body.dark .captcha-feedback-box p {
+  color: rgba(181, 0, 8, 0.8);
+}
+
+/* ================= SHAKE ANIMATION (wrong answer) ================= */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+.captcha-card.shake {
+  animation: shake 0.45s ease;
+}
+
+/* ================= SUCCESS PULSE ================= */
+
+@keyframes successPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(122, 26, 34, 0.4); }
+  70%  { box-shadow: 0 0 0 16px rgba(122, 26, 34, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(122, 26, 34, 0); }
+}
+
+.captcha-card.success {
+  animation: successPulse 0.6s ease;
+}
+/* ================= DARK MODE IMAGES ================= */
+
+.captcha-tile img {
+  transition: filter 0.6s ease;
+  filter: brightness(0) saturate(0); /* hidden in light mode */
+}
+
+body.dark .captcha-tile img {
+  filter: brightness(1) saturate(1); /* revealed in dark mode */
+}
+
+body.dark .captcha-tile:hover img {
+  filter: brightness(1.08) saturate(1);
+}
+
+body.dark .captcha-tile.selected img {
+  filter: brightness(0.95) saturate(1);
+}

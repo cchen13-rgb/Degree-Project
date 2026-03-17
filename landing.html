@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World</title>
+  <link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="Dante/1.webp" as="image">
+  <link rel="preload" href="Dante/2.webp" as="image">
+  <link rel="preload" href="Dante/3.webp" as="image">
+  <link rel="preload" href="Dante/4.webp" as="image">
+  <link rel="preload" href="Dante/5.webp" as="image">
+  <link rel="stylesheet" href="design.css">
+  <style>
+
+    /* ---- Loader ---- */
+    #loader{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:28px;
+      background:linear-gradient(to bottom, #ffb4ba 0%, #ffcacf 15%, #ffdbdf 35%, #ffebee 55%, #ffebee 75%, #ffffff 100%);
+      opacity:1;
+      transition:opacity 0.8s ease;
+      pointer-events:none;
+    }
+
+    body.dark #loader{
+      background:#b50008;
+    }
+
+    #loader-text{
+      font-family:"Gambarino",serif;
+      font-size:18px;
+      letter-spacing:4px;
+      color:#3d0d14;
+    }
+
+    body.dark #loader-text{
+      color:#0d0d0d;
+    }
+
+    #loader-bar-track{
+      width:200px;
+      height:2px;
+      background:rgba(93,20,30,0.15);
+      border-radius:2px;
+      overflow:hidden;
+    }
+
+    body.dark #loader-bar-track{
+      background:rgba(0,0,0,0.2);
+    }
+
+    #loader-bar-fill{
+      height:100%;
+      width:0%;
+      border-radius:2px;
+      background:linear-gradient(to right, #ffb4ba, #d4637a, #a8324a);
+      transition:width 0.3s ease;
+    }
+
+    body.dark #loader-bar-fill{
+      background:linear-gradient(to right, #ff8a8a, #c0392b, #7a0000);
+    }
+
+    /* ================= CHARACTER PROFILES ================= */
+
+    .profiles-section{
+      padding:80px 60px 120px 60px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:40px;
+      position:relative;
+      z-index:10;
+      background:linear-gradient(to bottom, #ffebee 0%, #ffffff 100%);
+    }
+
+    body.dark .profiles-section{
+      background:#b50008;
+    }
+
+    .char-card{
+      display:grid;
+      grid-template-columns:360px 1fr;
+      min-height:0;
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(93,20,30,0.1);
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .char-card.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    body.dark .char-card{
+      border-color:rgba(0,0,0,0.2);
+    }
+
+    .char-card--flip{ direction:ltr; }
+
+    .char-img-wrap{
+      position:relative;
+      overflow:hidden;
+      background:rgba(93,20,30,0.04);
+    }
+
+    body.dark .char-img-wrap{
+      background:rgba(0,0,0,0.15);
+    }
+
+    .char-img-wrap img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:top center;
+      display:block;
+      transition:transform 0.7s ease;
+    }
+
+    .char-card:hover .char-img-wrap img{
+      transform:scale(1.04);
+    }
+
+    .char-img-wrap::after{
+      content:attr(data-tag);
+      position:absolute;
+      bottom:20px;
+      right:20px;
+      font-family:"Switzer",sans-serif;
+      font-size:10px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      color:#fff8f8;
+      background:rgba(61,13,20,0.75);
+      padding:4px 12px;
+      backdrop-filter:blur(4px);
+    }
+
+    body.dark .char-img-wrap::after{
+      background:rgba(0,0,0,0.6);
+      color:#ffcacf;
+    }
+
+    .char-info{
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      border-left:1px solid rgba(93,20,30,0.12);
+      position:relative;
+      overflow-y:auto;
+    }
+
+    body.dark .char-info{
+      border-color:rgba(0,0,0,0.2);
+    }
+
+    .char-id{
+      font-family:"Switzer",sans-serif;
+      font-size:9px;
+      letter-spacing:4px;
+      color:rgba(93,20,30,0.35);
+      margin-bottom:8px;
+      transition:opacity .6s;
+    }
+
+    .char-name-en{
+      font-family:"Gambarino",serif;
+      font-size:54px;
+      line-height:1;
+      color:#3d0d14;
+      margin:0 0 2px 0;
+      letter-spacing:1px;
+      transition:color .6s;
+      /* Prevent layout shift during SplitText */
+      overflow:hidden;
+    }
+
+    .char-name-sub{
+      font-family:"Switzer",sans-serif;
+      font-size:9px;
+      letter-spacing:3px;
+      color:rgba(93,20,30,0.5);
+      margin-bottom:10px;
+      text-transform:uppercase;
+      transition:opacity .6s;
+    }
+
+    .char-rule{
+      width:30px;
+      height:1px;
+      background:rgba(93,20,30,0.3);
+      margin-bottom:10px;
+      transition:opacity .6s;
+    }
+
+    .char-stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      margin-bottom:12px;
+      border:1px solid rgba(93,20,30,0.1);
+      transition:opacity .6s;
+    }
+
+    .char-stat{
+      padding:6px 10px;
+      border-bottom:1px solid rgba(93,20,30,0.08);
+      border-right:1px solid rgba(93,20,30,0.08);
+    }
+
+    .char-stat:nth-child(even){
+      border-right:none;
+    }
+
+    .stat-label{
+      font-family:"Switzer",sans-serif;
+      font-size:9px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:rgba(93,20,30,0.4);
+      margin-bottom:3px;
+    }
+
+    .stat-value{
+      font-family:"Switzer",sans-serif;
+      font-size:13.5px;
+      color:#3d0d14;
+      letter-spacing:0.5px;
+    }
+
+    .char-profile-label{
+      font-family:"Switzer",sans-serif;
+      font-size:9px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      color:rgba(93,20,30,0.4);
+      margin-bottom:8px;
+      transition:opacity .6s;
+    }
+
+    .char-profile-text{
+      font-family:"Montserrat",sans-serif;
+      font-size:12.5px;
+      line-height:1.9;
+      color:#3d0d14;
+      letter-spacing:0.3px;
+      margin:0;
+      transition:color .6s;
+    }
+
+    body.dark .char-id            { opacity:0; }
+    body.dark .char-name-sub      { opacity:0; }
+    body.dark .char-rule          { opacity:0; }
+    body.dark .char-stats         { opacity:0; }
+    body.dark .char-profile-label { opacity:0; }
+
+    body.dark .char-name-en                   { color:transparent; }
+    body.dark .char-name-en .reveal-name      { color:#0d0d0d; }
+
+    body.dark .char-profile-text              { color:transparent; }
+    body.dark .char-profile-text .reveal-name { color:#0d0d0d; }
+
+  </style>
+</head>
+
+<body class="landing">
+
+<!-- Loader -->
+<div id="loader">
+  <div id="loader-text">loading<span class="dots"></span></div>
+  <div id="loader-bar-track">
+    <div id="loader-bar-fill"></div>
+  </div>
+</div>
+
+<!-- Particles -->
+<div id="particles"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeModal">✕</button>
+    <h2>404</h2>
+    <p>This page does not exist yet.<br>Still under some construction i guess.</p>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="topbar">
+  <div class="logo">HELLO WORLD</div>
+  <label class="switch">
+    <input type="checkbox" id="modeToggle">
+    <span class="slider"></span>
+  </label>
+</header>
+
+<!-- Hero -->
+<div class="layout">
+  <div></div>
+  <div class="center">
+    <div class="portal">
+      <div class="dante-parallax">
+        <img src="Dante/5.webp" class="dante-layer" data-depth="0.08" decoding="async" alt="">
+        <img src="Dante/4.webp" class="dante-layer" data-depth="0.14" decoding="async" alt="">
+        <img src="Dante/3.webp" class="dante-layer" data-depth="0.22" decoding="async" alt="">
+        <img src="Dante/2.webp" class="dante-layer" data-depth="0.32" decoding="async" alt="">
+        <img src="Dante/1.webp" class="dante-layer" data-depth="0.45" decoding="async" alt="">
+        <img src="svg/flower1.svg" class="dante-layer star star1" data-depth="0.55" alt="">
+        <img src="svg/flower2.svg" class="dante-layer star star2" data-depth="0.62" alt="">
+      </div>
+    </div>
+    <p class="text">
+Your name is—is— You are wandering alone through the dark.  You were something before this, somewhere before here, but now…you are being called down. 
+    </p>
+    <button class="login">Login</button>
+  </div>
+  <div></div>
+</div>
+
+<!-- Character Profiles -->
+<section class="profiles-section">
+
+  <div class="char-card" id="cheryl-card">
+    <div class="char-img-wrap" data-tag="Archive">
+      <img src="pngs/cheryl2.png" loading="lazy" alt="Cheryl">
+    </div>
+    <div class="char-info">
+      <div class="char-id">SUBJECT · 001</div>
+      <h2 class="char-name-en">Cheryl</h2>
+      <div class="char-name-sub">Cheryl · Shelley</div>
+      <div class="char-rule"></div>
+      <div class="char-stats">
+        <div class="char-stat">
+          <div class="stat-label">Last Name</div>
+          <div class="stat-value">When you were little you always doodled a seashell next to your name.  Shelley was it? That sounds right to you.</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">First Name</div>
+          <div class="stat-value">You seem to recall going by Cheryl. Was that short for something?</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">Age</div>
+          <div class="stat-value">24 no? Have you heard that four is an unlucky number?</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">Status</div>
+          <div class="stat-value">Presumably deceased from the looks of things.</div>
+        </div>
+      </div>
+      <div class="char-profile-label">Profile</div>
+      <p class="char-profile-text">With your bright smile, dainty appearance, and hair dyed candy-heart red, you radiate friendliness. At the moment, this is all overshadowed by the troubling loss of your memories. 'The familiarity of this place is unpleasant," you mumble, your quiet sighs exacerbated by the echoes of the abyss. Can you navigate these pages to help restore what was lost?</p>
+    </div>
+  </div>
+
+  <div class="char-card char-card--flip" id="crane-card">
+    <div class="char-img-wrap" data-tag="Archive">
+      <img src="pngs/crane2.png" loading="lazy" alt="Crane">
+    </div>
+    <div class="char-info">
+      <div class="char-id">SUBJECT · 002</div>
+      <h2 class="char-name-en">Ms. Crane</h2>
+      <div class="char-name-sub">Crane · T…</div>
+      <div class="char-rule"></div>
+      <div class="char-stats">
+        <div class="char-stat">
+          <div class="stat-label">Last Name</div>
+          <div class="stat-value">Crane</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">First Name</div>
+          <div class="stat-value">T…Ti…Ta…Th… It's on the tip of Cheryl's tongue, but Ms. Crane will have to do for now.</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">Age</div>
+          <div class="stat-value">26. Interesting that you remember this. Perhaps numbers come back easier than names, more commonplace and less personal.</div>
+        </div>
+        <div class="char-stat">
+          <div class="stat-label">Status</div>
+          <div class="stat-value">Unknown</div>
+        </div>
+      </div>
+      <div class="char-profile-label">Profile</div>
+      <p class="char-profile-text">Quiet and cautious, but kind.  Trying to remember her brings you a light brush of comfort followed by a deep sadness.  Cranes symbolize longevity and immortality in some places.  A very permanent association for a mostly migratory species.  Although, they do mate for life.  That is part of what makes the crane wife's story so sad.  She leaves when her husband discovers she'd been plucking out her feathers to make silk for their livelihood.  The Crane that you knew had no feathers however, just soft black hair.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- Scripts: gsap → plugins → ScrollTrigger → function.js (once) -->
+<script src="js/gsap.js"></script>
+<script src="js/SplitText.js"></script>
+<script src="js/ScrambleTextPlugin.js"></script>
+<script src="js/ScrollTrigger.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
+</script>
+<script src="function.js"></script>
+<script>
+  const cards = document.querySelectorAll('.char-card');
+  const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 120);
+        cardObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(c => cardObserver.observe(c));
+</script>
+
+</body>
+</html>
