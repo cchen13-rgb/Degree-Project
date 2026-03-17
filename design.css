@@ -442,13 +442,7 @@ filter:brightness(.15) contrast(2);
 
 /* ================= FLOWERS ================= */
 
-.star{
-position:absolute;
-top:150px;
-width:140px;
-height:140px;
-z-index:5;
-}
+
 
 .star2{
 animation:spin2 24s linear infinite;
@@ -930,7 +924,7 @@ position:absolute;
 width:140px;
 height:140px;
 top:300px;
-left:calc(50% - 70px);
+left:calc(50% - 5px);
 opacity:0;
 transform-origin:center center;
 pointer-events:all;
@@ -1049,12 +1043,6 @@ border-radius:2px 2px 0 0;
     width:1100px;
   }
 
-  .star{
-    width:90px;
-    height:90px;
-    top:100px;
-  }
-
   .dante-parallax .star{
     width:90px;
     left: 50%;
@@ -1119,10 +1107,7 @@ border-radius:2px 2px 0 0;
     display: none !important;
   }
 
-  /* Hide the second spinning star on mobile */
-  .dante-parallax .star2{
-    display: none !important;
-  }
+
 
   /* Login button — visible and styled */
   .center .login{
@@ -1150,10 +1135,7 @@ border-radius:2px 2px 0 0;
     display: none !important;
   }
 
-  /* Hide the second spinning star on mobile */
-  .dante-parallax .star2{
-    display: none !important;
-  }
+
 
   /* Login button — visible and styled */
   .center .login{
@@ -1269,6 +1251,7 @@ border-radius:2px 2px 0 0;
 
   .dante-parallax .star2{
     display: none !important;
+    
   }
 
   .center .text{
@@ -1366,36 +1349,4 @@ border-radius:2px 2px 0 0;
     font-size: 22px;
   }
 }
-
-@media (max-width: 480px) {
-
-  .portal{
-    height: 88vw;
-    min-height: 200px;
-  }
-
-  .dante-parallax{
-    width: 220vw !important;
-    min-width: 400px;
-    top: -2vw;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-  }
-
-  .dante-parallax .star{
-    width: 48px;
-    height: 48px;
-  }
-
-  .modal-box{
-    padding: 28px 16px 36px 16px;
-  }
-
-  .logo{
-    font-size: 18px;
-  }
-}
-
-
 
