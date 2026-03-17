@@ -418,7 +418,6 @@ display:flex;
 justify-content:center;
 align-items:flex-start;
 overflow:visible;
-/* Perspective only — no preserve-3d on the container itself */
 perspective:1200px;
 perspective-origin:50% 60%;
 }
@@ -536,14 +535,28 @@ fill:#0d0d0d;
 
 /* ================= DARK MODE IMAGES ================= */
 
-img[src$=".svg"]{
+img[src$=".svg"],
+img[src$=".webp"]{
 filter:brightness(1) contrast(1);
 transition:filter .6s ease;
 }
 
 body.dark img.dithered,
-body.dark img[src$=".svg"]{
-filter:brightness(.15) contrast(2);
+body.dark img[src$=".svg"],
+body.dark img[src$=".webp"]{
+filter:invert(1) grayscale(1);
+}
+
+body.dark .dante-layer:not(.star){
+filter:invert(1) grayscale(1);
+}
+
+body.dark .dante-parallax .star{
+filter:invert(1) grayscale(1);
+}
+
+body.dark .char-img-wrap img{
+filter:invert(1) grayscale(1);
 }
 
 
@@ -722,6 +735,8 @@ justify-content:center;
 opacity:0;
 pointer-events:none;
 transition:opacity .3s ease;
+padding:20px;
+box-sizing:border-box;
 }
 
 .modal-overlay.open{
@@ -739,6 +754,9 @@ text-align:center;
 position:relative;
 transform:translateY(12px);
 transition:transform .3s ease;
+box-sizing:border-box;
+max-height:90vh;
+overflow-y:auto;
 }
 
 .modal-overlay.open .modal-box{
@@ -746,8 +764,51 @@ transform:translateY(0);
 }
 
 body.dark .modal-box{
-background:#8a0006;
-border-color:rgba(0,0,0,0.3);
+background:#0a0000;
+border-color:rgba(181,0,8,0.3);
+}
+
+body.dark .modal-box h2{
+color:#fff8f8;
+}
+
+body.dark .modal-box label{
+color:rgba(255,220,220,0.5) !important;
+}
+
+body.dark .modal-box input{
+border-color:rgba(181,0,8,0.4) !important;
+color:#fff8f8 !important;
+}
+
+body.dark .modal-box input::placeholder{
+color:rgba(255,255,255,0.2) !important;
+}
+
+body.dark .modal-box .modal-close{
+color:rgba(255,220,220,0.6);
+}
+
+body.dark .modal-box #loginError{
+color:#ff6b6b;
+}
+
+body.dark .modal-box > div:first-of-type{
+border-left-color:rgba(181,0,8,0.5) !important;
+}
+
+body.dark .modal-box > div:first-of-type > div{
+color:rgba(255,220,220,0.35) !important;
+}
+
+body.dark .modal-box .login{
+border-color:#fff8f8 !important;
+color:#fff8f8 !important;
+}
+
+body.dark .modal-box .login:hover{
+background:#fff8f8 !important;
+color:#0a0000 !important;
 }
 
 .modal-box h2{
@@ -755,10 +816,6 @@ font-size:36px;
 margin:0 0 12px 0;
 border:none;
 padding:0;
-}
-
-body.dark .modal-box h2{
-color:#0d0d0d;
 }
 
 .modal-box p{
@@ -787,7 +844,7 @@ font-family:"Switzer";
 }
 
 body.dark .modal-close{
-color:#0d0d0d;
+color:rgba(255,220,220,0.6);
 }
 
 
@@ -822,7 +879,6 @@ right:-122%;
 width:1780px;
 pointer-events:none;
 z-index:0;
-/* No transform-style preserve-3d here — perspective on .portal handles depth */
 }
 
 .dante-parallax img:first-child{
@@ -841,7 +897,6 @@ height:auto;
 display:block;
 }
 
-/* All non-star layers entry animation — flat translateY only */
 .dante-layer:not(.star){
 opacity:0;
 transform:translateY(160px);
@@ -864,12 +919,11 @@ transform:translateY(0);
 }
 
 body.dark .dante-layer:not(.star){
-filter:brightness(0.15) contrast(2);
+filter:invert(1) grayscale(1);
 }
 
 
 /* ================= STARS ================= */
-/* No transform here — JS owns position fully */
 
 .dante-parallax .star{
 position:absolute;
@@ -893,7 +947,7 @@ animation:spin2 24s linear infinite;
 }
 
 body.dark .dante-parallax .star{
-filter:brightness(0.15) contrast(2);
+filter:invert(1) grayscale(1);
 }
 
 
@@ -903,6 +957,7 @@ filter:brightness(0.15) contrast(2);
 position:relative;
 z-index:50;
 color:#ffffff;
+opacity:0;
 }
 
 body.dark .center .text{
@@ -913,54 +968,9 @@ color:#ffffff;
 position:relative;
 z-index:50;
 border-color:#ffffff;
-color:#ffffff;
-}
-
-.center .login:hover{
-background:#ffffff;
-color:#3d0d14;
-}
-
-body.dark .center .login{
-border-color:#ffffff;
-color:#ffffff;
-}
-
-body.dark .center .login:hover{
-background:#ffffff;
-color:#b50008;
-}
-
-/* ================= DARK MODE IMAGES ================= */
-
-img[src$=".svg"]{
-filter:brightness(1) contrast(1);
-transition:filter .6s ease;
-}
-
-body.dark img.dithered,
-body.dark img[src$=".svg"]{
-filter:invert(1);
-}
-
-body.dark .dante-layer:not(.star){
-filter:invert(1);
-}
-
-body.dark .dante-parallax .star{
-filter:invert(1);
-}
-
-body.dark .char-img-wrap img {
-  filter: invert(1);
-}
-
-.center .login{
-position:relative;
-z-index:50;
-border-color:#ffffff;
 color:#3d0d14;
 background:#ffffff;
+opacity:0;
 }
 
 .center .login:hover{
@@ -981,110 +991,605 @@ border-color:#a8324a;
 color:#ffffff;
 }
 
-body.dark img.dithered,
-body.dark img[src$=".svg"]{
-filter:invert(1) grayscale(1);
+
+/* ================= PROFILES ================= */
+
+.profiles-section{
+position:sticky;
+top:0;
+z-index:20;
+will-change:transform;
+border-radius:2px 2px 0 0;
 }
 
-body.dark .dante-layer:not(.star){
-filter:invert(1) grayscale(1);
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  /* Header */
+  .topbar{
+    padding:8px 20px 0 20px;
+  }
+
+  .switch{
+    right:0;
+  }
+
+  /* Hero layout — collapse to single column */
+  .layout{
+    grid-template-columns:1fr;
+    padding-top:0;
+  }
+
+  .layout > div:first-child,
+  .layout > div:last-child{
+    display:none;
+  }
+
+  .center{
+    padding:20px 20px 80px 20px;
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  /* Portal / dante layers — scale down */
+  .portal{
+    width:100%;
+    max-width:340px;
+    height:340px;
+  }
+
+  .dante-parallax{
+    top:-80px;
+    right:-60%;
+    width:1100px;
+  }
+
+  .star{
+    width:90px;
+    height:90px;
+    top:100px;
+  }
+
+  .dante-parallax .star{
+    width:90px;
+    height:90px;
+  }
+
+  .text{
+    margin-top:-100px;
+    font-size:11px;
+    max-width:180px;
+  }
+
+  /* Modal — full width on mobile */
+  .modal-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+
+  .modal-box{
+    max-width:100%;
+    width:100%;
+    max-height:85vh;
+    padding:32px 24px 40px 24px;
+    border-radius:16px 16px 0 0;
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+  }
+
+  /* Slide up from bottom on mobile */
+  .modal-overlay .modal-box{
+    transform:translateY(40px);
+  }
+
+  .modal-overlay.open .modal-box{
+    transform:translateY(0);
+  }
+
+  /* Split layout */
+  .split-layout{
+    grid-template-columns:1fr;
+  }
+
+  .left-panel h2,
+  .scroll-content h2{
+    font-size:42px;
+    padding:24px 20px 12px 20px;
+  }
+
+  .left-panel p,
+  .scroll-content p{
+    padding:16px 20px 24px 20px;
+    font-size:11px;
+  }
+
+  h2{
+    font-size:38px;
+  }
 }
 
-body.dark .dante-parallax .star{
-filter:invert(1) grayscale(1);
+@media (max-width: 480px) {
+
+  .portal{
+    max-width:280px;
+    height:280px;
+  }
+
+  .dante-parallax{
+    top:-60px;
+    right:-80%;
+    width:900px;
+  }
+
+  .text{
+    margin-top:-80px;
+    max-width:160px;
+  }
+
+  .modal-box{
+    padding:28px 18px 36px 18px;
+  }
 }
 
-body.dark .char-img-wrap img {
-filter: invert(1) grayscale(1);
+/* ================= MOBILE ================= */
+
+@media (max-width: 1024px) {
+
+  .layout{
+    grid-template-columns: 1fr;
+  }
+
+  .layout > div:first-child,
+  .layout > div:last-child{
+    display: none;
+  }
+
+  .center{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 80px 0;
+    align-items: center;
+  }
+
+  /* Fixed cinematic aspect ratio — always wide, never tall */
+  .portal{
+    width: 100vw;
+    max-width: 100vw;
+    height: 52vw;
+    min-height: 200px;
+    max-height: 380px;
+    overflow: hidden;
+    perspective: none;
+  }
+
+  /* Dante layers fill the portal like a cropped banner */
+  .dante-parallax{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160vw;
+    min-width: 600px;
+  }
+
+  .dante-parallax .star{
+    width: 70px;
+    height: 70px;
+    top: 160px;
+    left: calc(50% - 35px);
+  }
+
+  /* Text sits below the portal, not overlapping */
+  .text{
+    margin-top: 28px;
+    max-width: 280px;
+    font-size: 11px;
+    color: #3d0d14;
+    opacity: 1 !important;
+  }
+
+  body.dark .text{
+    color: #0d0d0d;
+  }
+
+  .center .login{
+    opacity: 1 !important;
+    margin-top: 8px;
+  }
 }
 
-.center .text {
-  opacity: 0;
+@media (max-width: 768px) {
+
+  .topbar{
+    padding: 10px 20px 0 20px;
+  }
+
+  .switch{
+    right: 0;
+  }
+
+  .logo{
+    font-size: 24px;
+  }
+
+  .portal{
+    height: 55vw;
+    min-height: 180px;
+  }
+
+  .dante-parallax{
+    width: 180vw;
+    min-width: 520px;
+    top: -2vw;
+  }
+
+  .dante-parallax .star{
+    width: 60px;
+    height: 60px;
+    top: 130px;
+    left: calc(50% - 30px);
+  }
+
+  .text{
+    max-width: 240px;
+    margin-top: 24px;
+  }
+
+  /* Modal — bottom sheet */
+  .modal-overlay{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-box{
+    max-width: 100%;
+    width: 100%;
+    max-height: 88vh;
+    padding: 32px 20px 40px 20px;
+    border-radius: 16px 16px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .modal-overlay .modal-box{
+    transform: translateY(60px);
+  }
+
+  .modal-overlay.open .modal-box{
+    transform: translateY(0);
+  }
+
+  .split-layout{
+    grid-template-columns: 1fr;
+  }
+
+  .left-panel h2,
+  .scroll-content h2{
+    font-size: 42px;
+    padding: 24px 20px 12px 20px;
+  }
+
+  .left-panel p,
+  .scroll-content p{
+    padding: 16px 20px 24px 20px;
+    font-size: 11px;
+  }
+
+  h2{
+    font-size: 38px;
+  }
 }
 
-.center .login {
-  opacity: 0;
-}
-/* ================= DARK MODE IMAGES — add webp to existing rules ================= */
+@media (max-width: 480px) {
 
-/* Replace your existing dark mode image rules with these: */
+  .portal{
+    height: 60vw;
+    min-height: 160px;
+  }
 
-img[src$=".svg"],
-img[src$=".webp"] {
-  filter: brightness(1) contrast(1);
-  transition: filter .6s ease;
-}
+  .dante-parallax{
+    width: 210vw;
+    min-width: 440px;
+    top: -1vw;
+  }
 
-body.dark img.dithered,
-body.dark img[src$=".svg"],
-body.dark img[src$=".webp"] {
-  filter: invert(1) grayscale(1);
-}
+  .dante-parallax .star{
+    width: 50px;
+    height: 50px;
+    top: 100px;
+    left: calc(50% - 25px);
+  }
 
-body.dark .dante-layer:not(.star) {
-  filter: invert(1) grayscale(1);
-}
+  .text{
+    max-width: 200px;
+    font-size: 10.5px;
+  }
 
-body.dark .dante-parallax .star {
-  filter: invert(1) grayscale(1);
-}
+  .modal-box{
+    padding: 28px 16px 36px 16px;
+  }
 
-body.dark .char-img-wrap img {
-  filter: invert(1) grayscale(1);
-}
-
-.profiles-section {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  will-change: transform;
-  border-radius: 2px 2px 0 0;
+  .logo{
+    font-size: 20px;
+  }
 }
 
-body.dark .modal-box {
-  background: #0a0000;
-  border-color: rgba(181,0,8,0.3);
+@media (max-width: 1024px) {
+
+  .layout{
+    grid-template-columns: 1fr;
+  }
+
+  .layout > div:first-child,
+  .layout > div:last-child{
+    display: none;
+  }
+
+  .center{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 60px 0;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Portal flush to edges, no gap above or below */
+  .portal{
+    width: 100vw;
+    max-width: 100vw;
+    height: 52vw;
+    min-height: 200px;
+    max-height: 380px;
+    overflow: hidden;
+    perspective: none;
+    margin: 0;
+    /* Match page background so no colour gap shows */
+    background: linear-gradient(to bottom, #ffb4ba 0%, #ffcacf 15%, #ffdbdf 35%, #ffebee 55%);
+  }
+
+  body.dark .portal{
+    background: #b50008;
+  }
+
+  /* Dante parallax — nudge up so arch fills the frame */
+  .dante-parallax{
+    position: absolute;
+    top: -8vw;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 155vw;
+    min-width: 580px;
+  }
+
+  /* Star — centred in the arch opening */
+  .dante-parallax .star{
+    width: 70px;
+    height: 70px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%) !important;
+  }
+
+  /* Text — tight gap below portal */
+  .text{
+    margin-top: 20px;
+    margin-bottom: 16px;
+    max-width: 280px;
+    font-size: 11px;
+    color: #3d0d14;
+    opacity: 1 !important;
+    text-align: center;
+  }
+
+  body.dark .text{
+    color: #0d0d0d;
+  }
+
+  .center .login{
+    opacity: 1 !important;
+    margin-bottom: 0;
+  }
 }
 
-body.dark .modal-box h2 {
-  color: #fff8f8;
+@media (max-width: 1024px) {
+
+  .layout{
+    grid-template-columns: 1fr;
+  }
+
+  .layout > div:first-child,
+  .layout > div:last-child{
+    display: none;
+  }
+
+  .center{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 60px 0;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Portal flush to edges, no gap above or below */
+  .portal{
+    width: 100vw;
+    max-width: 100vw;
+    height: 52vw;
+    min-height: 200px;
+    max-height: 380px;
+    overflow: hidden;
+    perspective: none;
+    margin: 0;
+    /* Match page background so no colour gap shows */
+    background: linear-gradient(to bottom, #ffb4ba 0%, #ffcacf 15%, #ffdbdf 35%, #ffebee 55%);
+  }
+
+  body.dark .portal{
+    background: #b50008;
+  }
+
+  /* Dante parallax — nudge up so arch fills the frame */
+  .dante-parallax{
+    position: absolute;
+    top: -8vw;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 155vw;
+    min-width: 580px;
+  }
+
+  /* Star — centred in the arch opening */
+  .dante-parallax .star{
+    width: 70px;
+    height: 70px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%) !important;
+  }
+
+  /* Text — tight gap below portal */
+  .text{
+    margin-top: 20px;
+    margin-bottom: 16px;
+    max-width: 280px;
+    font-size: 11px;
+    color: #3d0d14;
+    opacity: 1 !important;
+    text-align: center;
+  }
+
+  body.dark .text{
+    color: #0d0d0d;
+  }
+
+  .center .login{
+    opacity: 1 !important;
+    margin-bottom: 0;
+  }
 }
 
-body.dark .modal-box label {
-  color: rgba(255, 220, 220, 0.5) !important;
+@media (max-width: 768px) {
+
+  .topbar{
+    padding: 10px 20px 0 20px;
+  }
+
+  .switch{
+    right: 0;
+  }
+
+  .logo{
+    font-size: 24px;
+  }
+
+  .portal{
+    height: 58vw;
+    min-height: 180px;
+  }
+
+  .dante-parallax{
+    width: 185vw;
+    min-width: 500px;
+    top: -6vw;
+  }
+
+  .dante-parallax .star{
+    width: 58px;
+    height: 58px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%) !important;
+  }
+
+  .text{
+    max-width: 240px;
+    margin-top: 20px;
+  }
+
+  .modal-overlay{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-box{
+    max-width: 100%;
+    width: 100%;
+    max-height: 88vh;
+    padding: 32px 20px 40px 20px;
+    border-radius: 16px 16px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .modal-overlay .modal-box{
+    transform: translateY(60px);
+  }
+
+  .modal-overlay.open .modal-box{
+    transform: translateY(0);
+  }
+
+  .split-layout{
+    grid-template-columns: 1fr;
+  }
+
+  .left-panel h2,
+  .scroll-content h2{
+    font-size: 42px;
+    padding: 24px 20px 12px 20px;
+  }
+
+  .left-panel p,
+  .scroll-content p{
+    padding: 16px 20px 24px 20px;
+    font-size: 11px;
+  }
+
+  h2{
+    font-size: 38px;
+  }
 }
 
-body.dark .modal-box input {
-  border-color: rgba(181,0,8,0.4) !important;
-  color: #fff8f8 !important;
-}
+@media (max-width: 480px) {
 
-body.dark .modal-box input::placeholder {
-  color: rgba(255,255,255,0.2) !important;
-}
+  .portal{
+    height: 64vw;
+    min-height: 160px;
+  }
 
-body.dark .modal-box .modal-close {
-  color: rgba(255,220,220,0.6);
-}
+  .dante-parallax{
+    width: 220vw;
+    min-width: 420px;
+    top: -4vw;
+  }
 
-body.dark .modal-box #loginError {
-  color: #ff6b6b;
-}
+  .dante-parallax .star{
+    width: 48px;
+    height: 48px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%) !important;
+  }
 
-body.dark .modal-box > div:first-of-type {
-  border-left-color: rgba(181,0,8,0.5) !important;
-}
+  .text{
+    max-width: 200px;
+    font-size: 10.5px;
+  }
 
-body.dark .modal-box > div:first-of-type > div {
-  color: rgba(255,220,220,0.35) !important;
-}
+  .modal-box{
+    padding: 28px 16px 36px 16px;
+  }
 
-body.dark .modal-box .login {
-  border-color: #fff8f8 !important;
-  color: #fff8f8 !important;
-}
-
-body.dark .modal-box .login:hover {
-  background: #fff8f8 !important;
-  color: #0a0000 !important;
+  .logo{
+    font-size: 20px;
+  }
 }

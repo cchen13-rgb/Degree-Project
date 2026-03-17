@@ -269,6 +269,50 @@
 
     body.dark .char-profile-text              { color:transparent; }
     body.dark .char-profile-text .reveal-name { color:#0d0d0d; }
+    @media (max-width: 900px) {
+  .profiles-section{
+    grid-template-columns: 1fr;
+    padding: 40px 20px 80px 20px;
+    gap: 24px;
+    position: static; /* remove sticky on mobile */
+  }
+
+  .char-card{
+    grid-template-columns: 1fr;
+  }
+
+  .char-img-wrap{
+    height: 260px;
+  }
+
+  .char-info{
+    border-left: none;
+    border-top: 1px solid rgba(93,20,30,0.12);
+  }
+
+  body.dark .char-info{
+    border-top-color: rgba(0,0,0,0.2);
+    border-left: none;
+  }
+
+  .char-name-en{
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .char-img-wrap{
+    height: 200px;
+  }
+
+  .char-name-en{
+    font-size: 32px;
+  }
+
+  .char-stats{
+    grid-template-columns: 1fr;
+  }
+}
 
   </style>
 </head>
