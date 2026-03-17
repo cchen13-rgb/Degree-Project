@@ -1010,6 +1010,7 @@ border-radius:2px 2px 0 0;
   /* Header */
   .topbar{
     padding:8px 20px 0 20px;
+    margin: 2%;
   }
 
   .switch{
@@ -1030,6 +1031,7 @@ border-radius:2px 2px 0 0;
   .center{
     padding:20px 20px 80px 20px;
     width:100%;
+    margin-top: 30px;
     box-sizing:border-box;
   }
 
@@ -1112,9 +1114,64 @@ border-radius:2px 2px 0 0;
   h2{
     font-size:20px;
   }
+  /* Hide lore text on mobile — too cluttered */
+  .center .text{
+    display: none !important;
+  }
+
+  /* Hide the second spinning star on mobile */
+  .dante-parallax .star2{
+    display: none !important;
+  }
+
+  /* Login button — visible and styled */
+  .center .login{
+    opacity: 1 !important;
+    margin-top: -60px;
+    margin-bottom: 0;
+    position: relative;
+    right: 1%;
+    z-index: 10;
+    color: #3d0d14 !important;
+    background: #ffffff !important;
+ 
+  }
+
+  body.dark .center .login{
+    color: #0a0000 !important;
+    background: #fff8f8 !important;
+    border-color: #fff8f8 !important;
+  }
 }
 
 @media (max-width: 480px) {
+    /* Hide lore text on mobile — too cluttered */
+  .center .text{
+    display: none !important;
+  }
+
+  /* Hide the second spinning star on mobile */
+  .dante-parallax .star2{
+    display: none !important;
+  }
+
+  /* Login button — visible and styled */
+  .center .login{
+    opacity: 1 !important;
+    margin-top: 12px;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 10;
+    color: #3d0d14 !important;
+    background: #ffffff !important;
+    border-color: #3d0d14 !important;
+  }
+
+  body.dark .center .login{
+    color: #0a0000 !important;
+    background: #fff8f8 !important;
+    border-color: #fff8f8 !important;
+  }
 
   .portal{
     max-width:280px;
@@ -1135,5 +1192,9 @@ border-radius:2px 2px 0 0;
 
   .modal-box{
     padding:28px 18px 36px 18px;
+
+    
   }
 }
+
+
