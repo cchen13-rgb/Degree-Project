@@ -1295,6 +1295,19 @@ display:block;
     transform:translateY(0);
   }
 
+  .modal-box:focus-within{
+    transform:none;
+  }
+
+  .modal-box input,
+  .modal-box select,
+  .modal-box textarea{
+    font-size:16px !important;
+    line-height:1.4;
+    -webkit-appearance:none;
+    border-radius:0;
+  }
+
   .split-layout{
     grid-template-columns:1fr;
   }
