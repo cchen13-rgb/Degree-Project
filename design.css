@@ -868,6 +868,7 @@ width:1780px;
 pointer-events:none;
 z-index:0;
 contain:layout style;
+isolation:isolate;
 }
 
 .dante-parallax img:first-child{
@@ -890,17 +891,20 @@ display:block;
 opacity:0;
 transform:translateY(160px);
 transform-origin:bottom center;
-transition:opacity 2s ease, transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+transition-property: opacity, transform;
+transition-duration: 3.5s, 2.5s;
+transition-timing-function: ease, cubic-bezier(0.16, 1, 0.3, 1);
+transition-delay: 0s;
 will-change:transform;
 }
 
-.dante-layer:not(.star):nth-child(1) { transition-delay: 1.8s; }
-.dante-layer:not(.star):nth-child(2) { transition-delay: 1.4s; }
-.dante-layer:not(.star):nth-child(3) { transition-delay: 1.0s; }
-.dante-layer:not(.star):nth-child(4) { transition-delay: 0.5s; }
-.dante-layer:not(.star):nth-child(5) { transition-delay: 0.0s; }
-.dante-layer:not(.star):nth-child(6) { transition-delay: 2.1s; }
-.dante-layer:not(.star):nth-child(7) { transition-delay: 2.4s; }
+.dante-layer:not(.star):nth-child(1) { transition-delay: 2.0s; }
+.dante-layer:not(.star):nth-child(2) { transition-delay: 1.6s; }
+.dante-layer:not(.star):nth-child(3) { transition-delay: 1.2s; }
+.dante-layer:not(.star):nth-child(4) { transition-delay: 0.8s; }
+.dante-layer:not(.star):nth-child(5) { transition-delay: 0.0s; transition-duration: 2s; }
+.dante-layer:not(.star):nth-child(6) { transition-delay: 2.3s; }
+.dante-layer:not(.star):nth-child(7) { transition-delay: 2.6s; }
 
 .dante-layer:not(.star).dante-in{
 opacity:1;
@@ -958,6 +962,7 @@ border-color:#ffffff;
 color:#3d0d14;
 background:#ffffff;
 opacity:0;
+transition:opacity 1s ease, background .3s, color .3s, transform .2s;
 }
 
 .center .login:hover{
@@ -987,6 +992,7 @@ top:0;
 z-index:20;
 will-change:transform;
 border-radius:2px 2px 0 0;
+content-visibility:auto;
 }
 
 .char-card{

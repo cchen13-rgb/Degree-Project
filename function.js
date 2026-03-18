@@ -19,6 +19,9 @@ function startParticles() {
 function stopParticles() {
   clearInterval(particleInterval);
   particleInterval = null;
+  /* Remove all existing particles immediately to free compositor resources */
+  const container = document.getElementById("particles");
+  if (container) container.innerHTML = '';
 }
 
 /* Pause/resume parallax ScrollTrigger */
@@ -183,14 +186,15 @@ window.addEventListener("load", () => {
   function beginEntry() {
     if (loader) {
       loader.style.opacity = '0';
-      setTimeout(() => loader.remove(), 800);
+      setTimeout(() => {
+        if (loader.parentNode) loader.remove();
+      }, 800);
     }
 
     /* ---- star2 NEVER gets an inline transform — CSS owns it for spin2 ---- */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
       if (el.classList.contains('star2')) {
         el.style.opacity = '0';
-        /* NO transform set here — ever */
       } else {
         el.style.transition = 'none';
         el.style.transform  = 'translateY(120px)';
@@ -201,27 +205,41 @@ window.addEventListener("load", () => {
     /* Force reflow */
     document.body.offsetHeight;
 
-    /* Add dante-in to all layers */
-    document.querySelectorAll('.dante-layer').forEach(el => {
-      el.classList.add('dante-in');
-    });
+    /* Wait for loader to fully fade out before starting transitions */
+    setTimeout(() => {
 
-    /* ---- Animate stars in ---- */
-    document.querySelectorAll('.dante-layer.star').forEach(el => {
-      if (el.classList.contains('star2')) {
-        /* Fade in only — transform stays 100% CSS */
-        el.style.transition = 'opacity 2s ease 0s';
-        requestAnimationFrame(() => {
-          el.style.opacity = '1';
-        });
-      } else {
-        el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
-        requestAnimationFrame(() => {
-          el.style.transform = 'translateY(0px)';
-          el.style.opacity   = '1';
-        });
+      /* Add dante-in — transitions now visible since loader is gone */
+      document.querySelectorAll('.dante-layer').forEach(el => {
+        el.classList.add('dante-in');
+      });
+
+      /* ---- Animate stars in ---- */
+      document.querySelectorAll('.dante-layer.star').forEach(el => {
+        if (el.classList.contains('star2')) {
+          el.style.transition = 'opacity 2s ease 0s';
+          requestAnimationFrame(() => {
+            el.style.opacity = '1';
+          });
+        } else {
+          el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
+          requestAnimationFrame(() => {
+            el.style.transform = 'translateY(0px)';
+            el.style.opacity   = '1';
+          });
+        }
+      });
+
+      /* ---- Fade in login button after layers appear ---- */
+      const heroLogin = document.querySelector('.center .login');
+      if (heroLogin) {
+        heroLogin.style.opacity = '0';
+        heroLogin.style.transition = 'opacity 1s ease';
+        setTimeout(() => {
+          heroLogin.style.opacity = '1';
+        }, 1200);
       }
-    });
+
+    }, 900); /* loader fades in 800ms + 100ms buffer */
 
     /* ---- ScrambleText on hero paragraph ---- */
     setTimeout(() => {
