@@ -1,236 +1,548 @@
-/**
- * THEME & PERFORMANCE CONFIG
- */
-const isMobile = window.matchMedia("(max-width: 1024px)").matches;
-const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+/* ===================== PARTICLES ===================== */
 
-const ParticleConfig = {
-    maxParticles: isMobile ? 25 : 60,
-    particleColor: 'rgba(0, 0, 0,',
-    isActive: false,
-    isPaused: false
-};
+const body = document.body;
 
-let canvas, ctx, particles = [];
-let particleAnimationId = null;
-
-/**
- * 1. CANVAS PARTICLES
- */
-function updateParticleColor() {
-    const isDark = document.body.classList.contains('dark');
-    ParticleConfig.particleColor = isDark ? 'rgba(13, 13, 13,' : 'rgba(0, 0, 0,';
-}
-
-class Particle {
-    constructor() { this.reset(); }
-    reset() {
-        this.x = Math.random() * (canvas ? canvas.width : window.innerWidth);
-        this.y = (canvas ? canvas.height : window.innerHeight) + 20;
-        this.size = Math.random() * (isMobile ? 1.2 : 2.5) + 0.5;
-        this.speed = Math.random() * 1.2 + 0.4;
-        this.opacity = Math.random() * 0.4 + 0.1;
-    }
-    update() {
-        this.y -= this.speed;
-        if (this.y < -20) this.reset();
-    }
-    draw() {
-        ctx.fillStyle = `${ParticleConfig.particleColor}${this.opacity})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-function animateParticles() {
-    if (!ParticleConfig.isActive || ParticleConfig.isPaused) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (particles.length < ParticleConfig.maxParticles) particles.push(new Particle());
-    for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-    }
-    particleAnimationId = requestAnimationFrame(animateParticles);
-}
+let particleInterval = null;
+let particleContainer = null;
+const particleRemovalTimers = new Set();
 
 function startParticles() {
-    if (ParticleConfig.isActive) return;
-    ParticleConfig.isActive = true;
-    updateParticleColor();
-    animateParticles();
+  particleContainer = particleContainer || document.getElementById("particles");
+  if (!particleContainer || particleInterval) return;
+  particleInterval = setInterval(() => {
+    const particle = document.createElement("div");
+    particle.classList.add("particle");
+    particle.style.left = Math.random() * 100 + "vw";
+    particle.style.animationDuration = (3 + Math.random() * 5) + "s";
+    particle.style.opacity = Math.random();
+    particleContainer.appendChild(particle);
+
+    const removalTimer = setTimeout(() => {
+      particle.remove();
+      particleRemovalTimers.delete(removalTimer);
+    }, 8000);
+
+    particleRemovalTimers.add(removalTimer);
+  }, 600);
 }
 
 function stopParticles() {
-    ParticleConfig.isActive = false;
-    if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
+  clearInterval(particleInterval);
+  particleInterval = null;
+
+  particleRemovalTimers.forEach(clearTimeout);
+  particleRemovalTimers.clear();
+
+  /* Remove all existing particles immediately to free compositor resources */
+  particleContainer = particleContainer || document.getElementById("particles");
+  if (particleContainer) particleContainer.replaceChildren();
 }
 
-function initParticles() {
-    const container = document.getElementById("particles");
-    if (!container || canvas) return;
-    canvas = document.createElement('canvas');
-    ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
-    container.appendChild(canvas);
-    const resizer = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resizer, { passive: true });
-    resizer();
-    const observer = new IntersectionObserver((entries) => {
-        entries[0].isIntersecting ? startParticles() : stopParticles();
-    }, { threshold: 0.01 });
-    observer.observe(container);
+/* Pause/resume parallax ScrollTrigger */
+let parallaxPaused = false;
+
+function pauseParallax() {
+  if (parallaxPaused || typeof ScrollTrigger === 'undefined') return;
+  parallaxPaused = true;
+  ScrollTrigger.getAll().forEach(t => t.disable());
 }
 
-/**
- * 2. MAGNETIC EFFECTS
- */
+function resumeParallax() {
+  if (!parallaxPaused || typeof ScrollTrigger === 'undefined') return;
+  parallaxPaused = false;
+  ScrollTrigger.getAll().forEach(t => t.enable());
+}
+
+
+/* ===================== MAGNETIC BUTTON ===================== */
+
+function bindMagneticHover(element, xFactor, yFactor, resetDuration, resetEase) {
+  if (!element || element.dataset.magneticBound === 'true') return;
+
+  element.dataset.magneticBound = 'true';
+
+  element.addEventListener('mousemove', (e) => {
+    const r = element.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    gsap.to(element, { x: x * xFactor, y: y * yFactor, duration: 0.4, ease: "power2.out", overwrite: true });
+  });
+
+  element.addEventListener('mouseleave', () => {
+    gsap.to(element, { x: 0, y: 0, duration: resetDuration, ease: resetEase, overwrite: true });
+  });
+}
+
 function initMagneticButtons() {
-    if (isTouch) return; 
-    document.querySelectorAll('.login, .star:not(.star2)').forEach(el => {
-        const xTo = gsap.quickTo(el, "x", { duration: 0.4, ease: "power2.out" });
-        const yTo = gsap.quickTo(el, "y", { duration: 0.4, ease: "power2.out" });
-        el.addEventListener('mousemove', (e) => {
-            const r = el.getBoundingClientRect();
-            const x = (e.clientX - r.left - r.width / 2) * 0.3;
-            const y = (e.clientY - r.top - r.height / 2) * 0.3;
-            xTo(x); yTo(y);
-        });
-        el.addEventListener('mouseleave', () => {
-            gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.3)" });
-        });
-    });
+  document.querySelectorAll('.login').forEach(btn => {
+    bindMagneticHover(btn, 0.3, 0.3, 0.7, "elastic.out(1, 0.4)");
+  });
+
+  /* star2 is NEVER given to GSAP - CSS owns its transform entirely */
+  document.querySelectorAll('.star:not(.star2)').forEach(star => {
+    bindMagneticHover(star, 0.4, 0.4, 0.9, "elastic.out(1, 0.3)");
+  });
 }
 
-/**
- * 3. INITIALIZATION & ENTRY
- */
+function setDarkMode(isDark) {
+  body.classList.toggle("dark", isDark);
+  applyLoginDarkMode();
+}
+
+
+/* ===================== DOM READY ===================== */
+
 document.addEventListener("DOMContentLoaded", () => {
-    initParticles();
-    if (!isTouch) initMagneticButtons();
 
-    // Force hide elements before animation starts
-    gsap.set(['.dante-layer', '.star', '.center .login', '.center .text'], { opacity: 0 });
+  /* ---- Panel scroll fade ---- */
+  const fadeEls = document.querySelectorAll(
+    '.left-panel h2, .left-panel .feature-image, .left-panel p, ' +
+    '.scroll-content h2, .scroll-content img, .scroll-content p'
+  );
+  fadeEls.forEach(el => el.classList.add('panel-fade'));
 
-    const door = document.getElementById("door");
-    if (door) {
-        door.addEventListener("click", () => {
-            gsap.timeline()
-                .to(['.enter', '.curveText'], { opacity: 0, duration: 0.3 })
-                .to(door, { scale: isMobile ? 15 : 25, duration: 0.8, ease: "power2.inOut" })
-                .to(door, { opacity: 0, duration: 0.5, onComplete: () => window.location.href = "landing.html" });
-        });
-    }
-
-    const toggle = document.getElementById("modeToggle");
-    const syncTheme = () => {
-        document.body.classList.toggle("dark");
-        requestAnimationFrame(updateParticleColor);
-    };
-    if (toggle) toggle.addEventListener("change", syncTheme);
-    document.addEventListener("click", (e) => {
-        if (e.target.closest(".star")) syncTheme();
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('panel-fade--visible');
+        fadeObserver.unobserve(entry.target);
+      }
     });
+  }, { threshold: 0.15, rootMargin: '0px 0px -100px 0px' });
+  fadeEls.forEach(el => fadeObserver.observe(el));
+
+  /* ---- Dark mode toggle ---- */
+  const toggle = document.getElementById("modeToggle");
+  if (toggle) {
+    toggle.addEventListener("change", () => {
+      setDarkMode(toggle.checked);
+    });
+  }
+
+  /* ---- Stars click to toggle dark mode ---- */
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".star")) {
+      const nextDarkMode = !body.classList.contains("dark");
+      if (toggle) toggle.checked = nextDarkMode;
+      setDarkMode(nextDarkMode);
+    }
+  });
+
+  /* ---- Door click ---- */
+  const door = document.getElementById("door");
+  if (door) {
+    door.addEventListener("click", () => {
+      door.style.transformOrigin = 'center center';
+      door.style.zIndex = '9999';
+      const enterText = document.querySelector('.enter');
+      const logoText  = document.querySelector('.curveText');
+      gsap.timeline()
+        .to([enterText, logoText], { opacity: 0, duration: 0.4, ease: "power1.in" })
+        .to(door, { scale: 20, duration: 0.8, ease: "power2.inOut" })
+        .to(door, {
+          opacity: 0, duration: 0.8, ease: "power1.in",
+          onComplete: () => { window.location.href = "landing.html"; }
+        });
+    });
+  }
+
+  startParticles();
+  applyNameReveal();
+  initMagneticButtons();
+
+  /* ---- SplitText reveal on char cards ---- */
+  const cardObserverSplit = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const nameEl = entry.target.querySelector('.char-name-en');
+      if (nameEl && typeof SplitText !== 'undefined') {
+        const split = new SplitText(nameEl, { type: "chars" });
+        gsap.from(split.chars, {
+          opacity: 0, y: 20, rotateX: -40, stagger: 0.04,
+          duration: 0.6, ease: "power3.out", delay: 0.2,
+          onComplete: () => split.revert()
+        });
+      }
+      cardObserverSplit.unobserve(entry.target);
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.char-card').forEach(c => cardObserverSplit.observe(c));
 });
+
+
+/* ===================== PAGE LOAD ===================== */
+
+let entryDone   = false;
+let imageLayers = [];
+let stars       = [];
+let portal3d    = null;
+let textEl      = null;
+let loginEl     = null;
 
 window.addEventListener("load", () => {
-    document.body.classList.add("loaded");
-    
-    const barFill = document.getElementById("loader-bar-fill");
-    if (barFill) {
-        gsap.to(barFill, { width: "100%", duration: 1.2, ease: "power1.inOut", onComplete: startPageEntry });
+  body.classList.add("loaded");
+
+  const loader  = document.getElementById("loader");
+  const barFill = document.getElementById("loader-bar-fill");
+  const totalLoad = 2500;
+  const startTime = performance.now();
+
+  function animateBar(now) {
+    const elapsed  = now - startTime;
+    const progress = Math.min(elapsed / totalLoad, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    if (barFill) barFill.style.width = (eased * 100) + '%';
+    if (progress < 1) {
+      requestAnimationFrame(animateBar);
     } else {
-        startPageEntry();
+      setTimeout(beginEntry, 200);
+    }
+  }
+
+  requestAnimationFrame(animateBar);
+
+  function beginEntry() {
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        if (loader.parentNode) loader.remove();
+      }, 800);
     }
 
-    function startPageEntry() {
-        const loader = document.getElementById("loader");
-        if (loader) gsap.to(loader, { opacity: 0, duration: 0.5, onComplete: () => loader.remove() });
+    /* ---- Set initial hidden state ---- */
+    /* star2 never gets a transform — CSS owns it */
+    document.querySelectorAll('.dante-layer.star').forEach(el => {
+      if (el.classList.contains('star2')) {
+        el.style.opacity = '0';
+      } else {
+        el.style.transition = 'none';
+        el.style.transform  = 'translateY(120px)';
+        el.style.opacity    = '0';
+      }
+    });
 
-        const layers = document.querySelectorAll('.dante-layer:not(.star)');
-        const stars = document.querySelectorAll('.dante-layer.star');
-        const heroLogin = document.querySelector('.center .login');
-        const heroText = document.querySelector('.center .text');
+    /* Hide login and text from the start */
+    const heroLogin = document.querySelector('.center .login');
+    const heroText  = document.querySelector('.center .text');
+    if (heroLogin) heroLogin.style.opacity = '0';
+    if (heroText)  heroText.style.opacity  = '0';
 
-        const tl = gsap.timeline({ delay: 0.2 });
+    /* Force reflow so transition:none takes effect */
+    body.offsetHeight;
 
-        // 1. Stagger Background Layers (1-5+)
-        tl.to(layers, { 
-            opacity: 1, 
-            y: 0, 
-            duration: 1.2, 
-            stagger: 0.08, 
-            ease: "power2.out" 
-        });
+    /* ---- Wait for loader to fully disappear before any fade starts ---- */
+    setTimeout(() => {
 
-        // 2. Pop in Flowers (Stars) - Slightly overlapped with layers
-        tl.to(stars, { 
-            opacity: 1, 
-            y: 0, 
-            duration: 1, 
-            stagger: 0.1, 
-            ease: "back.out(1.7)" 
-        }, "-=0.8");
+      /* Trigger CSS staggered fade-in on webp layers */
+      document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
+        el.classList.add('dante-in');
+      });
 
-        // 3. Fade in Text and Login Button together
-        tl.to([heroText, heroLogin], { 
-            opacity: 1, 
-            y: 0, 
-            duration: 1, 
-            stagger: 0.1, 
-            ease: "power2.out" 
-        }, "-=0.6");
-
-        // 4. Run Scramble effect last
-        if (heroText && !isMobile && typeof ScrambleTextPlugin !== 'undefined') {
-            tl.to(heroText, { 
-                scrambleText: { text: heroText.textContent, chars: "lowercase", speed: 0.5 },
-                duration: 0.5
-            }, "-=0.5");
+      /* star1 animate in with JS transition */
+      document.querySelectorAll('.dante-layer.star').forEach(el => {
+        if (el.classList.contains('star2')) {
+          /* fade only — no transform ever */
+          el.style.transition = 'opacity 2s ease 0s';
+          setTimeout(() => { el.style.opacity = '1'; }, 50);
+        } else {
+          el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
+          setTimeout(() => {
+            el.style.transform = 'translateY(0px)';
+            el.style.opacity   = '1';
+          }, 50);
         }
+      });
 
+      /* ---- Login fades in after layers have had time to appear ---- */
+      if (heroLogin) {
+        heroLogin.style.transition = 'opacity 1.4s ease';
         setTimeout(() => {
-            document.body.classList.add('entry-done');
-            if (!isMobile) initCinematicParallax();
-        }, 1500);
-    }
+          heroLogin.style.opacity = '1';
+        }, 1800);
+      }
+
+      /* ---- ScrambleText on hero text ---- */
+      if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
+        const lockedWidth  = heroText.offsetWidth;
+        const lockedHeight = heroText.offsetHeight;
+        heroText.style.width    = lockedWidth  + 'px';
+        heroText.style.height   = lockedHeight + 'px';
+        heroText.style.overflow = 'hidden';
+        heroText.style.display  = 'block';
+        const original = heroText.textContent.trim();
+        setTimeout(() => {
+          gsap.to(heroText, {
+            opacity: 1, duration: 1.2, ease: "power1.in",
+            onComplete() {
+              gsap.to(heroText, {
+                duration: 2.4,
+                scrambleText: {
+                  text: original,
+                  chars: "abcdefghijklmnopqrstuvwxyz—…",
+                  revealDelay: 0.4,
+                  speed: 0.5
+                },
+                ease: "none",
+                onComplete() {
+                  heroText.style.width  = '';
+                  heroText.style.height = '';
+                }
+              });
+            }
+          });
+        }, 1400);
+      }
+
+    }, 900); /* 800ms loader fade + 100ms buffer */
+
+    /* ---- Hand off to GSAP ScrollTrigger after everything has settled ---- */
+    setTimeout(() => {
+      imageLayers = [...document.querySelectorAll('.dante-layer:not(.star)')];
+      stars       = [...document.querySelectorAll('.dante-layer.star')];
+      portal3d    = document.querySelector('.portal');
+      textEl      = document.querySelector('.center .text');
+      loginEl     = document.querySelector('.center .login');
+
+      stars.forEach(el => {
+        if (el.classList.contains('star2')) {
+          el.style.removeProperty('transform');
+          el.style.transition = 'opacity 2s ease, filter 0.6s ease';
+        } else {
+          el.style.transition = 'filter 0.6s ease';
+        }
+      });
+
+      entryDone = true;
+      body.classList.add('entry-done');
+
+      setTimeout(() => {
+        initCinematicParallax();
+      }, 1200);
+
+    }, 4200);
+  }
 });
 
-function initCinematicParallax() {
-    const portal = document.querySelector('.portal');
-    if (!portal || isMobile || typeof ScrollTrigger === 'undefined') return;
 
-    gsap.timeline({
-        scrollTrigger: {
-            trigger: portal,
-            start: "top top",
-            end: "+=100%",
-            scrub: 0.5
-        }
-    })
-    .to('.dante-layer:not(.star)', {
-        y: (i, el) => (parseFloat(el.dataset.depth) || 0.1) * 300,
-        opacity: 0,
-        ease: "none"
-    }, 0);
+/* ===================== NAME REVEAL ===================== */
+
+function applyNameReveal() {
+  document.querySelectorAll(
+    '.left-panel p, .scroll-content p, .right-panel p, ' +
+    '.char-profile-text, .char-name-en, .stat-value'
+  ).forEach(p => {
+    if (p.dataset.nameRevealApplied === 'true') return;
+
+    p.innerHTML = p.innerHTML.replace(
+      /\b(Cheryl|Crane)\b/g,
+      '<span class="reveal-name">$1</span>'
+    );
+    p.dataset.nameRevealApplied = 'true';
+  });
 }
 
-// Modal
-const modal = document.getElementById('loginModal');
+
+/* ===================== LOGIN MODAL ===================== */
+
 const loginBtn = document.querySelector('.login');
+const modal    = document.getElementById('loginModal');
+const closeBtn = document.getElementById('closeModal');
+const modalBox = modal ? modal.querySelector('.modal-box') : null;
+
 if (loginBtn && modal) {
-    loginBtn.addEventListener('click', () => {
-        modal.classList.add('open');
-        document.body.classList.add('modal-open');
-        stopParticles();
-    });
+  loginBtn.addEventListener('click', () => {
+    modal.classList.add('open');
+    body.classList.add('modal-open');
+    renderLogin();
+    stopParticles();
+    pauseParallax();
+  });
 }
-window.addEventListener('click', (e) => {
-    if (e.target === modal || e.target.classList.contains('modal-close')) {
-        modal.classList.remove('open');
-        document.body.classList.remove('modal-open');
-        startParticles();
+
+function closeModal() {
+  if (!modal) return;
+  modal.classList.remove('open');
+  body.classList.remove('modal-open');
+  startParticles();
+  resumeParallax();
+}
+
+if (closeBtn) closeBtn.addEventListener('click', closeModal);
+if (modal)    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+let loginAttempts = 0;
+
+function renderLogin() {
+  if (!modalBox) return;
+
+  const isDark     = body.classList.contains('dark');
+  const loreColor  = isDark ? 'transparent' : '#3d0d14';
+  const heartColor = isDark ? '#b50008'     : '#3d0d14';
+
+  modalBox.innerHTML = `
+    <button class="modal-close" id="closeModal">✕</button>
+
+    <div style="border-left:2px solid rgba(93,20,30,0.2);padding:12px 16px;margin-bottom:28px;text-align:left;">
+      <div style="font-family:'Switzer';font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;">Entry · 001</div>
+      <p class="lore-text" style="font-family:'Montserrat',sans-serif;font-size:11px;line-height:1.85;margin:0;padding:0;border:none;overflow:hidden;word-break:break-word;">
+        <span class="lore-before" style="color:${loreColor};transition:color 0.6s;">Your name is—is— You are wandering alone through the dark. You were something before this, somewhere before here, but now…you are being called down. Perhaps these missing pieces will get filled in along the way. …</span><span class="lore-heart" style="color:${heartColor};transition:color 0.6s;">Heart</span><span class="lore-after" style="color:${loreColor};transition:color 0.6s;"> — Something about the word really resonates with you. I wonder why.</span>
+      </p>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <div style="flex:1;height:1px;background:rgba(93,20,30,0.12);"></div>
+      <h2 style="font-size:28px;margin:0;padding:0;border:none;white-space:nowrap;">Who Am I?</h2>
+      <div style="flex:1;height:1px;background:rgba(93,20,30,0.12);"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;text-align:left;">
+      <div>
+        <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Username</label>
+        <input id="loginUser" type="text" placeholder="username" inputmode="text" autocomplete="username" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+      </div>
+      <div>
+        <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Password</label>
+        <input id="loginPass" type="password" placeholder="password" inputmode="text" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+        <p id="loginError" style="color:#c0392b;font-family:'Switzer';font-size:10.5px;letter-spacing:1px;margin:6px 0 0 0;min-height:16px;padding:0;border:none;text-align:left;"></p>
+      </div>
+    </div>
+
+    <button class="login" id="submitLogin" style="width:100%;">Enter</button>
+  `;
+
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('submitLogin').addEventListener('click', checkLogin);
+  document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkLogin(); });
+
+  initMagneticButtons();
+}
+
+function applyLoginDarkMode() {
+  if (!modalBox) return;
+  const isDark   = body.classList.contains('dark');
+  const beforeEl = modalBox.querySelector('.lore-before');
+  const afterEl  = modalBox.querySelector('.lore-after');
+  const heartEl  = modalBox.querySelector('.lore-heart');
+  if (beforeEl) beforeEl.style.color = isDark ? 'transparent' : '#3d0d14';
+  if (afterEl)  afterEl.style.color  = isDark ? 'transparent' : '#3d0d14';
+  if (heartEl)  heartEl.style.color  = isDark ? '#b50008'     : '#3d0d14';
+}
+
+function checkLogin() {
+  const userInput = document.getElementById('loginUser');
+  const passInput = document.getElementById('loginPass');
+  const err       = document.getElementById('loginError');
+
+  if (!userInput || !passInput || !err) return;
+
+  const user = userInput.value.trim().toLowerCase();
+  const pass = passInput.value.trim().toLowerCase();
+
+  if (user === 'cheryl' && pass === 'heart') {
+    loginAttempts = 0;
+    closeModal();
+    window.location.href = "captcha.html";
+  } else {
+    loginAttempts++;
+    passInput.value = '';
+
+    let hint = '';
+    if (loginAttempts === 1) {
+      hint = 'That is not right...';
+    } else if (loginAttempts === 2) {
+      hint = 'Perhaps the answer lies in the dark.';
+      const toggle = document.getElementById('modeToggle');
+      if (toggle && !body.classList.contains('dark')) {
+        const slider = toggle.nextElementSibling;
+        if (slider) {
+          slider.style.transition = 'box-shadow 0.2s';
+          slider.style.boxShadow  = '0 0 0 3px rgba(181,0,8,0.6)';
+          setTimeout(() => { slider.style.boxShadow = ''; }, 1400);
+        }
+      }
+    } else {
+      hint = 'The password is your heart.';
     }
+
+    if (typeof ScrambleTextPlugin !== 'undefined') {
+      gsap.to(err, {
+        duration: 0.8,
+        scrambleText: { text: hint, chars: "abcdefghijklmnopqrstuvwxyz", speed: 0.4 },
+        ease: "none"
+      });
+    } else {
+      err.textContent = hint;
+    }
+  }
+}
+
+
+/* ===================== DANTE PARALLAX SCROLL — GSAP ScrollTrigger ===================== */
+
+function initCinematicParallax() {
+  if (!portal3d) return;
+
+  ScrollTrigger.getAll().forEach(t => t.kill());
+
+  let lastProgress = -1;
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: portal3d,
+      start: "top top",
+      end: "+=100%",
+      scrub: 0.2,
+      onEnter: () => {
+        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
+      },
+      onLeave: () => {
+        imageLayers.forEach(el => el.style.willChange = 'auto');
+      },
+      onEnterBack: () => {
+        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
+      },
+      onLeaveBack: () => {
+        imageLayers.forEach(el => el.style.willChange = 'auto');
+      },
+      onUpdate: (self) => {
+        const p = self.progress;
+        if (lastProgress < 0.08 && p >= 0.08) stopParticles();
+        else if (lastProgress >= 0.08 && p < 0.08) startParticles();
+        lastProgress = p;
+      }
+    }
+  });
+
+  imageLayers.forEach((el) => {
+    const depth  = parseFloat(el.dataset.depth) || 0.1;
+    const isBack = depth <= 0.22;
+    const yDist  = isBack ? depth * 320 : depth * 140;
+    const rotX   = isBack ? depth * 10 : 0;
+    tl.to(el, { y: yDist, rotateX: rotX, opacity: 0, ease: "power1.inOut", duration: 1 }, 0);
+  });
+
+  /* star2: opacity fade ONLY — GSAP never sets x/y/transform on it */
+  stars.forEach((el, i) => {
+    const depth = parseFloat(el.dataset.depth) || 0.1;
+    if (el.classList.contains('star2')) {
+      tl.to(el, { opacity: 0, ease: "power2.in", duration: 0.7 }, 0);
+    } else {
+      tl.to(el, {
+        y: depth * 130,
+        x: (i % 2 === 0 ? 1 : -1) * depth * 40,
+        opacity: 0,
+        ease: "power2.in",
+        duration: 0.7
+      }, 0);
+    }
+  });
+
+  tl.to(portal3d, { scale: 1.08, opacity: 0, ease: "power2.inOut", duration: 1 }, 0);
+  if (textEl)  tl.to(textEl,  { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0);
+  if (loginEl) tl.to(loginEl, { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0.05);
+}
+
+window.addEventListener('scroll', () => {
+  /* no-op — ScrollTrigger owns scroll */
 });
