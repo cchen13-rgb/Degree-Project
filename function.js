@@ -19,7 +19,6 @@ function startParticles() {
 function stopParticles() {
   clearInterval(particleInterval);
   particleInterval = null;
-  /* Remove all existing particles immediately to free compositor resources */
   const container = document.getElementById("particles");
   if (container) container.innerHTML = '';
 }
@@ -30,19 +29,27 @@ let parallaxPaused = false;
 function pauseParallax() {
   if (parallaxPaused) return;
   parallaxPaused = true;
-  ScrollTrigger.getAll().forEach(t => t.disable());
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.getAll().forEach(t => t.disable());
+  }
 }
 
 function resumeParallax() {
   if (!parallaxPaused) return;
   parallaxPaused = false;
-  ScrollTrigger.getAll().forEach(t => t.enable());
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.getAll().forEach(t => t.enable());
+  }
 }
+
+const isMobile = () => window.innerWidth <= 1024;
 
 
 /* ===================== MAGNETIC BUTTON ===================== */
 
 function initMagneticButtons() {
+  if (isMobile()) return; /* skip on mobile — not needed and costs performance */
+
   document.querySelectorAll('.login').forEach(btn => {
     btn.addEventListener('mousemove', (e) => {
       const r = btn.getBoundingClientRect();
@@ -169,6 +176,18 @@ window.addEventListener("load", () => {
   const totalLoad = 2500;
   const startTime = performance.now();
 
+  /* Hide login immediately before anything renders */
+  const heroLogin = document.querySelector('.center .login');
+  const heroText  = document.querySelector('.center .text');
+  if (heroLogin) {
+    heroLogin.style.opacity    = '0';
+    heroLogin.style.visibility = 'hidden';
+    heroLogin.style.transition = 'none';
+  }
+  if (heroText) {
+    heroText.style.opacity = '0';
+  }
+
   function animateBar(now) {
     const elapsed  = now - startTime;
     const progress = Math.min(elapsed / totalLoad, 1);
@@ -184,6 +203,7 @@ window.addEventListener("load", () => {
   requestAnimationFrame(animateBar);
 
   function beginEntry() {
+    /* Fade out loader */
     if (loader) {
       loader.style.opacity = '0';
       setTimeout(() => {
@@ -191,117 +211,144 @@ window.addEventListener("load", () => {
       }, 800);
     }
 
-    /* ---- Set initial hidden state ---- */
-    /* star2 never gets a transform — CSS owns it */
-    document.querySelectorAll('.dante-layer.star').forEach(el => {
-      if (el.classList.contains('star2')) {
-        el.style.opacity = '0';
-      } else {
-        el.style.transition = 'none';
-        el.style.transform  = 'translateY(120px)';
+    if (isMobile()) {
+      /* ============ MOBILE ENTRY — pure CSS, no GSAP parallax ============ */
+
+      /* Set all dante layers to hidden before animating */
+      document.querySelectorAll('.dante-layer').forEach(el => {
         el.style.opacity    = '0';
-      }
-    });
-
-    /* Hide login and text from the start */
-    const heroLogin = document.querySelector('.center .login');
-    const heroText  = document.querySelector('.center .text');
-    if (heroLogin) heroLogin.style.opacity = '0';
-    if (heroText)  heroText.style.opacity  = '0';
-
-    /* Force reflow so transition:none takes effect */
-    document.body.offsetHeight;
-
-    /* ---- Wait for loader to fully disappear before any fade starts ---- */
-    setTimeout(() => {
-
-      /* Trigger CSS staggered fade-in on webp layers */
-      document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
-        el.classList.add('dante-in');
+        el.style.transition = 'none';
       });
 
-      /* star1 animate in with JS transition */
+      document.body.offsetHeight; /* force reflow */
+
+      /* After loader gone, fade everything in cleanly with CSS */
+      setTimeout(() => {
+        document.querySelectorAll('.dante-layer').forEach((el, i) => {
+          const delay = i * 300;
+          el.style.transition = `opacity 1.2s ease ${delay}ms`;
+          setTimeout(() => { el.style.opacity = '1'; }, 50);
+        });
+
+        /* Fade in the login button on mobile */
+        if (heroLogin) {
+          const totalLayerTime = document.querySelectorAll('.dante-layer').length * 300 + 400;
+          heroLogin.style.visibility = 'visible';
+          heroLogin.style.transition = `opacity 1s ease`;
+          setTimeout(() => {
+            heroLogin.style.opacity = '1';
+          }, totalLayerTime);
+        }
+
+      }, 900);
+
+    } else {
+      /* ============ DESKTOP ENTRY — full GSAP + CSS stagger ============ */
+
+      /* star2 never gets a transform — CSS owns it */
       document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
-          /* fade only — no transform ever */
-          el.style.transition = 'opacity 2s ease 0s';
-          setTimeout(() => { el.style.opacity = '1'; }, 50);
+          el.style.opacity = '0';
         } else {
-          el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
-          setTimeout(() => {
-            el.style.transform = 'translateY(0px)';
-            el.style.opacity   = '1';
-          }, 50);
+          el.style.transition = 'none';
+          el.style.transform  = 'translateY(120px)';
+          el.style.opacity    = '0';
         }
       });
 
-      /* ---- Login fades in after layers have had time to appear ---- */
-      if (heroLogin) {
-        heroLogin.style.transition = 'opacity 1.4s ease';
-        setTimeout(() => {
-          heroLogin.style.opacity = '1';
-        }, 1800);
-      }
+      document.body.offsetHeight;
 
-      /* ---- ScrambleText on hero text ---- */
-      if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
-        const lockedWidth  = heroText.offsetWidth;
-        const lockedHeight = heroText.offsetHeight;
-        heroText.style.width    = lockedWidth  + 'px';
-        heroText.style.height   = lockedHeight + 'px';
-        heroText.style.overflow = 'hidden';
-        heroText.style.display  = 'block';
-        const original = heroText.textContent.trim();
-        setTimeout(() => {
-          gsap.to(heroText, {
-            opacity: 1, duration: 1.2, ease: "power1.in",
-            onComplete() {
-              gsap.to(heroText, {
-                duration: 2.4,
-                scrambleText: {
-                  text: original,
-                  chars: "abcdefghijklmnopqrstuvwxyz—…",
-                  revealDelay: 0.4,
-                  speed: 0.5
-                },
-                ease: "none",
-                onComplete() {
-                  heroText.style.width  = '';
-                  heroText.style.height = '';
-                }
-              });
-            }
-          });
-        }, 1400);
-      }
-
-    }, 900); /* 800ms loader fade + 100ms buffer */
-
-    /* ---- Hand off to GSAP ScrollTrigger after everything has settled ---- */
-    setTimeout(() => {
-      imageLayers = [...document.querySelectorAll('.dante-layer:not(.star)')];
-      stars       = [...document.querySelectorAll('.dante-layer.star')];
-      portal3d    = document.querySelector('.portal');
-      textEl      = document.querySelector('.center .text');
-      loginEl     = document.querySelector('.center .login');
-
-      stars.forEach(el => {
-        if (el.classList.contains('star2')) {
-          el.style.removeProperty('transform');
-          el.style.transition = 'opacity 2s ease, filter 0.6s ease';
-        } else {
-          el.style.transition = 'filter 0.6s ease';
-        }
-      });
-
-      entryDone = true;
-      document.body.classList.add('entry-done');
-
+      /* Wait for loader to fully disappear before any fade starts */
       setTimeout(() => {
-        initCinematicParallax();
-      }, 1200);
 
-    }, 4200);
+        /* Trigger CSS staggered fade-in on webp layers */
+        document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
+          el.classList.add('dante-in');
+        });
+
+        /* Animate stars in */
+        document.querySelectorAll('.dante-layer.star').forEach(el => {
+          if (el.classList.contains('star2')) {
+            el.style.transition = 'opacity 2s ease 0s';
+            setTimeout(() => { el.style.opacity = '1'; }, 50);
+          } else {
+            el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
+            setTimeout(() => {
+              el.style.transform = 'translateY(0px)';
+              el.style.opacity   = '1';
+            }, 50);
+          }
+        });
+
+        /* Login fades in after layers have appeared */
+        if (heroLogin) {
+          setTimeout(() => {
+            heroLogin.style.visibility = 'visible';
+            heroLogin.style.transition = 'opacity 1.4s ease';
+            heroLogin.style.opacity    = '1';
+          }, 1800);
+        }
+
+        /* ScrambleText on hero text */
+        if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
+          const lockedWidth  = heroText.offsetWidth;
+          const lockedHeight = heroText.offsetHeight;
+          heroText.style.width    = lockedWidth  + 'px';
+          heroText.style.height   = lockedHeight + 'px';
+          heroText.style.overflow = 'hidden';
+          heroText.style.display  = 'block';
+          const original = heroText.textContent.trim();
+          setTimeout(() => {
+            gsap.to(heroText, {
+              opacity: 1, duration: 1.2, ease: "power1.in",
+              onComplete() {
+                gsap.to(heroText, {
+                  duration: 2.4,
+                  scrambleText: {
+                    text: original,
+                    chars: "abcdefghijklmnopqrstuvwxyz—…",
+                    revealDelay: 0.4,
+                    speed: 0.5
+                  },
+                  ease: "none",
+                  onComplete() {
+                    heroText.style.width  = '';
+                    heroText.style.height = '';
+                  }
+                });
+              }
+            });
+          }, 1400);
+        }
+
+      }, 900);
+
+      /* Hand off to GSAP ScrollTrigger after everything settled */
+      setTimeout(() => {
+        imageLayers = [...document.querySelectorAll('.dante-layer:not(.star)')];
+        stars       = [...document.querySelectorAll('.dante-layer.star')];
+        portal3d    = document.querySelector('.portal');
+        textEl      = document.querySelector('.center .text');
+        loginEl     = document.querySelector('.center .login');
+
+        stars.forEach(el => {
+          if (el.classList.contains('star2')) {
+            el.style.removeProperty('transform');
+            el.style.transition = 'opacity 2s ease, filter 0.6s ease';
+          } else {
+            el.style.transition = 'filter 0.6s ease';
+          }
+        });
+
+        entryDone = true;
+        document.body.classList.add('entry-done');
+
+        setTimeout(() => {
+          initCinematicParallax();
+        }, 1200);
+
+      }, 4200);
+    }
   }
 });
 
@@ -393,7 +440,7 @@ function renderLogin() {
   document.getElementById('submitLogin').addEventListener('click', checkLogin);
   document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkLogin(); });
 
-  initMagneticButtons();
+  if (!isMobile()) initMagneticButtons();
 }
 
 function applyLoginDarkMode() {
@@ -451,10 +498,10 @@ function checkLogin() {
 }
 
 
-/* ===================== DANTE PARALLAX SCROLL — GSAP ScrollTrigger ===================== */
+/* ===================== DANTE PARALLAX SCROLL — desktop only ===================== */
 
 function initCinematicParallax() {
-  if (!portal3d) return;
+  if (!portal3d || isMobile()) return; /* skip entirely on mobile */
 
   ScrollTrigger.getAll().forEach(t => t.kill());
 
@@ -517,5 +564,5 @@ function initCinematicParallax() {
 }
 
 window.addEventListener('scroll', () => {
-  /* no-op — ScrollTrigger owns scroll */
+  /* no-op — ScrollTrigger owns scroll on desktop */
 });
