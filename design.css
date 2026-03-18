@@ -890,18 +890,18 @@ display:block;
 opacity:0;
 transform:translateY(160px);
 transform-origin:bottom center;
-transition-property: opacity, transform;
-transition-duration: 3.5s, 2.5s;
-transition-timing-function: ease, cubic-bezier(0.16, 1, 0.3, 1);
-transition-delay: 0s;
+transition-property:opacity, transform;
+transition-duration:3.5s, 2.5s;
+transition-timing-function:ease, cubic-bezier(0.16, 1, 0.3, 1);
+transition-delay:0s;
 will-change:transform;
 }
 
 .dante-layer:not(.star):nth-child(1) { transition-delay: 2.0s; }
 .dante-layer:not(.star):nth-child(2) { transition-delay: 1.6s; }
 .dante-layer:not(.star):nth-child(3) { transition-delay: 1.2s; }
-.dante-layer:not(.star):nth-child(4) { transition-delay: 0.8s; }
-.dante-layer:not(.star):nth-child(5) { transition-delay: 0.0s; transition-duration: 2s; }
+.dante-layer:not(.star):nth-child(4) { transition-delay: 1.0s; }
+.dante-layer:not(.star):nth-child(5) { transition-delay: 0.4s; transition-duration: 2s; }
 .dante-layer:not(.star):nth-child(6) { transition-delay: 2.3s; }
 .dante-layer:not(.star):nth-child(7) { transition-delay: 2.6s; }
 
@@ -930,8 +930,6 @@ transition:filter 0.6s ease;
 }
 
 /* star2 has NO base animation — dante-in class triggers it */
-/* NO animation:none rule here — that was breaking it */
-
 .dante-parallax .star2.dante-in{
 animation:spin2 24s linear infinite;
 }
@@ -954,6 +952,7 @@ body.dark .center .text{
 color:#ffffff;
 }
 
+/* Login hidden from first paint — JS fades it in */
 .center .login{
 position:relative;
 z-index:50;
@@ -962,7 +961,6 @@ color:#3d0d14;
 background:#ffffff;
 opacity:0;
 visibility:hidden;
-transition:opacity 1s ease, background .3s, color .3s, transform .2s;
 }
 
 .center .login:hover{
@@ -1019,8 +1017,6 @@ min-width:0;
 word-break:break-word;
 overflow-wrap:break-word;
 }
-
-/* ================= CHAR IMAGE WRAP ================= */
 
 .char-img-wrap{
 height:100%;
@@ -1086,7 +1082,6 @@ display:block;
     margin:0 !important;
   }
 
-  /* star1 only — no transform:none on this rule so star2 CSS spin is safe */
   .dante-parallax .star1{
     width:140px !important;
     height:140px !important;
@@ -1094,7 +1089,6 @@ display:block;
     left:calc(50% - 65px) !important;
   }
 
-  /* star2 desktop: display block, spin via dante-in — NO !important animation override */
   .dante-parallax .star2{
     display:block !important;
     width:140px !important;
@@ -1117,6 +1111,7 @@ display:block;
     transform:none !important;
     margin:450px 0 0 0 !important;
     opacity:0;
+    visibility:hidden;
     border:2px solid #ffffff !important;
     padding:5px 30px !important;
     font-size:12px !important;
@@ -1210,6 +1205,13 @@ display:block;
     transform:translate(-50%, -60%) !important;
   }
 
+  /* dante layers start slightly below on mobile for the rise animation */
+  .dante-layer:not(.star){
+    transform: translateY(40px);
+    opacity: 0;
+    transition: none;
+  }
+
   .dante-parallax .star2{
     display:none !important;
   }
@@ -1220,9 +1222,10 @@ display:block;
     visibility:hidden !important;
   }
 
+  /* Mobile login — starts hidden, JS fades it in */
   .center .login{
-    opacity:1 !important;
-    visibility:visible !important;
+    opacity:0 !important;
+    visibility:hidden !important;
     position:absolute !important;
     bottom:26vw !important;
     left:50% !important;
@@ -1236,7 +1239,6 @@ display:block;
     font-size:clamp(9px, 1.4vw, 12px) !important;
     letter-spacing:1px !important;
     white-space:nowrap;
-    transition:background 0.3s, color 0.3s, border-color 0.3s !important;
   }
 
   .center .login:hover{
