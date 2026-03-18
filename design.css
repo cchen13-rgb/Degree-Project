@@ -932,9 +932,7 @@ will-change:opacity, transform, filter;
 transition:filter 0.6s ease;
 }
 
-.dante-parallax .star2{
-animation:none;
-}
+
 
 .dante-parallax .star2.dante-in{
 animation:spin2 24s linear infinite;
@@ -1953,10 +1951,6 @@ will-change:opacity, transform, filter;
 transition:filter 0.6s ease;
 }
 
-.dante-parallax .star2{
-animation:none;
-}
-
 .dante-parallax .star2.dante-in{
 animation:spin2 24s linear infinite;
 }
@@ -2034,6 +2028,8 @@ border-radius:2px 2px 0 0;
 }
 /* ================= DESKTOP RESET ================= */
 
+
+
 @media (min-width: 1025px) {
 
   .layout{
@@ -2089,11 +2085,15 @@ border-radius:2px 2px 0 0;
     left: calc(50% - 65px) !important;
     transform: none !important;
   }
-
-  .dante-parallax .star2{
-    display: block !important;
-    animation: spin2 24s linear infinite !important;
+.dante-parallax .star{
+    width: 140px !important;
+    height: 140px !important;
+    top: 300px !important;
+    left: calc(50% - 65px) !important;
+    transform: none !important;
   }
+
+
 .center .text{
     display: block !important;
     visibility: visible !important;
@@ -2114,6 +2114,18 @@ border-radius:2px 2px 0 0;
   }
 }
 
+
+.char-img-wrap {
+  height: 100% !important;
+}
+
+.char-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
 
 
 

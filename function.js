@@ -21,6 +21,21 @@ function stopParticles() {
   particleInterval = null;
 }
 
+/* Pause/resume parallax ScrollTrigger */
+let parallaxPaused = false;
+
+function pauseParallax() {
+  if (parallaxPaused) return;
+  parallaxPaused = true;
+  ScrollTrigger.getAll().forEach(t => t.disable());
+}
+
+function resumeParallax() {
+  if (!parallaxPaused) return;
+  parallaxPaused = false;
+  ScrollTrigger.getAll().forEach(t => t.enable());
+}
+
 
 /* ===================== MAGNETIC BUTTON ===================== */
 
@@ -38,6 +53,8 @@ function initMagneticButtons() {
   });
 
   document.querySelectorAll('.star').forEach(star => {
+    /* star2 is never touched by GSAP — CSS owns its transform for spin2 */
+    if (star.classList.contains('star2')) return;
     star.addEventListener('mousemove', (e) => {
       const r = star.getBoundingClientRect();
       const x = e.clientX - r.left - r.width / 2;
@@ -187,10 +204,15 @@ window.addEventListener("load", () => {
       setTimeout(() => loader.remove(), 800);
     }
 
+    /* ---- star2 NEVER gets an inline transform — CSS owns it for spin2 ---- */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
-      el.style.transition = 'none';
-      el.style.transform  = 'translateY(120px)';
-      el.style.opacity    = '0';
+      if (el.classList.contains('star2')) {
+        el.style.opacity = '0';
+      } else {
+        el.style.transition = 'none';
+        el.style.transform  = 'translateY(120px)';
+        el.style.opacity    = '0';
+      }
     });
 
     document.body.offsetHeight;
@@ -199,12 +221,21 @@ window.addEventListener("load", () => {
       el.classList.add('dante-in');
     });
 
+    /* ---- Animate stars in ---- */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
-      el.style.transition = 'opacity 2s ease 0s, filter 0.6s ease';
-      requestAnimationFrame(() => {
-        el.style.transform = 'translateY(0px)';
-        el.style.opacity   = '1';
-      });
+      if (el.classList.contains('star2')) {
+        /* Only fade in — never set transform so CSS spin2 keeps full control */
+        el.style.transition = 'opacity 2s ease 0s';
+        requestAnimationFrame(() => {
+          el.style.opacity = '1';
+        });
+      } else {
+        el.style.transition = 'opacity 2s ease 0s, filter 0.6s ease';
+        requestAnimationFrame(() => {
+          el.style.transform = 'translateY(0px)';
+          el.style.opacity   = '1';
+        });
+      }
     });
 
     /* ---- ScrambleText on hero paragraph ---- */
@@ -256,8 +287,14 @@ window.addEventListener("load", () => {
       textEl      = document.querySelector('.center .text');
       loginEl     = document.querySelector('.center .login');
 
+      /* ---- star2: clear any inline transform, only filter transition ---- */
       stars.forEach(el => {
-        el.style.transition = 'filter 0.6s ease';
+        if (el.classList.contains('star2')) {
+          el.style.transition = 'opacity 2s ease, filter 0.6s ease';
+          el.style.transform  = '';
+        } else {
+          el.style.transition = 'filter 0.6s ease';
+        }
       });
 
       entryDone = true;
@@ -295,11 +332,22 @@ if (loginBtn && modal) {
   loginBtn.addEventListener('click', () => {
     modal.classList.add('open');
     renderLogin();
+    /* Stop heavy background work while modal is open */
+    stopParticles();
+    pauseParallax();
   });
 }
 
-if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
-if (modal)    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+function closeModal() {
+  if (!modal) return;
+  modal.classList.remove('open');
+  /* Resume background work */
+  startParticles();
+  resumeParallax();
+}
+
+if (closeBtn) closeBtn.addEventListener('click', closeModal);
+if (modal)    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
 let loginAttempts = 0;
 
@@ -373,9 +421,22 @@ function renderLogin() {
     <button class="login" id="submitLogin" style="width:100%;">Enter</button>
   `;
 
-  document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('open'));
+  document.getElementById('closeModal').addEventListener('click', closeModal);
   document.getElementById('submitLogin').addEventListener('click', checkLogin);
   document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkLogin(); });
+
+  /* Stop particles on focus, restore on blur */
+  ['loginUser', 'loginPass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', () => {
+      stopParticles();
+      pauseParallax();
+    });
+    el.addEventListener('blur', () => {
+      /* Only restore if modal is still closed — here modal is open so keep paused */
+    });
+  });
 
   initMagneticButtons();
 }
@@ -398,7 +459,7 @@ function checkLogin() {
 
   if (user === 'cheryl' && pass === 'heart') {
     loginAttempts = 0;
-    modal.classList.remove('open');
+    closeModal();
     window.location.href = "captcha.html";
   } else {
     loginAttempts++;
@@ -470,15 +531,24 @@ function initCinematicParallax() {
     }, 0);
   });
 
+  /* ---- star2: only fade opacity, NEVER set x/y/transform ---- */
   stars.forEach((el, i) => {
     const depth = parseFloat(el.dataset.depth) || 0.1;
-    tl.to(el, {
-      y:       depth * 130,
-      x:       (i % 2 === 0 ? 1 : -1) * depth * 40,
-      opacity: 0,
-      ease:    "power2.in",
-      duration: 0.7
-    }, 0);
+    if (el.classList.contains('star2')) {
+      tl.to(el, {
+        opacity:  0,
+        ease:     "power2.in",
+        duration: 0.7
+      }, 0);
+    } else {
+      tl.to(el, {
+        y:        depth * 130,
+        x:        (i % 2 === 0 ? 1 : -1) * depth * 40,
+        opacity:  0,
+        ease:     "power2.in",
+        duration: 0.7
+      }, 0);
+    }
   });
 
   tl.to(portal3d, {
