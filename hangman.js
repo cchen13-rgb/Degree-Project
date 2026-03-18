@@ -46,11 +46,11 @@ const HINTS = [
 ];
 
 const NAG_IDLE = [
-  "guess a letter, if you dare.",
+  "guess a letter.",
   "i'm waiting.",
   "still here. unfortunately.",
   "tick tock.",
-  "any day now.",
+  "i will be here forever.",
 ];
 
 const KEYBOARD_ROWS = [

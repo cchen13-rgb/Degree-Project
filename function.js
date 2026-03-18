@@ -245,9 +245,11 @@ window.addEventListener("load", () => {
       /* star1 animate in with JS transition */
       document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
-          /* fade only — no transform ever */
+          /* fade first, then start the CSS spin once fully visible */
+          el.classList.remove('star2-spinning');
           el.style.transition = 'opacity 2s ease 0s';
           setTimeout(() => { el.style.opacity = '1'; }, 50);
+          setTimeout(() => { el.classList.add('star2-spinning'); }, 2050);
         } else {
           el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
           setTimeout(() => {

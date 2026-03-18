@@ -828,7 +828,7 @@ color:rgba(255,220,220,0.6);
   }
 
   .particle,
-  .dante-parallax .star2.dante-in,
+  .dante-parallax .star2.star2-spinning,
   .dots::after{
     animation:none !important;
   }
@@ -960,10 +960,8 @@ pointer-events:all;
 transition:filter 0.6s ease;
 }
 
-/* star2 has NO base animation — dante-in class triggers it */
-/* NO animation:none rule here — that was breaking it */
-
-.dante-parallax .star2.dante-in{
+/* star2 stays still during fade, then spins once fully visible */
+.dante-parallax .star2.star2-spinning{
 animation:spin2 24s linear infinite;
 }
 
