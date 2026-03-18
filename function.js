@@ -191,7 +191,8 @@ window.addEventListener("load", () => {
       }, 800);
     }
 
-    /* ---- star2 NEVER gets an inline transform — CSS owns it for spin2 ---- */
+    /* ---- Set initial hidden state ---- */
+    /* star2 never gets a transform — CSS owns it */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
       if (el.classList.contains('star2')) {
         el.style.opacity = '0';
@@ -202,48 +203,47 @@ window.addEventListener("load", () => {
       }
     });
 
-    /* Force reflow */
+    /* Hide login and text from the start */
+    const heroLogin = document.querySelector('.center .login');
+    const heroText  = document.querySelector('.center .text');
+    if (heroLogin) heroLogin.style.opacity = '0';
+    if (heroText)  heroText.style.opacity  = '0';
+
+    /* Force reflow so transition:none takes effect */
     document.body.offsetHeight;
 
-    /* Wait for loader to fully fade out before starting transitions */
+    /* ---- Wait for loader to fully disappear before any fade starts ---- */
     setTimeout(() => {
 
-      /* Add dante-in — transitions now visible since loader is gone */
-      document.querySelectorAll('.dante-layer').forEach(el => {
+      /* Trigger CSS staggered fade-in on webp layers */
+      document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
         el.classList.add('dante-in');
       });
 
-      /* ---- Animate stars in ---- */
+      /* star1 animate in with JS transition */
       document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
+          /* fade only — no transform ever */
           el.style.transition = 'opacity 2s ease 0s';
-          requestAnimationFrame(() => {
-            el.style.opacity = '1';
-          });
+          setTimeout(() => { el.style.opacity = '1'; }, 50);
         } else {
           el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
-          requestAnimationFrame(() => {
+          setTimeout(() => {
             el.style.transform = 'translateY(0px)';
             el.style.opacity   = '1';
-          });
+          }, 50);
         }
       });
 
-      /* ---- Fade in login button after layers appear ---- */
-      const heroLogin = document.querySelector('.center .login');
+      /* ---- Login fades in after layers have had time to appear ---- */
       if (heroLogin) {
-        heroLogin.style.opacity = '0';
-        heroLogin.style.transition = 'opacity 1s ease';
+        heroLogin.style.transition = 'opacity 1.4s ease';
         setTimeout(() => {
           heroLogin.style.opacity = '1';
-        }, 1200);
+        }, 1800);
       }
 
-    }, 900); /* loader fades in 800ms + 100ms buffer */
-
-    /* ---- ScrambleText on hero paragraph ---- */
-    setTimeout(() => {
-      const heroText = document.querySelector('.center .text');
+      /* ---- ScrambleText on hero text ---- */
       if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
         const lockedWidth  = heroText.offsetWidth;
         const lockedHeight = heroText.offsetHeight;
@@ -251,35 +251,33 @@ window.addEventListener("load", () => {
         heroText.style.height   = lockedHeight + 'px';
         heroText.style.overflow = 'hidden';
         heroText.style.display  = 'block';
-        heroText.style.opacity  = '0';
-        const heroLogin = document.querySelector('.center .login');
-        if (heroLogin) heroLogin.style.opacity = '0';
         const original = heroText.textContent.trim();
-        if (heroLogin) {
-          gsap.to(heroLogin, { opacity: 1, duration: 0.4, delay: 0.4, ease: "power1.in" });
-        }
-        gsap.to(heroText, {
-          opacity: 1, duration: 0.8, delay: 0.4, ease: "power1.in",
-          onComplete() {
-            gsap.to(heroText, {
-              duration: 2.4,
-              scrambleText: {
-                text: original,
-                chars: "abcdefghijklmnopqrstuvwxyz—…",
-                revealDelay: 0.4,
-                speed: 0.5
-              },
-              ease: "none",
-              onComplete() {
-                heroText.style.width  = '';
-                heroText.style.height = '';
-              }
-            });
-          }
-        });
+        setTimeout(() => {
+          gsap.to(heroText, {
+            opacity: 1, duration: 1.2, ease: "power1.in",
+            onComplete() {
+              gsap.to(heroText, {
+                duration: 2.4,
+                scrambleText: {
+                  text: original,
+                  chars: "abcdefghijklmnopqrstuvwxyz—…",
+                  revealDelay: 0.4,
+                  speed: 0.5
+                },
+                ease: "none",
+                onComplete() {
+                  heroText.style.width  = '';
+                  heroText.style.height = '';
+                }
+              });
+            }
+          });
+        }, 1400);
       }
-    }, 800);
 
+    }, 900); /* 800ms loader fade + 100ms buffer */
+
+    /* ---- Hand off to GSAP ScrollTrigger after everything has settled ---- */
     setTimeout(() => {
       imageLayers = [...document.querySelectorAll('.dante-layer:not(.star)')];
       stars       = [...document.querySelectorAll('.dante-layer.star')];
@@ -287,7 +285,6 @@ window.addEventListener("load", () => {
       textEl      = document.querySelector('.center .text');
       loginEl     = document.querySelector('.center .login');
 
-      /* ---- star2: remove any inline transform, filter transition only ---- */
       stars.forEach(el => {
         if (el.classList.contains('star2')) {
           el.style.removeProperty('transform');
@@ -300,12 +297,11 @@ window.addEventListener("load", () => {
       entryDone = true;
       document.body.classList.add('entry-done');
 
-      /* Wait for all CSS entry transitions to fully finish before GSAP takes over */
       setTimeout(() => {
         initCinematicParallax();
       }, 1200);
 
-    }, 3200);
+    }, 4200);
   }
 });
 
@@ -335,6 +331,7 @@ const modalBox = modal ? modal.querySelector('.modal-box') : null;
 if (loginBtn && modal) {
   loginBtn.addEventListener('click', () => {
     modal.classList.add('open');
+    document.body.classList.add('modal-open');
     renderLogin();
     stopParticles();
     pauseParallax();
@@ -344,6 +341,7 @@ if (loginBtn && modal) {
 function closeModal() {
   if (!modal) return;
   modal.classList.remove('open');
+  document.body.classList.remove('modal-open');
   startParticles();
   resumeParallax();
 }
@@ -379,11 +377,11 @@ function renderLogin() {
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;text-align:left;">
       <div>
         <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Username</label>
-        <input id="loginUser" type="text" placeholder="username" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+        <input id="loginUser" type="text" placeholder="username" inputmode="text" autocomplete="username" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
       </div>
       <div>
         <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Password</label>
-        <input id="loginPass" type="password" placeholder="password" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+        <input id="loginPass" type="password" placeholder="password" inputmode="text" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
         <p id="loginError" style="color:#c0392b;font-family:'Switzer';font-size:10.5px;letter-spacing:1px;margin:6px 0 0 0;min-height:16px;padding:0;border:none;text-align:left;"></p>
       </div>
     </div>
