@@ -1235,7 +1235,7 @@ display:block;
   }
 
   .center .login{
-    opacity:1 !important;
+    opacity:0 !important;
     position:absolute !important;
     bottom:26vw !important;
     left:50% !important;
@@ -1249,7 +1249,7 @@ display:block;
     font-size:clamp(9px, 1.4vw, 12px) !important;
     letter-spacing:1px !important;
     white-space:nowrap;
-    transition:background 0.3s, color 0.3s, border-color 0.3s !important;
+    transition:opacity 2s ease, background 0.3s, color 0.3s, border-color 0.3s !important;
   }
 
   .center .login:hover{

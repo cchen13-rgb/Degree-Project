@@ -256,7 +256,7 @@ window.addEventListener("load", () => {
 
       /* ---- Login fades in after layers have had time to appear ---- */
       if (heroLogin) {
-        heroLogin.style.transition = 'opacity 1.4s ease';
+        heroLogin.style.transition = 'opacity 2s ease';
         setTimeout(() => {
           heroLogin.style.opacity = '1';
         }, 1800);
