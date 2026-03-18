@@ -52,9 +52,8 @@ function initMagneticButtons() {
     });
   });
 
-  document.querySelectorAll('.star').forEach(star => {
-    /* star2 is never touched by GSAP — CSS owns its transform for spin2 */
-    if (star.classList.contains('star2')) return;
+  /* star2 is NEVER given to GSAP — CSS owns its transform entirely */
+  document.querySelectorAll('.star:not(.star2)').forEach(star => {
     star.addEventListener('mousemove', (e) => {
       const r = star.getBoundingClientRect();
       const x = e.clientX - r.left - r.width / 2;
@@ -116,20 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const enterText = document.querySelector('.enter');
       const logoText  = document.querySelector('.curveText');
       gsap.timeline()
-        .to([enterText, logoText], {
-          opacity: 0,
-          duration: 0.4,
-          ease: "power1.in"
-        })
+        .to([enterText, logoText], { opacity: 0, duration: 0.4, ease: "power1.in" })
+        .to(door, { scale: 20, duration: 0.8, ease: "power2.inOut" })
         .to(door, {
-          scale: 20,
-          duration: 0.8,
-          ease: "power2.inOut"
-        })
-        .to(door, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power1.in",
+          opacity: 0, duration: 0.8, ease: "power1.in",
           onComplete: () => { window.location.href = "landing.html"; }
         });
     });
@@ -147,13 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (nameEl && typeof SplitText !== 'undefined') {
         const split = new SplitText(nameEl, { type: "chars" });
         gsap.from(split.chars, {
-          opacity: 0,
-          y: 20,
-          rotateX: -40,
-          stagger: 0.04,
-          duration: 0.6,
-          ease: "power3.out",
-          delay: 0.2,
+          opacity: 0, y: 20, rotateX: -40, stagger: 0.04,
+          duration: 0.6, ease: "power3.out", delay: 0.2,
           onComplete: () => split.revert()
         });
       }
@@ -168,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ===================== PAGE LOAD ===================== */
 
 let entryDone   = false;
-let scrollRaf   = null;
 let imageLayers = [];
 let stars       = [];
 let portal3d    = null;
@@ -180,7 +163,6 @@ window.addEventListener("load", () => {
 
   const loader  = document.getElementById("loader");
   const barFill = document.getElementById("loader-bar-fill");
-
   const totalLoad = 2500;
   const startTime = performance.now();
 
@@ -208,6 +190,7 @@ window.addEventListener("load", () => {
     document.querySelectorAll('.dante-layer.star').forEach(el => {
       if (el.classList.contains('star2')) {
         el.style.opacity = '0';
+        /* NO transform set here — ever */
       } else {
         el.style.transition = 'none';
         el.style.transform  = 'translateY(120px)';
@@ -215,8 +198,10 @@ window.addEventListener("load", () => {
       }
     });
 
+    /* Force reflow */
     document.body.offsetHeight;
 
+    /* Add dante-in to all layers */
     document.querySelectorAll('.dante-layer').forEach(el => {
       el.classList.add('dante-in');
     });
@@ -224,13 +209,13 @@ window.addEventListener("load", () => {
     /* ---- Animate stars in ---- */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
       if (el.classList.contains('star2')) {
-        /* Only fade in — never set transform so CSS spin2 keeps full control */
+        /* Fade in only — transform stays 100% CSS */
         el.style.transition = 'opacity 2s ease 0s';
         requestAnimationFrame(() => {
           el.style.opacity = '1';
         });
       } else {
-        el.style.transition = 'opacity 2s ease 0s, filter 0.6s ease';
+        el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
         requestAnimationFrame(() => {
           el.style.transform = 'translateY(0px)';
           el.style.opacity   = '1';
@@ -244,11 +229,11 @@ window.addEventListener("load", () => {
       if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
         const lockedWidth  = heroText.offsetWidth;
         const lockedHeight = heroText.offsetHeight;
-        heroText.style.width     = lockedWidth  + 'px';
-        heroText.style.height    = lockedHeight + 'px';
-        heroText.style.overflow  = 'hidden';
-        heroText.style.display   = 'block';
-        heroText.style.opacity   = '0';
+        heroText.style.width    = lockedWidth  + 'px';
+        heroText.style.height   = lockedHeight + 'px';
+        heroText.style.overflow = 'hidden';
+        heroText.style.display  = 'block';
+        heroText.style.opacity  = '0';
         const heroLogin = document.querySelector('.center .login');
         if (heroLogin) heroLogin.style.opacity = '0';
         const original = heroText.textContent.trim();
@@ -256,10 +241,7 @@ window.addEventListener("load", () => {
           gsap.to(heroLogin, { opacity: 1, duration: 0.4, delay: 0.4, ease: "power1.in" });
         }
         gsap.to(heroText, {
-          opacity: 1,
-          duration: 0.8,
-          delay: 0.4,
-          ease: "power1.in",
+          opacity: 1, duration: 0.8, delay: 0.4, ease: "power1.in",
           onComplete() {
             gsap.to(heroText, {
               duration: 2.4,
@@ -287,11 +269,11 @@ window.addEventListener("load", () => {
       textEl      = document.querySelector('.center .text');
       loginEl     = document.querySelector('.center .login');
 
-      /* ---- star2: clear any inline transform, only filter transition ---- */
+      /* ---- star2: remove any inline transform, filter transition only ---- */
       stars.forEach(el => {
         if (el.classList.contains('star2')) {
+          el.style.removeProperty('transform');
           el.style.transition = 'opacity 2s ease, filter 0.6s ease';
-          el.style.transform  = '';
         } else {
           el.style.transition = 'filter 0.6s ease';
         }
@@ -299,7 +281,11 @@ window.addEventListener("load", () => {
 
       entryDone = true;
       document.body.classList.add('entry-done');
-      initCinematicParallax();
+
+      /* Wait for all CSS entry transitions to fully finish before GSAP takes over */
+      setTimeout(() => {
+        initCinematicParallax();
+      }, 1200);
 
     }, 3200);
   }
@@ -332,7 +318,6 @@ if (loginBtn && modal) {
   loginBtn.addEventListener('click', () => {
     modal.classList.add('open');
     renderLogin();
-    /* Stop heavy background work while modal is open */
     stopParticles();
     pauseParallax();
   });
@@ -341,7 +326,6 @@ if (loginBtn && modal) {
 function closeModal() {
   if (!modal) return;
   modal.classList.remove('open');
-  /* Resume background work */
   startParticles();
   resumeParallax();
 }
@@ -361,31 +345,11 @@ function renderLogin() {
   modalBox.innerHTML = `
     <button class="modal-close" id="closeModal">✕</button>
 
-    <div style="
-      border-left: 2px solid rgba(93,20,30,0.2);
-      padding: 12px 16px;
-      margin-bottom: 28px;
-      text-align: left;
-    ">
-      <div style="
-        font-family:'Switzer';
-        font-size:9px;
-        letter-spacing:3px;
-        text-transform:uppercase;
-        color:rgba(93,20,30,0.4);
-        margin-bottom:8px;
-      ">Entry · 001</div>
-
-      <p class="lore-text" style="
-        font-family:'Montserrat',sans-serif;
-        font-size:11px;
-        line-height:1.85;
-        margin:0;
-        padding:0;
-        border:none;
-        overflow:hidden;
-        word-break:break-word;
-      "><span class="lore-before" style="color:${loreColor};transition:color 0.6s;">Your name is—is— You are wandering alone through the dark. You were something before this, somewhere before here, but now…you are being called down. Perhaps these missing pieces will get filled in along the way. …</span><span class="lore-heart" style="color:${heartColor};transition:color 0.6s;">Heart</span><span class="lore-after" style="color:${loreColor};transition:color 0.6s;"> — Something about the word really resonates with you. I wonder why.</span></p>
+    <div style="border-left:2px solid rgba(93,20,30,0.2);padding:12px 16px;margin-bottom:28px;text-align:left;">
+      <div style="font-family:'Switzer';font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;">Entry · 001</div>
+      <p class="lore-text" style="font-family:'Montserrat',sans-serif;font-size:11px;line-height:1.85;margin:0;padding:0;border:none;overflow:hidden;word-break:break-word;">
+        <span class="lore-before" style="color:${loreColor};transition:color 0.6s;">Your name is—is— You are wandering alone through the dark. You were something before this, somewhere before here, but now…you are being called down. Perhaps these missing pieces will get filled in along the way. …</span><span class="lore-heart" style="color:${heartColor};transition:color 0.6s;">Heart</span><span class="lore-after" style="color:${loreColor};transition:color 0.6s;"> — Something about the word really resonates with you. I wonder why.</span>
+      </p>
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
@@ -397,24 +361,12 @@ function renderLogin() {
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;text-align:left;">
       <div>
         <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Username</label>
-        <input id="loginUser" type="text" placeholder="username"
-          style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+        <input id="loginUser" type="text" placeholder="username" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
       </div>
       <div>
         <label style="font-family:'Switzer';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);display:block;margin-bottom:6px;">Password</label>
-        <input id="loginPass" type="password" placeholder="password"
-          style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
-        <p id="loginError" style="
-          color:#c0392b;
-          font-family:'Switzer';
-          font-size:10.5px;
-          letter-spacing:1px;
-          margin:6px 0 0 0;
-          min-height:16px;
-          padding:0;
-          border:none;
-          text-align:left;
-        "></p>
+        <input id="loginPass" type="password" placeholder="password" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid rgba(93,20,30,0.2);background:transparent;font-family:'Switzer';font-size:12px;outline:none;">
+        <p id="loginError" style="color:#c0392b;font-family:'Switzer';font-size:10.5px;letter-spacing:1px;margin:6px 0 0 0;min-height:16px;padding:0;border:none;text-align:left;"></p>
       </div>
     </div>
 
@@ -424,19 +376,6 @@ function renderLogin() {
   document.getElementById('closeModal').addEventListener('click', closeModal);
   document.getElementById('submitLogin').addEventListener('click', checkLogin);
   document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkLogin(); });
-
-  /* Stop particles on focus, restore on blur */
-  ['loginUser', 'loginPass'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('focus', () => {
-      stopParticles();
-      pauseParallax();
-    });
-    el.addEventListener('blur', () => {
-      /* Only restore if modal is still closed — here modal is open so keep paused */
-    });
-  });
 
   initMagneticButtons();
 }
@@ -503,15 +442,31 @@ function initCinematicParallax() {
 
   ScrollTrigger.getAll().forEach(t => t.kill());
 
+  let lastProgress = -1;
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: portal3d,
       start: "top top",
       end: "+=100%",
-      scrub: 0.1,
+      scrub: 0.2,
+      onEnter: () => {
+        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
+      },
+      onLeave: () => {
+        imageLayers.forEach(el => el.style.willChange = 'auto');
+      },
+      onEnterBack: () => {
+        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
+      },
+      onLeaveBack: () => {
+        imageLayers.forEach(el => el.style.willChange = 'auto');
+      },
       onUpdate: (self) => {
-        if (self.progress > 0.08) stopParticles();
-        else startParticles();
+        const p = self.progress;
+        if (lastProgress < 0.08 && p >= 0.08) stopParticles();
+        else if (lastProgress >= 0.08 && p < 0.08) startParticles();
+        lastProgress = p;
       }
     }
   });
@@ -521,61 +476,30 @@ function initCinematicParallax() {
     const isBack = depth <= 0.22;
     const yDist  = isBack ? depth * 320 : depth * 140;
     const rotX   = isBack ? depth * 10 : 0;
-
-    tl.to(el, {
-      y:       yDist,
-      rotateX: rotX,
-      opacity: 0,
-      ease:    "power1.inOut",
-      duration: 1
-    }, 0);
+    tl.to(el, { y: yDist, rotateX: rotX, opacity: 0, ease: "power1.inOut", duration: 1 }, 0);
   });
 
-  /* ---- star2: only fade opacity, NEVER set x/y/transform ---- */
+  /* star2: opacity fade ONLY — GSAP never sets x/y/transform on it */
   stars.forEach((el, i) => {
     const depth = parseFloat(el.dataset.depth) || 0.1;
     if (el.classList.contains('star2')) {
-      tl.to(el, {
-        opacity:  0,
-        ease:     "power2.in",
-        duration: 0.7
-      }, 0);
+      tl.to(el, { opacity: 0, ease: "power2.in", duration: 0.7 }, 0);
     } else {
       tl.to(el, {
-        y:        depth * 130,
-        x:        (i % 2 === 0 ? 1 : -1) * depth * 40,
-        opacity:  0,
-        ease:     "power2.in",
+        y: depth * 130,
+        x: (i % 2 === 0 ? 1 : -1) * depth * 40,
+        opacity: 0,
+        ease: "power2.in",
         duration: 0.7
       }, 0);
     }
   });
 
-  tl.to(portal3d, {
-    scale:   1.08,
-    opacity: 0,
-    ease:    "power2.inOut",
-    duration: 1
-  }, 0);
-
-  if (textEl) {
-    tl.to(textEl, {
-      y:       40,
-      opacity: 0,
-      ease:    "power2.in",
-      duration: 0.6
-    }, 0);
-  }
-  if (loginEl) {
-    tl.to(loginEl, {
-      y:       40,
-      opacity: 0,
-      ease:    "power2.in",
-      duration: 0.6
-    }, 0.05);
-  }
+  tl.to(portal3d, { scale: 1.08, opacity: 0, ease: "power2.inOut", duration: 1 }, 0);
+  if (textEl)  tl.to(textEl,  { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0);
+  if (loginEl) tl.to(loginEl, { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0.05);
 }
 
 window.addEventListener('scroll', () => {
-  /* Kept as no-op — ScrollTrigger owns scroll now */
+  /* no-op — ScrollTrigger owns scroll */
 });
