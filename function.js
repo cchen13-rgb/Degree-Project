@@ -1,6 +1,7 @@
 /* ===================== PARTICLES ===================== */
 
 const body = document.body;
+const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
 let particleInterval = null;
 let particleContainer = null;
@@ -74,6 +75,8 @@ function bindMagneticHover(element, xFactor, yFactor, resetDuration, resetEase) 
 }
 
 function initMagneticButtons() {
+  if (isTouchDevice) return;
+
   document.querySelectorAll('.login').forEach(btn => {
     bindMagneticHover(btn, 0.3, 0.3, 0.7, "elastic.out(1, 0.4)");
   });

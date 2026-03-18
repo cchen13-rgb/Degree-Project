@@ -688,6 +688,22 @@ box-sizing:border-box;
     animation-play-state: paused;
     transition: none;
   }
+
+  body.modal-open{
+    overflow:hidden;
+  }
+
+  body.modal-open #particles,
+  body.modal-open .dante-parallax,
+  body.modal-open .portal-text,
+  body.modal-open .center .text{
+    display:none !important;
+  }
+
+  body.modal-open .portal{
+    background:none !important;
+    min-height:0 !important;
+  }
 }
 
 .modal-overlay.open{
@@ -1272,27 +1288,29 @@ display:block;
   }
 
   .modal-overlay{
-    align-items:flex-end;
+    align-items:flex-start;
     padding:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
   }
 
   .modal-box{
     max-width:100%;
     width:100%;
-    max-height:88vh;
+    max-height:none;
     padding:32px 24px 40px 24px;
     border-radius:16px 16px 0 0;
     border:none;
     box-sizing:border-box;
-    overflow-y:auto;
+    overflow:visible;
   }
 
   .modal-overlay .modal-box{
-    transform:translateY(60px);
+    transform:none;
   }
 
   .modal-overlay.open .modal-box{
-    transform:translateY(0);
+    transform:none;
   }
 
   .modal-box:focus-within{
