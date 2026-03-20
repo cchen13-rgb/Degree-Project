@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hello World</title>
   <link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="Dante/1.webp" as="image">
-  <link rel="preload" href="Dante/2.webp" as="image">
-  <link rel="preload" href="Dante/3.webp" as="image">
-  <link rel="preload" href="Dante/4.webp" as="image">
   <link rel="preload" href="Dante/5.webp" as="image">
+  <link rel="preload" href="Dante/1.webp" as="image">
+  <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
   <link rel="stylesheet" href="design.css">
   <style>
+
+    h1, h2, h3, h4, h5, h6{
+      font-family:"fayte-pixel-hard",sans-serif;
+      font-weight:400;
+      font-style:normal;
+    }
 
     /* ---- Loader ---- */
     #loader{
@@ -34,7 +38,9 @@
     }
 
     #loader-text{
-      font-family:"Gambarino",serif;
+      font-family:"fayte-pixel-hard",sans-serif;
+      font-weight:400;
+      font-style:normal;
       font-size:18px;
       letter-spacing:4px;
       color:#3d0d14;
@@ -174,7 +180,9 @@
     }
 
     .char-name-en{
-      font-family:"Gambarino",serif;
+      font-family:"fayte-pixel-hard",sans-serif;
+      font-weight:400;
+      font-style:normal;
       font-size:54px;
       line-height:1;
       color:#3d0d14;
@@ -259,16 +267,21 @@
     }
 
     body.dark .char-id            { opacity:0; }
-    body.dark .char-name-sub      { opacity:0; }
     body.dark .char-rule          { opacity:0; }
     body.dark .char-stats         { opacity:0; }
     body.dark .char-profile-label { opacity:0; }
 
-    body.dark .char-name-en                   { color:transparent; }
-    body.dark .char-name-en .reveal-name      { color:#0d0d0d; }
+    body.dark .char-name-en,
+    body.dark .char-name-sub,
+    body.dark .char-profile-text{
+      color:transparent;
+    }
 
-    body.dark .char-profile-text              { color:transparent; }
-    body.dark .char-profile-text .reveal-name { color:#0d0d0d; }
+    body.dark .char-name-en .reveal-name,
+    body.dark .char-name-sub .reveal-name,
+    body.dark .char-profile-text .reveal-name{
+      color:#0d0d0d;
+    }
     @media (max-width: 900px) {
   .profiles-section{
     grid-template-columns: 1fr;
@@ -354,13 +367,13 @@
   <div class="center">
     <div class="portal">
       <div class="dante-parallax">
-        <img src="Dante/5.webp" class="dante-layer" data-depth="0.08" decoding="async" alt="">
+        <img src="Dante/5.webp" class="dante-layer" data-depth="0.08" decoding="async" fetchpriority="high" alt="">
         <img src="Dante/4.webp" class="dante-layer" data-depth="0.14" decoding="async" alt="">
         <img src="Dante/3.webp" class="dante-layer" data-depth="0.22" decoding="async" alt="">
         <img src="Dante/2.webp" class="dante-layer" data-depth="0.32" decoding="async" alt="">
-        <img src="Dante/1.webp" class="dante-layer" data-depth="0.45" decoding="async" alt="">
-        <img src="svg/flower1.webp" class="dante-layer star star1" data-depth="0.55" alt="">
-        <img src="svg/flower2.webp" class="dante-layer star star2" data-depth="0.55" alt="">
+        <img src="Dante/1.webp" class="dante-layer" data-depth="0.45" decoding="async" fetchpriority="high" alt="">
+        <img src="svg/flower1.webp" class="dante-layer star star1" decoding="async" fetchpriority="low" data-depth="0.55" alt="">
+        <img src="svg/flower2.webp" class="dante-layer star star2" decoding="async" fetchpriority="low" data-depth="0.55" alt="">
       </div>
       <button class="login">Login</button>
     </div>
@@ -374,11 +387,11 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 <section class="profiles-section">
 
   <div class="char-card" id="cheryl-card">
-    <div class="char-img-wrap" data-tag="Archive">
+    <div class="char-img-wrap" data-tag="Photo">
       <img src="pngs/cheryl2.png" loading="lazy" alt="Cheryl">
     </div>
     <div class="char-info">
-      <div class="char-id">SUBJECT · 001</div>
+      <div class="char-id">Patient · 001</div>
       <h2 class="char-name-en">Cheryl</h2>
       <div class="char-name-sub">Cheryl · Shelley</div>
       <div class="char-rule"></div>
@@ -406,11 +419,11 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   </div>
 
   <div class="char-card char-card--flip" id="crane-card">
-    <div class="char-img-wrap" data-tag="Archive">
+    <div class="char-img-wrap" data-tag="Photo">
       <img src="pngs/crane2.png" loading="lazy" alt="Crane">
     </div>
     <div class="char-info">
-      <div class="char-id">SUBJECT · 002</div>
+      <div class="char-id">Patient · 002</div>
       <h2 class="char-name-en">Ms. Crane</h2>
       <div class="char-name-sub">Crane · T…</div>
       <div class="char-rule"></div>

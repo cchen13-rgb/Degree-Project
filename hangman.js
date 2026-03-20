@@ -58,6 +58,7 @@ const KEYBOARD_ROWS = [
   ["a","s","d","f","g","h","j","k","l"],
   ["z","x","c","v","b","n","m"],
 ];
+const HANGMAN_SEEN_KEY = "hangmanSeenBefore";
 
 let wrongCount = 0;
 let guessed    = new Set();
@@ -94,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderWord();
   renderCrane();
   updateHint();
+  applyReturningPlayerMessage();
 
   document.addEventListener("keydown", (e) => {
     const letter = e.key.toLowerCase();
@@ -202,6 +204,12 @@ function updateHint() {
   }
 }
 
+function applyReturningPlayerMessage() {
+  if (!localStorage.getItem(HANGMAN_SEEN_KEY)) return;
+  const nag = document.getElementById("nagMsg");
+  if (nag) nag.textContent = "were you not here before?";
+}
+
 /* ===================== CRANE ===================== */
 
 function renderCrane() {
@@ -284,6 +292,7 @@ function showOverlay(win) {
   gameOver = true;
 
   if (win) {
+    localStorage.setItem(HANGMAN_SEEN_KEY, "true");
     morphCraneToDoor();
     return;
   }

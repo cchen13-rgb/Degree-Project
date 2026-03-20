@@ -2,10 +2,13 @@
 
 const body = document.body;
 const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+const isDesktopViewport = window.matchMedia('(min-width: 1025px)').matches;
 
 let particleInterval = null;
 let particleContainer = null;
 const particleRemovalTimers = new Set();
+let postEntryEffectsStarted = false;
+let introInteractionLocked = true;
 
 function startParticles() {
   particleContainer = particleContainer || document.getElementById("particles");
@@ -87,7 +90,15 @@ function initMagneticButtons() {
   });
 }
 
+function startPostEntryEffects() {
+  if (postEntryEffectsStarted) return;
+  postEntryEffectsStarted = true;
+  startParticles();
+  initMagneticButtons();
+}
+
 function setDarkMode(isDark) {
+  if (introInteractionLocked) return;
   body.classList.toggle("dark", isDark);
   applyLoginDarkMode();
 }
@@ -124,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ---- Stars click to toggle dark mode ---- */
   document.addEventListener("click", (e) => {
+    if (introInteractionLocked) return;
     if (e.target.closest(".star")) {
       const nextDarkMode = !body.classList.contains("dark");
       if (toggle) toggle.checked = nextDarkMode;
@@ -149,9 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  startParticles();
   applyNameReveal();
-  initMagneticButtons();
 
   /* ---- SplitText reveal on char cards ---- */
   const cardObserverSplit = new IntersectionObserver((entries) => {
@@ -206,6 +216,12 @@ window.addEventListener("load", () => {
   requestAnimationFrame(animateBar);
 
   function beginEntry() {
+    const modeToggle = document.getElementById('modeToggle');
+    if (modeToggle) {
+      modeToggle.disabled = true;
+      body.classList.add('intro-toggle-locked');
+    }
+
     if (loader) {
       loader.style.opacity = '0';
       setTimeout(() => {
@@ -231,9 +247,6 @@ window.addEventListener("load", () => {
     if (heroLogin) heroLogin.style.opacity = '0';
     if (heroText)  heroText.style.opacity  = '0';
 
-    /* Force reflow so transition:none takes effect */
-    body.offsetHeight;
-
     /* ---- Wait for loader to fully disappear before any fade starts ---- */
     setTimeout(() => {
 
@@ -248,8 +261,15 @@ window.addEventListener("load", () => {
           /* fade first, then start the CSS spin once fully visible */
           el.classList.remove('star2-spinning');
           el.style.transition = 'opacity 2s ease 0s';
-          setTimeout(() => { el.style.opacity = '1'; }, 50);
-          setTimeout(() => { el.classList.add('star2-spinning'); }, 2050);
+          setTimeout(() => { el.style.opacity = '1'; }, 450);
+          setTimeout(() => {
+            el.classList.add('star2-spinning');
+            if (modeToggle) {
+              modeToggle.disabled = false;
+              body.classList.remove('intro-toggle-locked');
+            }
+            introInteractionLocked = false;
+          }, 2450);
         } else {
           el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
           setTimeout(() => {
@@ -267,8 +287,8 @@ window.addEventListener("load", () => {
         }, 1800);
       }
 
-      /* ---- ScrambleText on hero text ---- */
-      if (heroText && typeof ScrambleTextPlugin !== 'undefined') {
+      /* ---- Keep desktop startup lighter by using a simple fade for hero text ---- */
+      if (heroText && !isDesktopViewport && typeof ScrambleTextPlugin !== 'undefined') {
         const lockedWidth  = heroText.offsetWidth;
         const lockedHeight = heroText.offsetHeight;
         heroText.style.width    = lockedWidth  + 'px';
@@ -297,9 +317,14 @@ window.addEventListener("load", () => {
             }
           });
         }, 1400);
+      } else if (heroText) {
+        heroText.style.transition = 'opacity 1.6s ease';
+        setTimeout(() => {
+          heroText.style.opacity = '1';
+        }, 1400);
       }
 
-    }, 900); /* 800ms loader fade + 100ms buffer */
+    }, 1300); /* 800ms loader fade + extra settle time for first hero decode/paint */
 
     /* ---- Hand off to GSAP ScrollTrigger after everything has settled ---- */
     setTimeout(() => {
@@ -323,6 +348,7 @@ window.addEventListener("load", () => {
 
       setTimeout(() => {
         initCinematicParallax();
+        startPostEntryEffects();
       }, 1200);
 
     }, 4200);
@@ -335,12 +361,12 @@ window.addEventListener("load", () => {
 function applyNameReveal() {
   document.querySelectorAll(
     '.left-panel p, .scroll-content p, .right-panel p, ' +
-    '.char-profile-text, .char-name-en, .stat-value'
+    '.char-profile-text, .char-name-en, .char-name-sub, .stat-value'
   ).forEach(p => {
     if (p.dataset.nameRevealApplied === 'true') return;
 
     p.innerHTML = p.innerHTML.replace(
-      /\b(Cheryl|Crane)\b/g,
+      /\b(Cheryl|Shelley|heart)\b/gi,
       '<span class="reveal-name">$1</span>'
     );
     p.dataset.nameRevealApplied = 'true';
@@ -444,7 +470,7 @@ function checkLogin() {
   const user = userInput.value.trim().toLowerCase();
   const pass = passInput.value.trim().toLowerCase();
 
-  if (user === 'cheryl' && pass === 'heart') {
+  if (user === 'cherylshelley' && pass === 'heart') {
     loginAttempts = 0;
     closeModal();
     window.location.href = "captcha.html";
@@ -467,7 +493,7 @@ function checkLogin() {
         }
       }
     } else {
-      hint = 'The password is your heart.';
+      hint = 'cherylshelley+heart.';
     }
 
     if (typeof ScrambleTextPlugin !== 'undefined') {
@@ -490,14 +516,12 @@ function initCinematicParallax() {
 
   ScrollTrigger.getAll().forEach(t => t.kill());
 
-  let lastProgress = -1;
-
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: portal3d,
       start: "top top",
       end: "+=100%",
-      scrub: 0.2,
+      scrub: 0.35,
       onEnter: () => {
         imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
       },
@@ -509,12 +533,6 @@ function initCinematicParallax() {
       },
       onLeaveBack: () => {
         imageLayers.forEach(el => el.style.willChange = 'auto');
-      },
-      onUpdate: (self) => {
-        const p = self.progress;
-        if (lastProgress < 0.08 && p >= 0.08) stopParticles();
-        else if (lastProgress >= 0.08 && p < 0.08) startParticles();
-        lastProgress = p;
       }
     }
   });
@@ -522,8 +540,8 @@ function initCinematicParallax() {
   imageLayers.forEach((el) => {
     const depth  = parseFloat(el.dataset.depth) || 0.1;
     const isBack = depth <= 0.22;
-    const yDist  = isBack ? depth * 320 : depth * 140;
-    const rotX   = isBack ? depth * 10 : 0;
+    const yDist  = isBack ? depth * 190 : depth * 95;
+    const rotX   = isBack ? depth * 4 : 0;
     tl.to(el, { y: yDist, rotateX: rotX, opacity: 0, ease: "power1.inOut", duration: 1 }, 0);
   });
 
@@ -534,8 +552,8 @@ function initCinematicParallax() {
       tl.to(el, { opacity: 0, ease: "power2.in", duration: 0.7 }, 0);
     } else {
       tl.to(el, {
-        y: depth * 130,
-        x: (i % 2 === 0 ? 1 : -1) * depth * 40,
+        y: depth * 85,
+        x: (i % 2 === 0 ? 1 : -1) * depth * 22,
         opacity: 0,
         ease: "power2.in",
         duration: 0.7
@@ -543,9 +561,9 @@ function initCinematicParallax() {
     }
   });
 
-  tl.to(portal3d, { scale: 1.08, opacity: 0, ease: "power2.inOut", duration: 1 }, 0);
-  if (textEl)  tl.to(textEl,  { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0);
-  if (loginEl) tl.to(loginEl, { y: 40, opacity: 0, ease: "power2.in", duration: 0.6 }, 0.05);
+  tl.to(portal3d, { scale: 1.03, opacity: 0, ease: "power2.inOut", duration: 1 }, 0);
+  if (textEl)  tl.to(textEl,  { y: 24, opacity: 0, ease: "power2.in", duration: 0.6 }, 0);
+  if (loginEl) tl.to(loginEl, { y: 24, opacity: 0, ease: "power2.in", duration: 0.6 }, 0.05);
 }
 
 window.addEventListener('scroll', () => {
