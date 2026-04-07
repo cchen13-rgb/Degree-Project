@@ -37,24 +37,8 @@ function stopParticles() {
   particleRemovalTimers.forEach(clearTimeout);
   particleRemovalTimers.clear();
 
-  /* Remove all existing particles immediately to free compositor resources */
   particleContainer = particleContainer || document.getElementById("particles");
   if (particleContainer) particleContainer.replaceChildren();
-}
-
-/* Pause/resume parallax ScrollTrigger */
-let parallaxPaused = false;
-
-function pauseParallax() {
-  if (parallaxPaused || typeof ScrollTrigger === 'undefined') return;
-  parallaxPaused = true;
-  ScrollTrigger.getAll().forEach(t => t.disable());
-}
-
-function resumeParallax() {
-  if (!parallaxPaused || typeof ScrollTrigger === 'undefined') return;
-  parallaxPaused = false;
-  ScrollTrigger.getAll().forEach(t => t.enable());
 }
 
 
@@ -69,10 +53,30 @@ function bindMagneticHover(element, xFactor, yFactor, resetDuration, resetEase) 
     const r = element.getBoundingClientRect();
     const x = e.clientX - r.left - r.width / 2;
     const y = e.clientY - r.top - r.height / 2;
+    if (element.classList.contains('star2')) {
+      gsap.to(element, {
+        '--hover-x': `${x * xFactor}px`,
+        '--hover-y': `${y * yFactor}px`,
+        duration: 0.4,
+        ease: "power2.out",
+        overwrite: true
+      });
+      return;
+    }
     gsap.to(element, { x: x * xFactor, y: y * yFactor, duration: 0.4, ease: "power2.out", overwrite: true });
   });
 
   element.addEventListener('mouseleave', () => {
+    if (element.classList.contains('star2')) {
+      gsap.to(element, {
+        '--hover-x': '0px',
+        '--hover-y': '0px',
+        duration: resetDuration,
+        ease: resetEase,
+        overwrite: true
+      });
+      return;
+    }
     gsap.to(element, { x: 0, y: 0, duration: resetDuration, ease: resetEase, overwrite: true });
   });
 }
@@ -84,8 +88,7 @@ function initMagneticButtons() {
     bindMagneticHover(btn, 0.3, 0.3, 0.7, "elastic.out(1, 0.4)");
   });
 
-  /* star2 is NEVER given to GSAP - CSS owns its transform entirely */
-  document.querySelectorAll('.star:not(.star2)').forEach(star => {
+  document.querySelectorAll('.star').forEach(star => {
     bindMagneticHover(star, 0.4, 0.4, 0.9, "elastic.out(1, 0.3)");
   });
 }
@@ -95,6 +98,8 @@ function startPostEntryEffects() {
   postEntryEffectsStarted = true;
   startParticles();
   initMagneticButtons();
+  /* Three.js parallax boots here, after entry sequence completes */
+  initThreeParallax();
 }
 
 function setDarkMode(isDark) {
@@ -186,12 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ===================== PAGE LOAD ===================== */
 
-let entryDone   = false;
-let imageLayers = [];
-let stars       = [];
-let portal3d    = null;
-let textEl      = null;
-let loginEl     = null;
+let entryDone = false;
+let textEl    = null;
+let loginEl   = null;
 
 window.addEventListener("load", () => {
   body.classList.add("loaded");
@@ -229,8 +231,7 @@ window.addEventListener("load", () => {
       }, 800);
     }
 
-    /* ---- Set initial hidden state ---- */
-    /* star2 never gets a transform — CSS owns it */
+    /* star2 never gets a JS transform — CSS owns it */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
       if (el.classList.contains('star2')) {
         el.style.opacity = '0';
@@ -241,24 +242,19 @@ window.addEventListener("load", () => {
       }
     });
 
-    /* Hide login and text from the start */
     const heroLogin = document.querySelector('.center .login');
     const heroText  = document.querySelector('.center .text');
     if (heroLogin) heroLogin.style.opacity = '0';
     if (heroText)  heroText.style.opacity  = '0';
 
-    /* ---- Wait for loader to fully disappear before any fade starts ---- */
     setTimeout(() => {
 
-      /* Trigger CSS staggered fade-in on webp layers */
       document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
         el.classList.add('dante-in');
       });
 
-      /* star1 animate in with JS transition */
       document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
-          /* fade first, then start the CSS spin once fully visible */
           el.classList.remove('star2-spinning');
           el.style.transition = 'opacity 2s ease 0s';
           setTimeout(() => { el.style.opacity = '1'; }, 450);
@@ -279,15 +275,11 @@ window.addEventListener("load", () => {
         }
       });
 
-      /* ---- Login fades in after layers have had time to appear ---- */
       if (heroLogin) {
         heroLogin.style.transition = 'opacity 2s ease';
-        setTimeout(() => {
-          heroLogin.style.opacity = '1';
-        }, 1800);
+        setTimeout(() => { heroLogin.style.opacity = '1'; }, 1800);
       }
 
-      /* ---- Keep desktop startup lighter by using a simple fade for hero text ---- */
       if (heroText && !isDesktopViewport && typeof ScrambleTextPlugin !== 'undefined') {
         const lockedWidth  = heroText.offsetWidth;
         const lockedHeight = heroText.offsetHeight;
@@ -319,22 +311,16 @@ window.addEventListener("load", () => {
         }, 1400);
       } else if (heroText) {
         heroText.style.transition = 'opacity 1.6s ease';
-        setTimeout(() => {
-          heroText.style.opacity = '1';
-        }, 1400);
+        setTimeout(() => { heroText.style.opacity = '1'; }, 1400);
       }
 
-    }, 1300); /* 800ms loader fade + extra settle time for first hero decode/paint */
+    }, 1300);
 
-    /* ---- Hand off to GSAP ScrollTrigger after everything has settled ---- */
     setTimeout(() => {
-      imageLayers = [...document.querySelectorAll('.dante-layer:not(.star)')];
-      stars       = [...document.querySelectorAll('.dante-layer.star')];
-      portal3d    = document.querySelector('.portal');
-      textEl      = document.querySelector('.center .text');
-      loginEl     = document.querySelector('.center .login');
+      textEl  = document.querySelector('.center .text');
+      loginEl = document.querySelector('.center .login');
 
-      stars.forEach(el => {
+      document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
           el.style.removeProperty('transform');
           el.style.transition = 'opacity 2s ease, filter 0.6s ease';
@@ -347,7 +333,6 @@ window.addEventListener("load", () => {
       body.classList.add('entry-done');
 
       setTimeout(() => {
-        initCinematicParallax();
         startPostEntryEffects();
       }, 1200);
 
@@ -364,7 +349,6 @@ function applyNameReveal() {
     '.char-profile-text, .char-name-en, .char-name-sub, .stat-value'
   ).forEach(p => {
     if (p.dataset.nameRevealApplied === 'true') return;
-
     p.innerHTML = p.innerHTML.replace(
       /\b(Cheryl|Shelley|heart)\b/gi,
       '<span class="reveal-name">$1</span>'
@@ -387,7 +371,6 @@ if (loginBtn && modal) {
     body.classList.add('modal-open');
     renderLogin();
     stopParticles();
-    pauseParallax();
   });
 }
 
@@ -396,7 +379,6 @@ function closeModal() {
   modal.classList.remove('open');
   body.classList.remove('modal-open');
   startParticles();
-  resumeParallax();
 }
 
 if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -509,63 +491,152 @@ function checkLogin() {
 }
 
 
-/* ===================== DANTE PARALLAX SCROLL — GSAP ScrollTrigger ===================== */
+/* ===================== THREE.JS PARALLAX =====================
+   The root problem: CSS owns `transform` on .dante-layer via the
+   .dante-in class (translateY(0)). Writing el.style.transform from
+   JS triggers the CSS transition and fights the class rule.
 
-function initCinematicParallax() {
-  if (!portal3d) return;
+   Solution: JS never touches `transform` on individual layers.
+   Instead each layer gets a wrapper <div> that JS translates freely,
+   while the layer element itself stays CSS-only.
 
-  ScrollTrigger.getAll().forEach(t => t.kill());
+   star2 is fully excluded — CSS owns its animation.
+   Touch devices skip entirely.
+================================================================ */
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: portal3d,
-      start: "top top",
-      end: "+=100%",
-      scrub: 0.35,
-      onEnter: () => {
-        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
-      },
-      onLeave: () => {
-        imageLayers.forEach(el => el.style.willChange = 'auto');
-      },
-      onEnterBack: () => {
-        imageLayers.forEach(el => el.style.willChange = 'transform, opacity');
-      },
-      onLeaveBack: () => {
-        imageLayers.forEach(el => el.style.willChange = 'auto');
-      }
+function initThreeParallax() {
+  if (isTouchDevice) return;
+
+  const container = document.querySelector('.dante-parallax');
+  const portal    = document.querySelector('.portal');
+  if (!container || !portal) return;
+
+  const shells = [];
+
+  /* ── Helper: wrap any element in a parallax shell ──
+     JS moves only the shell; the element inside keeps
+     its own CSS transforms/animations completely untouched. */
+  function makeShell(el, depth, opts = {}) {
+    if (!el) return;
+    if (el.parentElement && el.parentElement.classList.contains('parallax-shell')) return;
+
+    const shell = document.createElement('div');
+    shell.className = 'parallax-shell';
+
+    const isAbsolute = opts.forceAbsolute ||
+      getComputedStyle(el).position === 'absolute';
+
+    shell.style.cssText = [
+      isAbsolute ? 'position:absolute' : 'position:relative',
+      'top:0', 'left:0',
+      'width:100%',
+      'will-change:transform',
+      /* shells that wrap interactive elements must pass pointer events through */
+      opts.interactive ? 'pointer-events:auto' : 'pointer-events:none',
+    ].join(';');
+
+    el.parentNode.insertBefore(shell, el);
+    shell.appendChild(el);
+    shells.push({ shell, depth });
+  }
+
+  /* ── 1. Dante image layers (non-star2) ── */
+  container.querySelectorAll('.dante-layer:not(.star2)').forEach(layer => {
+    const depth = parseFloat(layer.dataset.depth) || 0.1;
+    makeShell(layer, depth, { forceAbsolute: getComputedStyle(layer).position === 'absolute' });
+  });
+
+  /* ── 2. star2 — CSS owns the spin via --star2-rot; shell handles XY offset ── */
+  const star2 = container.querySelector('.star2');
+  if (star2) {
+    makeShell(star2, 0.7, { forceAbsolute: true });
+  }
+
+  /* ── 3. Hero text + login button ──
+     These are flex children of .center — wrapping them in a div
+     breaks the layout. Instead we drive them via CSS custom
+     properties so JS never conflicts with any existing transform. */
+  const textEl  = document.querySelector('.center .text');
+  const loginEl = document.querySelector('.center .login');
+
+  /* Inject the custom-property transform once, then update vars each frame.
+     Any pre-existing CSS transform (opacity transitions etc.) is preserved
+     because we're adding a NEW transform that reads the vars.            */
+  function injectVarTransform(el) {
+    if (!el) return;
+    el.style.setProperty('--px', '0px');
+    el.style.setProperty('--py', '0px');
+    /* Append to whatever transform is already there by reading it back.
+       Safest: just set will-change and write transform directly each tick
+       using the vars — since these elements have no competing class
+       transform (unlike .dante-layer which has .dante-in translateY).   */
+    el.style.willChange = 'transform';
+  }
+
+  injectVarTransform(textEl);
+  injectVarTransform(loginEl);
+
+  /* ── Smooth mouse tracking — listen on .center so text/login
+        keep responding when mouse drifts below .portal          ── */
+  const center = document.querySelector('.center') || portal;
+
+  const target  = { x: 0, y: 0 };
+  const current = { x: 0, y: 0 };
+  const SPREAD  = 28;
+  const TILT    = 8;
+
+  center.addEventListener('mousemove', e => {
+    const r  = portal.getBoundingClientRect();
+    const nx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+    const ny = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+    target.x =  nx * SPREAD;
+    target.y = -ny * SPREAD;
+  });
+
+  center.addEventListener('mouseleave', () => {
+    target.x = 0;
+    target.y = 0;
+  });
+
+  /* ── RAF loop ── */
+  function tick() {
+    requestAnimationFrame(tick);
+
+    current.x += (target.x - current.x) * 0.07;
+    current.y += (target.y - current.y) * 0.07;
+
+    /* Tilt the dante-parallax container */
+    const tx = (current.x / SPREAD) * TILT;
+    const ty = (current.y / SPREAD) * TILT;
+    container.style.transform = `rotateY(${tx}deg) rotateX(${-ty}deg)`;
+
+    /* Shells inside .dante-parallax */
+    shells.forEach(({ shell, depth }) => {
+      const px = current.x * depth;
+      const py = current.y * depth;
+      shell.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+    });
+
+    /* text + login: write transform directly — these elements have no
+       competing CSS class transform so there is no conflict here.
+       We preserve any existing inline transform prefix (e.g. the
+       desktop !important margin-based positioning leaves transform:none). */
+    if (textEl) {
+      const px = current.x * 0.18;
+      const py = current.y * 0.18;
+      textEl.style.transform = `translate3d(${px}px, ${py}px, 0)`;
     }
-  });
-
-  imageLayers.forEach((el) => {
-    const depth  = parseFloat(el.dataset.depth) || 0.1;
-    const isBack = depth <= 0.22;
-    const yDist  = isBack ? depth * 190 : depth * 95;
-    const rotX   = isBack ? depth * 4 : 0;
-    tl.to(el, { y: yDist, rotateX: rotX, opacity: 0, ease: "power1.inOut", duration: 1 }, 0);
-  });
-
-  /* star2: opacity fade ONLY — GSAP never sets x/y/transform on it */
-  stars.forEach((el, i) => {
-    const depth = parseFloat(el.dataset.depth) || 0.1;
-    if (el.classList.contains('star2')) {
-      tl.to(el, { opacity: 0, ease: "power2.in", duration: 0.7 }, 0);
-    } else {
-      tl.to(el, {
-        y: depth * 85,
-        x: (i % 2 === 0 ? 1 : -1) * depth * 22,
-        opacity: 0,
-        ease: "power2.in",
-        duration: 0.7
-      }, 0);
+    if (loginEl) {
+      const px = current.x * 0.12;
+      const py = current.y * 0.12;
+      /* On mobile the login has translateX(-50%) from CSS !important.
+         We must preserve it or the button jumps off-centre.           */
+      const isMobile = window.innerWidth <= 1024;
+      loginEl.style.transform = isMobile
+        ? `translateX(-50%) translate3d(${px}px, ${py}px, 0)`
+        : `translate3d(${px}px, ${py}px, 0)`;
     }
-  });
+  }
 
-  tl.to(portal3d, { scale: 1.03, opacity: 0, ease: "power2.inOut", duration: 1 }, 0);
-  if (textEl)  tl.to(textEl,  { y: 24, opacity: 0, ease: "power2.in", duration: 0.6 }, 0);
-  if (loginEl) tl.to(loginEl, { y: 24, opacity: 0, ease: "power2.in", duration: 0.6 }, 0.05);
+  tick();
 }
-
-window.addEventListener('scroll', () => {
-  /* no-op — ScrollTrigger owns scroll */
-});

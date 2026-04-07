@@ -1,7 +1,7 @@
 /* ===================== HANGMAN ===================== */
 
-const ANSWER      = "nest egg heart";
-const MAX_WRONG   = 9;
+const ANSWER    = "nest egg heart";
+const MAX_WRONG = 9;
 
 const CRANE_IMGS = [
   "Hangman/Crane Default.png",
@@ -17,26 +17,26 @@ const CRANE_IMGS = [
 ];
 
 const NAG_CORRECT = [
-  "oh. you got one.",
-  "lucky.",
-  "making progress..",
-  "i am impressed.",
-  "this one works.",
-  "hm. not bad.",
-  "getting closer..",
-  "sure. you got it.",
+  "Oh. you got one.",
+  "Looks like you got the worm early bird.",
+  "Making progress.",
+  "Excellent.  Or should I say, eggcelent.  Not funny?",
+  "Getting closer.",
+  "hm. Creative guess.",
+  "It's all coming together.",
+  "Keep it up and you'll achieve your goals in no time.",
 ];
 
 const NAG_WRONG = [
-  "i don't think Crane meat taste good...",
-  "there was an attempt",
-  "are you even trying?",
-  "put your heart into it.",
+  "I don't think Crane meat tastes very good...",
+  "What a bird brained guess",
+  "Are you even trying?",
+  "You're not putting your heart into it.",
   "unlucky...",
-  "think! think harder!.",
-  "nope. absolutely no",
-  "why can't you understand?",
-  "you are not good enough",
+  "Think harder.",
+  "\u266aCruidae, gentille gruidae...\u266a",
+  "\u266a... je te plumerai\u266a",
+  "You may just not be good enough",
 ];
 
 const HINTS = [
@@ -46,11 +46,11 @@ const HINTS = [
 ];
 
 const NAG_IDLE = [
-  "guess a letter.",
-  "i'm waiting.",
-  "still here. unfortunately.",
+  "Guess a letter.",
+  "Bird's don't live forever. Well, actually...",
+  "You have places to be, or have you forgotten that too.",
   "tick tock.",
-  "i will be here forever.",
+  "Let's get a move on shall we.",
 ];
 
 const KEYBOARD_ROWS = [
@@ -58,6 +58,7 @@ const KEYBOARD_ROWS = [
   ["a","s","d","f","g","h","j","k","l"],
   ["z","x","c","v","b","n","m"],
 ];
+
 const HANGMAN_SEEN_KEY = "hangmanSeenBefore";
 
 let wrongCount = 0;
@@ -214,6 +215,7 @@ function applyReturningPlayerMessage() {
 
 function renderCrane() {
   const img = document.getElementById("craneImg");
+  if (!img) return;
   const idx = Math.min(wrongCount, CRANE_IMGS.length - 1);
   img.style.opacity = "0";
   setTimeout(() => {
@@ -252,18 +254,26 @@ function handleGuess(letter) {
     if (key) key.classList.add("used-wrong");
     setNag(NAG_WRONG);
 
-    // Jump + red flash on crane
+    /* ── Three.js: blood fill ── */
+    if (typeof HMThree !== "undefined") {
+      HMThree.onWrong(wrongCount, MAX_WRONG);
+    }
+
     const craneImg = document.getElementById("craneImg");
-    craneImg.classList.remove("hurt");
-    void craneImg.offsetWidth; // force reflow
-    craneImg.classList.add("hurt");
-    craneImg.addEventListener("animationend", () => craneImg.classList.remove("hurt"), { once: true });
+    if (craneImg) {
+      craneImg.classList.remove("hurt");
+      void craneImg.offsetWidth;
+      craneImg.classList.add("hurt");
+      craneImg.addEventListener("animationend", () => craneImg.classList.remove("hurt"), { once: true });
+    }
 
     renderCrane();
     renderWrongLetters();
     updateHint();
 
     if (wrongCount >= MAX_WRONG) {
+      /* ── Three.js: flood on loss ── */
+      if (typeof HMThree !== "undefined") HMThree.onLose();
       setTimeout(() => showOverlay(false), 600);
     }
   }
@@ -292,12 +302,14 @@ function showOverlay(win) {
   gameOver = true;
 
   if (win) {
+    /* ── Three.js: drain blood on win ── */
+    if (typeof HMThree !== "undefined") HMThree.onWin();
     localStorage.setItem(HANGMAN_SEEN_KEY, "true");
     morphCraneToDoor();
     return;
   }
 
-  const window_ = document.querySelector(".hm-window");
+  const windowEl = document.querySelector(".hm-window");
 
   const overlay = document.createElement("div");
   overlay.classList.add("hm-overlay");
@@ -318,7 +330,7 @@ function showOverlay(win) {
   overlay.appendChild(title);
   overlay.appendChild(msg);
   overlay.appendChild(btn);
-  window_.appendChild(overlay);
+  windowEl.appendChild(overlay);
 
   requestAnimationFrame(() => overlay.classList.add("show"));
 }
@@ -344,7 +356,6 @@ function morphCraneToDoor() {
     const archR = doorW / 2;
     const doorX = (w - doorW) / 2;
     const doorY = h * 0.08;
-    const doorH = h - doorY;
 
     const svg = `
     <svg id="craneDoorSvg" xmlns="http://www.w3.org/2000/svg"
@@ -356,9 +367,7 @@ function morphCraneToDoor() {
             opacity: 0;
             animation: archReveal 0.8s ease 0.1s forwards;
           }
-          @keyframes archReveal {
-            to { opacity: 1; }
-          }
+          @keyframes archReveal { to { opacity: 1; } }
         </style>
       </defs>
       <path class="crane-arch" id="craneArch" d="
@@ -377,17 +386,13 @@ function morphCraneToDoor() {
       modeToggle._doorListener = () => {
         const arch = document.getElementById("craneArch");
         if (arch) {
-          const dark = document.body.classList.contains("dark");
-          arch.setAttribute("fill", dark ? "#e8e0e0" : "#050000");
+          arch.setAttribute("fill", document.body.classList.contains("dark") ? "#e8e0e0" : "#050000");
         }
       };
       modeToggle.addEventListener("change", modeToggle._doorListener);
     }
 
-    document.getElementById("craneDoorSvg").addEventListener("click", () => {
-      triggerDoorTransition();
-    });
-
+    document.getElementById("craneDoorSvg").addEventListener("click", triggerDoorTransition);
   }, 450);
 }
 
@@ -396,13 +401,13 @@ function morphCraneToDoor() {
 function triggerDoorTransition() {
   const overlay = document.createElement("div");
   overlay.style.cssText = `
-    position:fixed; inset:0; z-index:9999;
-    background:#000; opacity:0; pointer-events:none;
+    position:fixed;inset:0;z-index:9999;
+    background:#000;opacity:0;pointer-events:none;
     transition:opacity 0.8s ease;
   `;
   document.body.appendChild(overlay);
   requestAnimationFrame(() => { overlay.style.opacity = "1"; });
-  setTimeout(() => { window.location.href = "index.html"; }, 850);
+  setTimeout(() => { window.location.href = "parallax.html"; }, 850);
 }
 
 /* ===================== RESET ===================== */
@@ -411,6 +416,9 @@ function resetGame(overlay) {
   wrongCount = 0;
   guessed.clear();
   gameOver   = false;
+
+  /* ── Three.js: reset blood fill ── */
+  if (typeof HMThree !== "undefined") HMThree.onReset();
 
   overlay.classList.remove("show");
   setTimeout(() => overlay.remove(), 400);

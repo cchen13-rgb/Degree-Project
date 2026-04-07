@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telescope Memories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;font-family:'EB Garamond',Georgia,serif;background:#fff;}
+#sticky-wrap{position:sticky;top:0;width:100%;height:100vh;overflow:hidden;z-index:0;}
+#c{display:block;width:100%;height:100vh;}
+#vignette{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse at center, transparent 40%, var(--vcolor,rgba(255,255,255,0.75)) 100%);
+}
+#grain{
+  position:absolute;inset:0;pointer-events:none;z-index:3;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+#caption{
+  position:absolute;bottom:68px;left:0;right:0;text-align:center;
+  color:rgba(10,5,0,0);font-size:15px;font-style:italic;
+  letter-spacing:0.07em;line-height:1.95;
+  transition:color 1.2s ease;pointer-events:none;z-index:10;white-space:pre-line;
+}
+#caption.vis{color:var(--capcolor,rgba(10,5,0,0.78));}
+#phase-label{
+  position:absolute;top:24px;left:0;right:0;text-align:center;
+  color:var(--hintcolor,rgba(10,5,0,0.22));
+  font-size:10px;font-style:italic;letter-spacing:0.26em;text-transform:uppercase;
+  pointer-events:none;z-index:10;transition:color .5s;
+}
+#progress-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--dotcolor,rgba(10,5,0,0.08));z-index:10;pointer-events:none;}
+#progress-fill{height:100%;width:0%;background:var(--dotactive,rgba(10,5,0,0.4));transition:background .5s;}
+#dots{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:10;pointer-events:none;}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--dotcolor,rgba(10,5,0,0.18));transition:background .5s,transform .5s;}
+.dot.active{background:var(--dotactive,rgba(10,5,0,0.7));transform:scale(1.8);}
+#hint{position:absolute;bottom:22px;right:24px;color:var(--hintcolor,rgba(10,5,0,0.22));font-size:9px;letter-spacing:0.3em;text-transform:uppercase;pointer-events:none;z-index:10;transition:color .4s;}
+#scroll-driver{height:1100vh;position:relative;z-index:1;pointer-events:none;}
+</style>
+</head>
+<body>
+<div id="sticky-wrap">
+  <canvas id="c"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  <div id="phase-label">Memory I</div>
+  <div id="caption"></div>
+  <div id="dots"></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <div id="hint">scroll</div>
+</div>
+<div id="scroll-driver"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const N = 9;
+const CAPTIONS = [
+  "Are things starting to come back?",
+  "Close your eyes. ",
+  "You kept looking for familiar faces\nin unfamiliar places.",
+  "Maybe this way you can better keep hold of those fragments in your mind’s eye.",
+  "Careful though, you can’t stop here.",
+  "Careful.",
+  "Try putting out your arms,",
+  "Open your eyes",
+  "wouldnt want you to trip"
+];
+const PHASE_NAMES = ['Memory I','Memory II','Memory III','Memory IV','Memory V','Memory VI','Memory VII','Memory VIII','Memory IX'];
+const IMAGE_PATHS = [
+  'parallax/1.png','parallax/2.png','parallax/3.PNG',
+  'parallax/4.jpg','parallax/5.png','parallax/6.png',
+  'parallax/7.jpg','parallax/8.jpg','parallax/9.png',
+];
+
+function getBgColor(p){
+  if(p<0.5){const t=p/0.5;return{r:255,g:Math.round(255*(1-t)),b:Math.round(255*(1-t))};}
+  else{const t=(p-0.5)/0.5;return{r:Math.round(255*(1-t)),g:0,b:0};}
+}
+
+/* ── Renderer ── */
+const canvas=document.getElementById('c');
+let W=canvas.offsetWidth,H=canvas.offsetHeight;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(W,H);
+renderer.setClearColor(0xffffff,1);
+
+const scene=new THREE.Scene();
+const sceneFog=new THREE.FogExp2(0xffffff,0.02);
+scene.fog=sceneFog;
+const camera=new THREE.PerspectiveCamera(52,W/H,0.1,120);
+
+/* ── Lighting for frame only (images use MeshBasicMaterial) ── */
+scene.add(new THREE.AmbientLight(0xffffff,2.0));
+const keyLight=new THREE.DirectionalLight(0xfff8ee,1.5);
+keyLight.position.set(5,8,5); scene.add(keyLight);
+const rimLight=new THREE.PointLight(0xfff0dd,2.0,28,2);
+rimLight.position.set(0,4,3); scene.add(rimLight);
+
+/* Stars */
+const starGeo=new THREE.BufferGeometry();
+const sv=[];
+for(let i=0;i<1800;i++) sv.push((Math.random()-.5)*110,(Math.random()-.5)*110,(Math.random()-.5)*110);
+starGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
+const starMat=new THREE.PointsMaterial({color:0xffeedd,size:0.055,transparent:true,opacity:0});
+scene.add(new THREE.Points(starGeo,starMat));
+
+/* Procedural fallback */
+const PALETTES=[
+  ['#c8b898','#f0e8d8','#a09070','#786848','#d4b870'],
+  ['#8098c0','#c0d0e8','#607098','#3a5080','#a0c0e0'],
+  ['#78b098','#b0d8c0','#508870','#307050','#90c8a8'],
+  ['#b09060','#d8c090','#887040','#604820','#c8a870'],
+  ['#a080c0','#c8b0e0','#785898','#502870','#b898d0'],
+  ['#c07070','#e0a8a8','#904848','#602020','#d88888'],
+  ['#5898b0','#90c0d8','#386888','#185060','#78b0c8'],
+  ['#909060','#c8c888','#686830','#404010','#b0b070'],
+  ['#888888','#cccccc','#606060','#383838','#a0a0a0'],
+];
+function makeProceduralTex(idx){
+  const sz=512,cv=document.createElement('canvas');cv.width=cv.height=sz;
+  const ctx=cv.getContext('2d'),p=PALETTES[idx%PALETTES.length];
+  const g=ctx.createRadialGradient(sz*.5,sz*.42,0,sz*.5,sz*.5,sz*.9);
+  g.addColorStop(0,p[1]);g.addColorStop(.45,p[0]);g.addColorStop(.85,p[2]);g.addColorStop(1,p[3]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
+  ctx.globalAlpha=0.2;
+  for(let i=0;i<160;i++){
+    const x=Math.random()*sz,y=Math.random()*sz,r=Math.random()*90+10;
+    const lg=ctx.createRadialGradient(x,y,0,x,y,r);
+    lg.addColorStop(0,p[4]+'aa');lg.addColorStop(1,'transparent');
+    ctx.fillStyle=lg;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=0.05;
+  for(let i=0;i<4000;i++){ctx.fillStyle=Math.random()>.5?'#000':'#888';ctx.fillRect(Math.random()*sz,Math.random()*sz,1,1);}
+  ctx.globalAlpha=1;ctx.fillStyle='rgba(0,0,0,0.06)';ctx.font=`italic ${sz*.44}px Georgia`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(['I','II','III','IV','V','VI','VII','VIII','IX'][idx%9],sz/2,sz/2);
+  return new THREE.CanvasTexture(cv);
+}
+
+/* ── Planes ── */
+const RADIUS=5.5;
+let planes=[];
+const procTextures=Array.from({length:N},(_,i)=>makeProceduralTex(i));
+const memState=Array(N).fill('clear');
+const memPhase=new Float32Array(N);
+const lastTrigger=new Float32Array(N).fill(-99999);
+const memInterval=Float32Array.from({length:N},()=>6000+Math.random()*6000);
+const waveOff=Float32Array.from({length:N},()=>Math.random()*Math.PI*2);
+
+function buildPlanes(texList){
+  planes.forEach(p=>{scene.remove(p.mesh);scene.remove(p.frame);scene.remove(p.frameInner);scene.remove(p.glow);});
+  planes=[];
+  for(let i=0;i<N;i++){
+    const planeAngle=(i/N)*Math.PI*2;
+    const bx=Math.sin(planeAngle)*RADIUS, bz=Math.cos(planeAngle)*RADIUS;
+    const faceAngle=planeAngle+Math.PI;
+    const outward=new THREE.Vector3(Math.sin(planeAngle),0,Math.cos(planeAngle));
+
+    // *** MeshBasicMaterial — unaffected by lights, shows true photo color ***
+    const mesh=new THREE.Mesh(
+      new THREE.PlaneGeometry(2.2,1.52,28,18),
+      new THREE.MeshBasicMaterial({map:texList[i],transparent:true,opacity:1.0,side:THREE.FrontSide})
+    );
+    mesh.position.set(bx,0,bz);
+    mesh.rotation.y=faceAngle;
+    mesh.userData={i,planeAngle,faceAngle};
+
+    // White frame — MeshStandardMaterial gets nice lighting
+    const frame=new THREE.Mesh(
+      new THREE.PlaneGeometry(2.84,2.08),
+      new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.88,metalness:0})
+    );
+    frame.position.copy(new THREE.Vector3(bx,0,bz)).addScaledVector(outward,-0.016);
+    frame.rotation.y=faceAngle;
+
+    const frameInner=new THREE.Mesh(
+      new THREE.PlaneGeometry(2.28,1.60),
+      new THREE.MeshStandardMaterial({color:0xe4e4e4,roughness:1,metalness:0})
+    );
+    frameInner.position.copy(new THREE.Vector3(bx,0,bz)).addScaledVector(outward,-0.010);
+    frameInner.rotation.y=faceAngle;
+
+    const glow=new THREE.Mesh(
+      new THREE.PlaneGeometry(3.5,2.7),
+      new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false})
+    );
+    glow.position.copy(new THREE.Vector3(bx,0,bz)).addScaledVector(outward,-0.07);
+    glow.rotation.y=faceAngle;
+
+    scene.add(glow);scene.add(frame);scene.add(frameInner);scene.add(mesh);
+    planes.push({mesh,frame,frameInner,glow,i,planeAngle,faceAngle});
+  }
+}
+buildPlanes(procTextures);
+
+const loader=new THREE.TextureLoader();
+IMAGE_PATHS.forEach((path,i)=>{
+  loader.load(path,tex=>{
+    tex.colorSpace=THREE.SRGBColorSpace;
+    if(planes[i]){planes[i].mesh.material.map=tex;planes[i].mesh.material.needsUpdate=true;}
+  },undefined,()=>{});
+});
+
+/* ── UI ── */
+const dotsEl=document.getElementById('dots');
+const dots=[];
+for(let i=0;i<N;i++){const d=document.createElement('div');d.className='dot';dotsEl.appendChild(d);dots.push(d);}
+const capEl=document.getElementById('caption');
+const phaseLbl=document.getElementById('phase-label');
+const progFill=document.getElementById('progress-fill');
+const root=document.documentElement;
+let capIdx=-1;
+function showCaption(i){
+  if(i===capIdx)return;capIdx=i;
+  capEl.classList.remove('vis');
+  phaseLbl.textContent=PHASE_NAMES[i]||'';
+  setTimeout(()=>{capEl.textContent=CAPTIONS[i]||'';capEl.classList.add('vis');},300);
+}
+function updateUIColors(r,g,b){
+  const bright=(r+g+b)/(255*3);
+  const textA=bright>.45?`rgba(10,5,0,${(0.58+bright*.22).toFixed(2)})`:`rgba(255,240,230,${(0.88-bright*.25).toFixed(2)})`;
+  const textD=bright>.45?`rgba(10,5,0,${(0.16+bright*.12).toFixed(2)})`:`rgba(255,240,230,${(0.32-bright*.15).toFixed(2)})`;
+  const vr=Math.max(0,r-50),vg=Math.max(0,g-25),vb=Math.max(0,b-25);
+  root.style.setProperty('--vcolor',`rgba(${vr},${vg},${vb},0.82)`);
+  root.style.setProperty('--capcolor',textA);
+  root.style.setProperty('--dotcolor',textD);
+  root.style.setProperty('--dotactive',textA);
+  root.style.setProperty('--hintcolor',textD);
+}
+
+/* ── Scroll ── */
+let scrollP=0,activeF=0;
+let camAngle=0,targetCamAngle=0,camY=0,targetCamY=0,camDist=6.0,targetCamDist=6.0;
+function onScroll(){
+  const total=document.body.scrollHeight-window.innerHeight;
+  scrollP=Math.min(Math.max(window.scrollY/total,0),1);
+  activeF=scrollP*(N-1);
+  const idx=Math.round(activeF);
+  targetCamAngle=(idx/N)*Math.PI*2;
+  targetCamY=Math.sin(scrollP*Math.PI*1.4)*0.22;
+  targetCamDist=5.8+Math.sin(scrollP*Math.PI)*0.5;
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+/* ── Wave helpers ── */
+function ensureOrig(plane){
+  if(!plane.mesh.geometry.userData.origPos)
+    plane.mesh.geometry.userData.origPos=new Float32Array(plane.mesh.geometry.attributes.position.array);
+}
+function applyWave(plane,t,intensity){
+  ensureOrig(plane);
+  const pos=plane.mesh.geometry.attributes.position,orig=plane.mesh.geometry.userData.origPos;
+  for(let v=0;v<pos.count;v++){
+    const x=orig[v*3],y=orig[v*3+1];
+    const w=Math.sin(x*3.8+t*2.1+waveOff[plane.i])*.038*intensity
+           +Math.sin(y*4.6+t*1.6)*.026*intensity
+           +Math.sin((x+y)*2.2+t*2.8+plane.i)*.016*intensity;
+    pos.setZ(v,w);
+  }
+  pos.needsUpdate=true;plane.mesh.geometry.computeVertexNormals();
+}
+function clearWave(plane){
+  if(!plane.mesh.geometry.userData.origPos)return;
+  const pos=plane.mesh.geometry.attributes.position;
+  for(let v=0;v<pos.count;v++) pos.setZ(v,0);
+  pos.needsUpdate=true;plane.mesh.geometry.computeVertexNormals();
+}
+const EFFECTS=['waving','waving','fogging','fading'];
+function triggerMemory(i){if(memState[i]!=='clear')return;memState[i]=EFFECTS[Math.floor(Math.random()*EFFECTS.length)];memPhase[i]=0;}
+function forceTrigger(i){memState[i]=EFFECTS[Math.floor(Math.random()*EFFECTS.length)];memPhase[i]=0;lastTrigger[i]=performance.now();}
+function eio(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+canvas.addEventListener('click',e=>{
+  const r=canvas.getBoundingClientRect();
+  mouse.x=((e.clientX-r.left)/r.width)*2-1;
+  mouse.y=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const hits=ray.intersectObjects(planes.map(p=>p.mesh));
+  if(hits.length) forceTrigger(hits[0].object.userData.i);
+});
+
+/* ── Main loop ── */
+const clock=new THREE.Clock();
+let globalT=0,bgR=255,bgG=255,bgB=255;
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  globalT+=dt;
+  const now=performance.now();
+
+  /* Background */
+  const bgT=getBgColor(scrollP);
+  bgR+=(bgT.r-bgR)*.05;bgG+=(bgT.g-bgG)*.05;bgB+=(bgT.b-bgB)*.05;
+  const hexBg=(Math.round(bgR)<<16)|(Math.round(bgG)<<8)|Math.round(bgB);
+  renderer.setClearColor(hexBg,1);
+  sceneFog.color.setRGB(bgR/255,bgG/255,bgB/255);
+  document.body.style.background=`rgb(${Math.round(bgR)},${Math.round(bgG)},${Math.round(bgB)})`;
+  updateUIColors(bgR,bgG,bgB);
+
+  starMat.opacity=Math.max(0,(scrollP-.58)/.4)*.65;
+  const srm=Math.max(0,1-(scrollP-.58)/.3);
+  starMat.color.setRGB(1,.88-srm*.28,.78-srm*.52);
+
+  const kG=Math.max(0,.96-scrollP*.5),kB=Math.max(0,.88-scrollP*.75);
+  keyLight.color.setRGB(1,kG,kB);
+  keyLight.intensity=1.5+Math.sin(globalT*.09)*.25;
+  const rG=Math.max(0,.88-scrollP*1.4),rB=Math.max(0,.7-scrollP*1.2);
+  rimLight.color.setRGB(1,rG,rB);
+  rimLight.position.set(Math.sin(globalT*.22)*3.5,Math.sin(globalT*.15)*1.6+3.8,Math.cos(globalT*.19)*3+3);
+  rimLight.intensity=2.0+Math.sin(globalT*.38)*.6;
+
+  progFill.style.width=(scrollP*100)+'%';
+
+  /* Camera */
+  let ad=targetCamAngle-camAngle;
+  while(ad>Math.PI) ad-=Math.PI*2;while(ad<-Math.PI) ad+=Math.PI*2;
+  camAngle+=ad*.07;camY+=(targetCamY-camY)*.06;camDist+=(targetCamDist-camDist)*.06;
+  camera.position.set(Math.sin(camAngle)*camDist,camY,Math.cos(camAngle)*camDist);
+  camera.lookAt(0,0,0);
+
+  const activeIdx=Math.round(activeF);
+  showCaption(Math.max(0,Math.min(N-1,activeIdx)));
+  dots.forEach((d,i)=>d.className='dot'+(i===activeIdx?' active':''));
+
+  /* Per-plane */
+  planes.forEach((p,i)=>{
+    const dist=Math.abs(i-activeF);
+    const isActive=dist<0.6;
+
+    if(isActive&&memState[i]==='clear'&&now-lastTrigger[i]>memInterval[i]){
+      triggerMemory(i);lastTrigger[i]=now;memInterval[i]=6000+Math.random()*7000;
+    }
+
+    memPhase[i]+=dt;
+    const DURATIONS={waving:5.5,fogging:7.0,fading:5.0};
+    const prog=Math.min(memPhase[i]/(DURATIONS[memState[i]]||1),1);
+
+    // Active image = fully visible. Others fade hard by distance.
+    const distFade=Math.max(0,1-dist*1.4);
+    const baseOpa=isActive?1.0:distFade*0.12;
+
+    let opacity=baseOpa,scaleX=1.0,scaleY=1.0,opMod=1.0;
+
+    switch(memState[i]){
+      case 'waving':{
+        const env=Math.sin(prog*Math.PI);
+        applyWave(p,globalT,env);
+        opMod=1-.08*Math.sin(globalT*2.1+waveOff[i])*env;
+        if(prog>=1){clearWave(p);memState[i]='clear';}
+        break;
+      }
+      case 'fogging':{
+        clearWave(p);
+        const fog=Math.sin(prog*Math.PI);
+        opMod=1-.6*fog;
+        const s=1+.06*fog;scaleX=s;scaleY=s+.018*Math.sin(globalT*3.1+i);
+        const gr=Math.min(1,bgR/200),gg=Math.min(1,bgG/200),gb=Math.min(1,bgB/200);
+        p.glow.material.color.setRGB(gr,gg,gb);
+        p.glow.material.opacity=(isActive?.32:.06)+.22*fog;
+        if(prog>=1) memState[i]='clear';
+        break;
+      }
+      case 'fading':{
+        clearWave(p);
+        let fa;
+        if(prog<.4) fa=eio(prog/.4);
+        else if(prog<.65) fa=1;
+        else fa=1-eio((prog-.65)/.35);
+        opMod=1-.9*fa;
+        const s=1-0.04*fa;scaleX=s;scaleY=s;
+        if(prog>=1) memState[i]='clear';
+        break;
+      }
+      default: clearWave(p);
+    }
+
+    opacity=baseOpa*opMod;
+
+    p.mesh.material.opacity+=(opacity-p.mesh.material.opacity)*.1;
+    p.mesh.scale.x+=(scaleX-p.mesh.scale.x)*.08;
+    p.mesh.scale.y+=(scaleY-p.mesh.scale.y)*.08;
+    p.frame.scale.x=p.mesh.scale.x;p.frame.scale.y=p.mesh.scale.y;
+    p.frameInner.scale.x=p.mesh.scale.x;p.frameInner.scale.y=p.mesh.scale.y;
+
+    // Frames are always fully opaque white — never fade
+    p.frame.material.opacity=1;p.frame.material.transparent=false;
+    p.frameInner.material.opacity=1;p.frameInner.material.transparent=false;
+    p.frame.material.color.setRGB(1,1,1);
+    p.frameInner.material.color.setRGB(0.9,0.9,0.9);
+
+    if(memState[i]!=='fogging'){
+      const gr=Math.min(1,(bgR+70)/255),gg=Math.min(1,(bgG+25)/255),gb=Math.min(1,(bgB+15)/255);
+      p.glow.material.color.setRGB(gr,gg,gb);
+      p.glow.material.opacity+=((isActive?.14:0)-p.glow.material.opacity)*.07;
+    }
+
+    const floatY=isActive?Math.sin(globalT*.4+i*1.3)*.03:0;
+    p.mesh.position.y+=(floatY-p.mesh.position.y)*.05;
+    p.frame.position.y=p.mesh.position.y;
+    p.frameInner.position.y=p.mesh.position.y;
+    p.glow.position.y=p.mesh.position.y;
+  });
+
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  W=canvas.offsetWidth;H=canvas.offsetHeight;
+  renderer.setSize(W,H);camera.aspect=W/H;camera.updateProjectionMatrix();
+});
+</script>
+</body>
+</html>

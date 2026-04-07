@@ -394,6 +394,12 @@ from{transform:rotate(360deg);}
 to{transform:rotate(0deg);}
 }
 
+@property --star2-rot {
+syntax: "<angle>";
+inherits: false;
+initial-value: 360deg;
+}
+
 
 /* ================= TEXT ================= */
 
@@ -969,9 +975,20 @@ pointer-events:all;
 transition:filter 0.6s ease;
 }
 
-/* star2 stays still during fade, then spins once fully visible */
+.dante-parallax .star2{
+--hover-x:0px;
+--hover-y:0px;
+--star2-rot:360deg;
+transform:translate3d(var(--hover-x), var(--hover-y), 0) rotate(var(--star2-rot));
+}
+
+@keyframes spin2-follow{
+from{ --star2-rot:360deg; }
+to{ --star2-rot:0deg; }
+}
+
 .dante-parallax .star2.star2-spinning{
-animation:spin2 24s linear infinite;
+animation:spin2-follow 24s linear infinite;
 }
 
 body.dark .dante-parallax .star{
@@ -1490,4 +1507,28 @@ display:block;
   .logo{
     font-size:18px;
   }
+}
+
+/* ===== 3D PARALLAX OPTIMIZATION ===== */
+
+
+.dante-parallax {
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.dante-layer {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.dante-parallax{
+  pointer-events:auto;
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+}
+
+.dante-layer{
+  transform-style:preserve-3d;
+  will-change:transform;
 }

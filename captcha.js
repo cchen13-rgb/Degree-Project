@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
     toggle.addEventListener("change", () => {
       document.body.classList.toggle("dark");
 
-      // If the door is currently showing, update the arch color live
       const doorArch = document.querySelector("#captchaGrid .door-arch");
       if (doorArch) {
         const isDark = document.body.classList.contains("dark");
@@ -147,11 +146,19 @@ function handleVerify() {
   if (correct) {
     card.classList.add("success");
     card.addEventListener("animationend", () => card.classList.remove("success"), { once: true });
-    // Trigger the door morph instead of old feedback
+
+    /* ── Three.js: bloom on success ── */
+    if (typeof CaptchaThree !== "undefined") CaptchaThree.onSuccess();
+
     setTimeout(() => morphToDoor(), 400);
+
   } else {
     lives--;
     renderLives();
+
+    /* ── Three.js: shockwave on wrong ── */
+    if (typeof CaptchaThree !== "undefined") CaptchaThree.onWrong();
+
     card.classList.add("shake");
     card.addEventListener("animationend", () => card.classList.remove("shake"), { once: true });
 
@@ -167,42 +174,32 @@ function handleVerify() {
 /* ===================== DOOR MORPH ===================== */
 
 function morphToDoor() {
-  const card   = document.querySelector(".captcha-card");
-  const grid   = document.getElementById("captchaGrid");
-  const footer = document.querySelector(".captcha-footer");
-  const header = document.querySelector(".captcha-header");
-
-  // Keep header & footer — only morph the grid tiles
+  const grid = document.getElementById("captchaGrid");
 
   const tiles = Array.from(grid.querySelectorAll(".captcha-tile"));
-
-  // Measure grid before any changes
   const gridRect = grid.getBoundingClientRect();
   const gridW = gridRect.width;
   const gridH = gridRect.height;
 
-  // Fade each tile out
   tiles.forEach((tile, i) => {
     tile.style.transition = `opacity 0.35s ease ${i * 30}ms, transform 0.35s ease ${i * 30}ms`;
     tile.style.opacity    = "0";
     tile.style.transform  = "scale(0.85)";
   });
 
-  // After tiles disappear, show door inside the grid
   setTimeout(() => {
-    grid.style.display     = "block";
-    grid.style.gap         = "0";
-    grid.style.padding     = "0";
-    grid.style.background  = "transparent";
-    grid.style.width       = gridW + "px";
-    grid.style.height      = gridH + "px";
-    grid.style.overflow    = "hidden";
+    grid.style.display    = "block";
+    grid.style.gap        = "0";
+    grid.style.padding    = "0";
+    grid.style.background = "transparent";
+    grid.style.width      = gridW + "px";
+    grid.style.height     = gridH + "px";
+    grid.style.overflow   = "hidden";
     grid.innerHTML = buildDoorHTML(gridW, gridH);
   }, tiles.length * 30 + 380);
 }
 
 function buildDoorHTML(w, h) {
-  // Door proportions matching the reference image
   const doorW   = w * 0.42;
   const doorH   = h * 0.88;
   const archR   = doorW / 2;
@@ -210,24 +207,17 @@ function buildDoorHTML(w, h) {
   const doorY   = h - doorH;
   const isDark  = document.body.classList.contains("dark");
   const archCol = isDark ? "#e8e0e0" : "#050000";
-  const bgRect  = '';
 
-  // Pixel/retro font from Google Fonts loaded inline
   const svgContent = `
   <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <defs>
       <style>
-
         .door-void-reveal {
           opacity: 0;
           animation: voidReveal 0.9s ease 0.2s forwards;
         }
-        @keyframes voidReveal {
-          to { opacity: 1; }
-        }
-        .enter-click {
-          cursor: pointer;
-        }
+        @keyframes voidReveal { to { opacity: 1; } }
+        .enter-click { cursor: pointer; }
       </style>
       <clipPath id="archClip">
         <path d="
@@ -240,7 +230,6 @@ function buildDoorHTML(w, h) {
       </clipPath>
     </defs>
 
-    <!-- Door void -->
     <path class="door-void-reveal door-arch" d="
       M ${doorX} ${h}
       L ${doorX} ${doorY + archR}
@@ -249,9 +238,7 @@ function buildDoorHTML(w, h) {
       Z
     " fill="${archCol}"/>
 
-    <!-- Clickable enter zone -->
     <g class="enter-click" id="doorEnterZone">
-      <!-- Invisible hit area over the arch -->
       <path d="
         M ${doorX} ${h}
         L ${doorX} ${doorY + archR}
@@ -259,25 +246,9 @@ function buildDoorHTML(w, h) {
         L ${doorX + doorW} ${h}
         Z
       " fill="transparent"/>
-
     </g>
   </svg>`;
 
-  // Wrap in a div that handles the click + page transition
-  const wrapper = document.createElement("div");
-  wrapper.style.cssText = `
-    width:100%; height:100%; position:relative; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-  `;
-  wrapper.innerHTML = svgContent;
-
-  // Attach click listener for page transition
-  wrapper.addEventListener("click", () => {
-    triggerDoorTransition();
-  });
-
-  // Return as DOM element — but since we set innerHTML we return html string
-  // Actually we need to return html string for grid.innerHTML usage
   const outerDiv = `<div id="doorWrapper" style="width:100%;height:100%;position:relative;cursor:pointer;">${svgContent}</div>`;
   return outerDiv;
 }
@@ -285,39 +256,19 @@ function buildDoorHTML(w, h) {
 /* ===================== PAGE TRANSITION ===================== */
 
 function triggerDoorTransition() {
-  // Re-attach click to the wrapper (since it was set via innerHTML)
-  // This is called from the actual click so just run transition
-
-  // Create full-screen black overlay that expands from center
   const overlay = document.createElement("div");
   overlay.style.cssText = `
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: #000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.8s ease;
+    position:fixed;inset:0;z-index:9999;
+    background:#000;opacity:0;pointer-events:none;
+    transition:opacity 0.8s ease;
   `;
   document.body.appendChild(overlay);
-
-  // Fade to black
-  requestAnimationFrame(() => {
-    overlay.style.opacity = "1";
-  });
-
-  // Navigate after fade
-  setTimeout(() => {
-    window.location.href = "hangman.html";
-  }, 850);
+  requestAnimationFrame(() => { overlay.style.opacity = "1"; });
+  setTimeout(() => { window.location.href = "hangman.html"; }, 850);
 }
 
-// Delegate click on dynamically inserted doorWrapper
 document.addEventListener("click", (e) => {
-  const wrapper = e.target.closest("#doorWrapper");
-  if (wrapper) {
-    triggerDoorTransition();
-  }
+  if (e.target.closest("#doorWrapper")) triggerDoorTransition();
 });
 
 /* ===================== HIGHLIGHT WRONG ===================== */
@@ -327,7 +278,7 @@ function highlightWrong(realIndices, decoyIndices) {
     const idx      = parseInt(tile.dataset.index);
     const isReal   = realIndices.includes(idx);
     const selected = selectedTiles.has(idx);
-    if (isReal && !selected)   tile.style.outline = "3px solid #b50008";
+    if (isReal && !selected)    tile.style.outline = "3px solid #b50008";
     else if (!isReal && selected) tile.style.outline = "3px solid #ff3a1a";
   });
 }
@@ -344,8 +295,8 @@ function renderLives() {
     heart.innerHTML = `
       <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M16 27.5S3 19.5 3 10.5C3 7 5.5 4 9 4c2.5 0 5 1.5 7 4 2-2.5 4.5-4 7-4 3.5 0 6 3 6 6.5C29 19.5 16 27.5 16 27.5Z"
-          fill="${i < lives ? '#7a1a22' : '#ccc'}"
-          stroke="${i < lives ? '#5a0d14' : '#aaa'}"
+          fill="${i < lives ? "#7a1a22" : "#ccc"}"
+          stroke="${i < lives ? "#5a0d14" : "#aaa"}"
           stroke-width="1.5"/>
       </svg>`;
     container.appendChild(heart);
@@ -387,4 +338,3 @@ function shuffle(arr) {
   }
   return arr;
 }
-
