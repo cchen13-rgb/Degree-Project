@@ -1,36 +1,41 @@
-const express   = require('express');
-const http      = require('http');
+const express    = require('express');
+const http       = require('http');
 const { Server } = require('socket.io');
-const QRCode    = require('qrcode');
-const crypto    = require('crypto');
-const cors      = require('cors');
+const QRCode     = require('qrcode');
+const crypto     = require('crypto');
 
 const app    = express();
 const server = http.createServer(app);
 
-app.use(cors());
+/* Manual CORS for all routes */
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 app.use(express.static('.'));
 
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+  allowEIO3: true
 });
 
 const rooms = {};
-
 function makeCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase();
 }
 
 app.get('/qr/:code', async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', '*');
   const code = req.params.code.toUpperCase();
   const phoneUrl = `https://cchen13-rgb.github.io/Degree-Project/phone.html?room=${code}`;
   try {
     const svg = await QRCode.toString(phoneUrl, { type: 'svg', margin: 1 });
     res.set('Content-Type', 'image/svg+xml').send(svg);
-  } catch (e) {
-    res.status(500).send('QR error');
-  }
+  } catch (e) { res.status(500).send('QR error'); }
 });
 
 io.on('connection', socket => {
