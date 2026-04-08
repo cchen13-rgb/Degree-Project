@@ -30,7 +30,8 @@ function makeCode() {
 /* ── QR endpoint ─────────────────────────────────────────────── */
 app.get('/qr/:code', async (req, res) => {
   const code = req.params.code.toUpperCase();
-  const phoneUrl = `${req.protocol}://${req.get('host')}/phone.html?room=${code}`;
+  /* Point to GitHub Pages where phone.html is hosted */
+  const phoneUrl = `https://cchen13-rgb.github.io/Degree-Project/phone.html?room=${code}`;
   try {
     const svg = await QRCode.toString(phoneUrl, { type: 'svg', margin: 1 });
     res.set('Content-Type', 'image/svg+xml').send(svg);

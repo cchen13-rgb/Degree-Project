@@ -12,7 +12,7 @@
   <link rel="preload" href="Dante/1.webp" as="image" fetchpriority="high">
   <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
   <link rel="stylesheet" href="design.css">
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://degree-project-production-7b91.up.railway.app/socket.io/socket.io.js"></script>
 
   <style>
 
@@ -588,7 +588,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   }
 
   /* Desktop only */
-  const socket     = io();
+  const socket     = io('https://degree-project-production-7b91.up.railway.app');
   let curX         = window.innerWidth  / 2;
   let curY         = window.innerHeight / 2;
   let remoteReady  = false;
