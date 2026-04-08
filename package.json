@@ -1,0 +1,13 @@
+{
+  "name": "degree-project-remote",
+  "version": "1.0.0",
+  "main": "remote.js",
+  "scripts": {
+    "start": "node remote.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5",
+    "qrcode": "^1.5.3"
+  }
+}
