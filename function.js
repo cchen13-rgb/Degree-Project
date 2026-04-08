@@ -506,6 +506,7 @@ function checkLogin() {
 
    star2 is fully excluded — CSS owns its animation.
    Touch devices skip entirely.
+   star1 is excluded on mobile (≤1024px) — CSS owns its position there.
 ================================================================ */
 
 function initThreeParallax() {
@@ -514,6 +515,10 @@ function initThreeParallax() {
   const container = document.querySelector('.dante-parallax');
   const portal    = document.querySelector('.portal');
   if (!container || !portal) return;
+
+  /* Capture viewport size once at init — stays consistent for the
+     lifetime of this parallax instance. */
+  const isMobileViewport = window.innerWidth <= 1024;
 
   const shells = [];
 
@@ -544,8 +549,11 @@ function initThreeParallax() {
     shells.push({ shell, depth });
   }
 
-  /* ── 1. Dante image layers (non-star2) ── */
+  /* ── 1. Dante image layers (non-star2) ──
+     Skip star1 entirely on mobile — CSS owns its translate(-50%, -60%)
+     position there, and a parallax shell would displace it to the top. */
   container.querySelectorAll('.dante-layer:not(.star2)').forEach(layer => {
+    if (isMobileViewport && layer.classList.contains('star')) return;
     const depth = parseFloat(layer.dataset.depth) || 0.1;
     makeShell(layer, depth, { forceAbsolute: getComputedStyle(layer).position === 'absolute' });
   });
@@ -609,10 +617,13 @@ function initThreeParallax() {
     current.x += (target.x - current.x) * 0.07;
     current.y += (target.y - current.y) * 0.07;
 
-    /* Tilt the dante-parallax container */
-    const tx = (current.x / SPREAD) * TILT;
-    const ty = (current.y / SPREAD) * TILT;
-    container.style.transform = `rotateY(${tx}deg) rotateX(${-ty}deg)`;
+    /* Tilt the dante-parallax container — desktop only.
+       Skipped on mobile so the full-screen stagnant layout is untouched. */
+    if (!isMobileViewport) {
+      const tx = (current.x / SPREAD) * TILT;
+      const ty = (current.y / SPREAD) * TILT;
+      container.style.transform = `rotateY(${tx}deg) rotateX(${-ty}deg)`;
+    }
 
     /* Shells inside .dante-parallax */
     shells.forEach(({ shell, depth }) => {
@@ -635,8 +646,7 @@ function initThreeParallax() {
       const py = current.y * 0.12;
       /* On mobile the login has translateX(-50%) from CSS !important.
          We must preserve it or the button jumps off-centre.           */
-      const isMobile = window.innerWidth <= 1024;
-      loginEl.style.transform = isMobile
+      loginEl.style.transform = isMobileViewport
         ? `translateX(-50%) translate3d(${px}px, ${py}px, 0)`
         : `translate3d(${px}px, ${py}px, 0)`;
     }
