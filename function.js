@@ -452,7 +452,9 @@ function checkLogin() {
   const user = userInput.value.trim().toLowerCase();
   const pass = passInput.value.trim().toLowerCase();
 
-  if (user === 'cherylshelley' && pass === 'heart') {
+  const validUsernames = ['cherylshelley', 'cheryl', 'shelley', 'cheryl shelley'];
+
+  if (validUsernames.includes(user) && pass === 'heart') {
     loginAttempts = 0;
     closeModal();
     window.location.href = "captcha.html";
