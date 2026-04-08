@@ -205,7 +205,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   if (isMobile) { window.location.replace('phone.html' + location.search); return; }
 
   const RAILWAY = 'https://degree-project-production-7b91.up.railway.app';
-  const socket  = io(RAILWAY, { transports: ['websocket', 'polling'] });
+  const socket  = io(RAILWAY, { transports: ['polling'] });
 
   let curX = window.innerWidth / 2;
   let curY = window.innerHeight / 2;
