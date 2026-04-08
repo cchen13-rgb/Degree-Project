@@ -203,6 +203,43 @@ window.addEventListener("load", () => {
   const totalLoad = 2500;
   const startTime = performance.now();
 
+  let barDone    = false;
+  let imagesDone = false;
+
+  function tryBeginEntry() {
+    if (barDone && imagesDone) beginEntry();
+  }
+
+  /* Wait for every dante-parallax image to fully load AND decode
+     before allowing the reveal. Uses decode() which waits until the
+     image is truly ready to paint — not just downloaded. */
+  const imgEls = Array.from(document.querySelectorAll('.dante-parallax img'));
+  let remaining = imgEls.length || 0;
+
+  function onImageReady() {
+    remaining--;
+    if (remaining <= 0) {
+      imagesDone = true;
+      tryBeginEntry();
+    }
+  }
+
+  if (remaining === 0) {
+    imagesDone = true;
+  } else {
+    imgEls.forEach(img => {
+      if (img.complete && img.naturalWidth > 0) {
+        /* Already downloaded — still call decode() to ensure it's paint-ready */
+        img.decode().then(onImageReady).catch(onImageReady);
+      } else {
+        img.addEventListener('load', () => {
+          img.decode().then(onImageReady).catch(onImageReady);
+        }, { once: true });
+        img.addEventListener('error', onImageReady, { once: true });
+      }
+    });
+  }
+
   function animateBar(now) {
     const elapsed  = now - startTime;
     const progress = Math.min(elapsed / totalLoad, 1);
@@ -211,7 +248,8 @@ window.addEventListener("load", () => {
     if (progress < 1) {
       requestAnimationFrame(animateBar);
     } else {
-      setTimeout(beginEntry, 200);
+      barDone = true;
+      tryBeginEntry();
     }
   }
 
@@ -224,12 +262,7 @@ window.addEventListener("load", () => {
       body.classList.add('intro-toggle-locked');
     }
 
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => {
-        if (loader.parentNode) loader.remove();
-      }, 800);
-    }
+    /* Keep loader visible — hide it only after dante layers start painting */
 
     /* star2 never gets a JS transform — CSS owns it */
     document.querySelectorAll('.dante-layer.star').forEach(el => {
@@ -250,15 +283,30 @@ window.addEventListener("load", () => {
 
     setTimeout(() => {
 
+      /* NOW fade the loader — dante layers are about to paint */
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => {
+          if (loader.parentNode) loader.remove();
+        }, 800);
+      }
+
       document.querySelectorAll('.dante-layer:not(.star)').forEach(el => {
-        el.classList.add('dante-in');
+        if (window.innerWidth <= 1024) {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          el.style.transform  = 'translateY(0)';
+          el.style.opacity    = '1';
+        } else {
+          el.classList.add('dante-in');
+        }
       });
 
       document.querySelectorAll('.dante-layer.star').forEach(el => {
         if (el.classList.contains('star2')) {
           el.classList.remove('star2-spinning');
-          el.style.transition = 'opacity 2s ease 0s';
-          setTimeout(() => { el.style.opacity = '1'; }, 450);
+          const isMobile = window.innerWidth <= 1024;
+          el.style.transition = isMobile ? 'opacity 0.4s ease 0s' : 'opacity 2s ease 0s';
+          setTimeout(() => { el.style.opacity = '1'; }, isMobile ? 50 : 450);
           setTimeout(() => {
             el.classList.add('star2-spinning');
             if (modeToggle) {
@@ -266,14 +314,20 @@ window.addEventListener("load", () => {
               body.classList.remove('intro-toggle-locked');
             }
             introInteractionLocked = false;
-          }, 2450);
+          }, isMobile ? 500 : 2450);
         } else {
-          el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
-          setTimeout(() => {
-            const isMobileStar = el.classList.contains('star') && window.innerWidth <= 1024;
-            el.style.transform = isMobileStar ? 'translate(-50%, -60%)' : 'translateY(0px)';
-            el.style.opacity   = '1';
-          }, 50);
+          const isMobileStar = el.classList.contains('star') && window.innerWidth <= 1024;
+          if (isMobileStar) {
+            el.style.transition = 'opacity 0.3s ease 0s';
+            el.style.transform  = 'translate(-50%, -60%)';
+            el.style.opacity    = '1';
+          } else {
+            el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
+            setTimeout(() => {
+              el.style.transform = 'translateY(0px)';
+              el.style.opacity   = '1';
+            }, 50);
+          }
         }
       });
 
@@ -338,7 +392,7 @@ window.addEventListener("load", () => {
         startPostEntryEffects();
       }, 1200);
 
-    }, 4200);
+    }, window.innerWidth <= 1024 ? 1200 : 4200);
   }
 });
 
