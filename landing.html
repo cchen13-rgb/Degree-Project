@@ -12,8 +12,6 @@
   <link rel="preload" href="Dante/1.webp" as="image" fetchpriority="high">
   <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
   <link rel="stylesheet" href="design.css">
-
-  <!-- Socket.io (served by remote-server.js) -->
   <script src="/socket.io/socket.io.js"></script>
 
   <style>
@@ -39,10 +37,7 @@
       transition:opacity 0.8s ease;
       pointer-events:none;
     }
-
-    body.dark #loader{
-      background:#b50008;
-    }
+    body.dark #loader{ background:#b50008; }
 
     #loader-text{
       font-family:"fayte-pixel-hard",sans-serif;
@@ -52,10 +47,7 @@
       letter-spacing:4px;
       color:#3d0d14;
     }
-
-    body.dark #loader-text{
-      color:#0d0d0d;
-    }
+    body.dark #loader-text{ color:#0d0d0d; }
 
     #loader-bar-track{
       width:200px;
@@ -64,10 +56,7 @@
       border-radius:2px;
       overflow:hidden;
     }
-
-    body.dark #loader-bar-track{
-      background:rgba(0,0,0,0.2);
-    }
+    body.dark #loader-bar-track{ background:rgba(0,0,0,0.2); }
 
     #loader-bar-fill{
       height:100%;
@@ -76,13 +65,11 @@
       background:linear-gradient(to right, #ffb4ba, #d4637a, #a8324a);
       transition:width 0.3s ease;
     }
-
     body.dark #loader-bar-fill{
       background:linear-gradient(to right, #ff8a8a, #c0392b, #7a0000);
     }
 
     /* ================= CHARACTER PROFILES ================= */
-
     .profiles-section{
       padding:80px 60px 120px 60px;
       display:grid;
@@ -92,10 +79,7 @@
       z-index:10;
       background:linear-gradient(to bottom, #ffebee 0%, #ffffff 100%);
     }
-
-    body.dark .profiles-section{
-      background:#b50008;
-    }
+    body.dark .profiles-section{ background:#b50008; }
 
     .char-card{
       display:grid;
@@ -108,16 +92,8 @@
       transform:translateY(28px);
       transition:opacity 0.8s ease, transform 0.8s ease;
     }
-
-    .char-card.visible{
-      opacity:1;
-      transform:translateY(0);
-    }
-
-    body.dark .char-card{
-      border-color:rgba(0,0,0,0.2);
-    }
-
+    .char-card.visible{ opacity:1; transform:translateY(0); }
+    body.dark .char-card{ border-color:rgba(0,0,0,0.2); }
     .char-card--flip{ direction:ltr; }
 
     .char-img-wrap{
@@ -125,10 +101,7 @@
       overflow:hidden;
       background:rgba(93,20,30,0.04);
     }
-
-    body.dark .char-img-wrap{
-      background:rgba(0,0,0,0.15);
-    }
+    body.dark .char-img-wrap{ background:rgba(0,0,0,0.15); }
 
     .char-img-wrap img{
       width:100%;
@@ -138,10 +111,7 @@
       display:block;
       transition:transform 0.7s ease;
     }
-
-    .char-card:hover .char-img-wrap img{
-      transform:scale(1.04);
-    }
+    .char-card:hover .char-img-wrap img{ transform:scale(1.04); }
 
     .char-img-wrap::after{
       content:attr(data-tag);
@@ -157,7 +127,6 @@
       padding:4px 12px;
       backdrop-filter:blur(4px);
     }
-
     body.dark .char-img-wrap::after{
       background:rgba(0,0,0,0.6);
       color:#ffcacf;
@@ -172,10 +141,7 @@
       position:relative;
       overflow-y:auto;
     }
-
-    body.dark .char-info{
-      border-color:rgba(0,0,0,0.2);
-    }
+    body.dark .char-info{ border-color:rgba(0,0,0,0.2); }
 
     .char-id{
       font-family:"Switzer",sans-serif;
@@ -185,7 +151,6 @@
       margin-bottom:8px;
       transition:opacity .6s;
     }
-
     .char-name-en{
       font-family:"fayte-pixel-hard",sans-serif;
       font-weight:400;
@@ -198,7 +163,6 @@
       transition:color .6s;
       overflow:hidden;
     }
-
     .char-name-sub{
       font-family:"Switzer",sans-serif;
       font-size:9px;
@@ -208,7 +172,6 @@
       text-transform:uppercase;
       transition:opacity .6s;
     }
-
     .char-rule{
       width:30px;
       height:1px;
@@ -216,7 +179,6 @@
       margin-bottom:10px;
       transition:opacity .6s;
     }
-
     .char-stats{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -225,17 +187,12 @@
       border:1px solid rgba(93,20,30,0.1);
       transition:opacity .6s;
     }
-
     .char-stat{
       padding:6px 10px;
       border-bottom:1px solid rgba(93,20,30,0.08);
       border-right:1px solid rgba(93,20,30,0.08);
     }
-
-    .char-stat:nth-child(even){
-      border-right:none;
-    }
-
+    .char-stat:nth-child(even){ border-right:none; }
     .stat-label{
       font-family:"Switzer",sans-serif;
       font-size:9px;
@@ -244,14 +201,12 @@
       color:rgba(93,20,30,0.4);
       margin-bottom:3px;
     }
-
     .stat-value{
       font-family:"Switzer",sans-serif;
       font-size:13.5px;
       color:#3d0d14;
       letter-spacing:0.5px;
     }
-
     .char-profile-label{
       font-family:"Switzer",sans-serif;
       font-size:9px;
@@ -261,7 +216,6 @@
       margin-bottom:8px;
       transition:opacity .6s;
     }
-
     .char-profile-text{
       font-family:"Montserrat",sans-serif;
       font-size:12.5px;
@@ -276,143 +230,129 @@
     body.dark .char-rule          { opacity:0; }
     body.dark .char-stats         { opacity:0; }
     body.dark .char-profile-label { opacity:0; }
-
     body.dark .char-name-en,
     body.dark .char-name-sub,
-    body.dark .char-profile-text{
-      color:transparent;
-    }
-
+    body.dark .char-profile-text{ color:transparent; }
     body.dark .char-name-en .reveal-name,
     body.dark .char-name-sub .reveal-name,
-    body.dark .char-profile-text .reveal-name{
-      color:#0d0d0d;
-    }
+    body.dark .char-profile-text .reveal-name{ color:#0d0d0d; }
 
     @media (max-width: 900px) {
-      .profiles-section{
-        grid-template-columns: 1fr;
-        padding: 40px 20px 80px 20px;
-        gap: 24px;
-        position: static;
-      }
-      .char-card{
-        grid-template-columns: 1fr;
-      }
-      .char-img-wrap{
-        height: 260px;
-      }
-      .char-info{
-        border-left: none;
-        border-top: 1px solid rgba(93,20,30,0.12);
-      }
-      body.dark .char-info{
-        border-top-color: rgba(0,0,0,0.2);
-        border-left: none;
-      }
-      .char-name-en{
-        font-size: 40px;
-      }
+      .profiles-section{ grid-template-columns:1fr; padding:40px 20px 80px 20px; gap:24px; position:static; }
+      .char-card{ grid-template-columns:1fr; }
+      .char-img-wrap{ height:260px; }
+      .char-info{ border-left:none; border-top:1px solid rgba(93,20,30,0.12); }
+      body.dark .char-info{ border-top-color:rgba(0,0,0,0.2); border-left:none; }
+      .char-name-en{ font-size:40px; }
     }
-
     @media (max-width: 480px) {
-      .char-img-wrap{
-        height: 200px;
-      }
-      .char-name-en{
-        font-size: 32px;
-      }
-      .char-stats{
-        grid-template-columns: 1fr;
-      }
+      .char-img-wrap{ height:200px; }
+      .char-name-en{ font-size:32px; }
+      .char-stats{ grid-template-columns:1fr; }
     }
 
     /* ================= REMOTE CURSOR SYSTEM ================= */
 
-    /* Remote panel — desktop top-right corner */
-    #remotePanel {
+    /* Logo wrapper — clickable toggle, logo always stays visible */
+    .logo-wrap {
+      position: relative;
+      display: inline-block;
+      cursor: url("pngs/cursor.png") 0 0, pointer !important;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+    .logo-wrap.remote-ready:hover { opacity: 0.65; }
+
+    /* Single self-contained dropdown — overlaps logo completely */
+    #remoteQRDrop {
       position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 9000;
-      width: 200px;
-      background: rgba(255,248,248,0.92);
-      border: 1px solid rgba(93,20,30,0.14);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 16px;
+      top: 0px;
+      left: 0px;
+      z-index: 8990;
+      background: rgba(255,248,248,0.97);
+      border: 1px solid rgba(93,20,30,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 8px;
       opacity: 0;
-      transform: translateY(-8px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateY(-6px);
       pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      min-width: 200px;
     }
-    #remotePanel.visible {
+    .logo-wrap.remote-open #remoteQRDrop {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
-    body.dark #remotePanel {
-      background: rgba(10,0,0,0.88);
+    body.dark #remoteQRDrop {
+      background: rgba(10,0,0,0.94);
       border-color: rgba(181,0,8,0.25);
     }
-    #remotePanel .rp-eye {
+    #remoteQRDrop .rq-eyebrow {
       font-family: "Switzer", sans-serif;
       font-size: 8px;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(93,20,30,0.4);
+      color: rgba(93,20,30,0.35);
     }
-    body.dark #remotePanel .rp-eye { color: rgba(255,200,200,0.35); }
+    body.dark #remoteQRDrop .rq-eyebrow { color: rgba(255,200,200,0.3); }
     #remoteCode {
       font-family: "fayte-pixel-hard", sans-serif;
-      font-size: 22px;
+      font-size: 26px;
       letter-spacing: 4px;
       color: #3d0d14;
-      text-align: center;
+      line-height: 1;
     }
     body.dark #remoteCode { color: #fff8f8; }
-    #remoteQR {
+    #remoteQRDrop .rq-rule {
+      width: 100%;
+      height: 1px;
+      background: rgba(93,20,30,0.08);
+      align-self: stretch;
+    }
+    body.dark #remoteQRDrop .rq-rule { background: rgba(255,200,200,0.08); }
+    #remoteQRDrop img {
       width: 120px;
       height: 120px;
+      display: block;
       background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px;
+      padding: 4px;
+      align-self: center;
     }
-    #remoteQR img { width: 100%; height: 100%; }
-    #remotePanel .rp-status {
-      font-family: "Switzer", sans-serif;
-      font-size: 8px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: rgba(93,20,30,0.4);
-    }
-    body.dark #remotePanel .rp-status { color: rgba(255,200,200,0.35); }
     .rp-pip {
       width: 5px; height: 5px; border-radius: 50%;
       background: rgba(93,20,30,0.2);
+      flex-shrink: 0;
       transition: background 0.4s;
     }
     .rp-pip.connected { background: #1D9E75; animation: pipblink 2s ease-in-out infinite; }
     @keyframes pipblink { 0%,100%{opacity:1} 50%{opacity:.3} }
-    #remotePanel .rp-hint {
+    #remoteQRDrop .rq-status {
       font-family: "Switzer", sans-serif;
       font-size: 8px;
-      letter-spacing: 1.5px;
-      color: rgba(93,20,30,0.3);
-      text-align: center;
-      line-height: 1.6;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(93,20,30,0.35);
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    body.dark #remotePanel .rp-hint { color: rgba(255,200,200,0.25); }
-    #remotePanel.phone-active .rp-hint { display: none; }
+    body.dark #remoteQRDrop .rq-status { color: rgba(255,200,200,0.3); }
+    #remoteQRDrop .qr-hint {
+      font-family: "Switzer", sans-serif;
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: rgba(93,20,30,0.22);
+      line-height: 1.7;
+      align-self: center;
+      text-align: center;
+    }
+    body.dark #remoteQRDrop .qr-hint { color: rgba(255,200,200,0.18); }
 
     /* Custom cursor layer */
     #remoteCursorLayer {
@@ -425,14 +365,12 @@
     #remoteCursorEl {
       position: absolute;
       top: 0; left: 0;
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       will-change: transform;
       display: none;
     }
     #remoteCursorEl img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: contain;
       display: block;
     }
@@ -449,16 +387,11 @@
       color: #fff8f8;
       padding: 2px 7px;
     }
-    body.dark #remoteCursorEl .rc-name {
-      background: #fff8f8;
-      color: #3d0d14;
-    }
+    body.dark #remoteCursorEl .rc-name { background: #fff8f8; color: #3d0d14; }
 
-    /* Click ripple */
     .rc-ripple {
       position: fixed;
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       border: 1.5px solid rgba(93,20,30,0.4);
       transform: translate(-50%, -50%) scale(0);
@@ -496,7 +429,7 @@
   </div>
 </div>
 
-<!-- Remote cursor layer (always in DOM, invisible until phone pairs) -->
+<!-- Remote cursor layer -->
 <div id="remoteCursorLayer">
   <div id="remoteCursorEl">
     <img id="remoteCursorImg" src="" alt="">
@@ -504,25 +437,27 @@
   </div>
 </div>
 
-<!-- Remote panel (desktop top-right, fades in after intro) -->
-<div id="remotePanel">
-  <div class="rp-eye">Remote</div>
-  <div id="remoteCode">——</div>
-  <div id="remoteQR">
-    <img id="remoteQRImg" src="" alt="QR code">
-  </div>
-  <div class="rp-status">
-    <div class="rp-pip" id="remotePip"></div>
-    <span id="remoteStatusText">Waiting for phone</span>
-  </div>
-  <div class="rp-hint" id="remotePanelHint">
-    Scan QR or type code<br>into phone.html
-  </div>
-</div>
-
 <!-- Header -->
 <header class="topbar">
-  <div class="logo">HELLO WORLD</div>
+
+  <!-- Logo is the remote toggle — logo text always stays -->
+  <div class="logo-wrap" id="logoWrap">
+    <div class="logo">HELLO WORLD</div>
+
+    <!-- One clean dropdown box with everything inside -->
+    <div id="remoteQRDrop">
+      <div class="rq-eyebrow">Remote</div>
+      <div id="remoteCode">——</div>
+      <div class="rq-rule"></div>
+      <img id="remoteQRImg" src="" alt="QR code">
+      <div class="rq-status">
+        <div class="rp-pip" id="remotePip"></div>
+        <span id="remoteStatusText">Waiting for phone</span>
+      </div>
+      <div class="qr-hint">Scan QR or visit phone.html<br>and enter the code</div>
+    </div>
+  </div>
+
   <label class="switch">
     <input type="checkbox" id="modeToggle">
     <span class="slider"></span>
@@ -621,7 +556,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 
 </section>
 
-<!-- Scripts: gsap → plugins → ScrollTrigger → function.js (once) -->
+<!-- Scripts -->
 <script>
   gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 </script>
@@ -644,67 +579,70 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 <script>
 (function () {
 
-  /* ── Mobile redirect ──────────────────────────────────────
-     Touch / small-screen visitors go straight to phone.html.
-     The intro animation, parallax, and character cards are
-     replaced entirely by the drawing + remote experience.
-  ──────────────────────────────────────────────────────────── */
+  /* Mobile redirect */
   const isMobile = window.matchMedia('(hover: none), (pointer: coarse)').matches
                    || window.innerWidth < 768;
-
   if (isMobile) {
     window.location.replace('phone.html' + location.search);
     return;
   }
 
-  /* ── Desktop only from here ───────────────────────────── */
+  /* Desktop only */
+  const socket     = io();
+  let curX         = window.innerWidth  / 2;
+  let curY         = window.innerHeight / 2;
+  let remoteReady  = false;
 
-  const socket = io();
-
-  let curX = window.innerWidth  / 2;
-  let curY = window.innerHeight / 2;
-
-  const panel      = document.getElementById('remotePanel');
+  const logoWrap   = document.getElementById('logoWrap');
   const codeEl     = document.getElementById('remoteCode');
   const qrImg      = document.getElementById('remoteQRImg');
   const pip        = document.getElementById('remotePip');
   const statusText = document.getElementById('remoteStatusText');
-  const panelHint  = document.getElementById('remotePanelHint');
   const cursorEl   = document.getElementById('remoteCursorEl');
   const cursorImg  = document.getElementById('remoteCursorImg');
+  const noCursorStyle = document.createElement('style');
+  document.head.appendChild(noCursorStyle);
 
-  /* Request a room as soon as socket connects */
+  /* Click logo to toggle open/closed */
+  logoWrap.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!remoteReady) return;
+    logoWrap.classList.toggle('remote-open');
+  });
+
+  /* Click anywhere else to close */
+  document.addEventListener('click', () => {
+    logoWrap.classList.remove('remote-open');
+  });
+
+  /* Init room */
   socket.emit('desktop:init');
 
   socket.on('room:created', ({ code }) => {
     codeEl.textContent = code;
     qrImg.src = `/qr/${code}`;
-    /* Wait for the intro animation to finish before showing the panel.
-       Your intro runs ~4-5 s — we wait 5.5 s to be safe. */
-    setTimeout(() => panel.classList.add('visible'), 5500);
+    /* Unlock after intro */
+    setTimeout(() => { remoteReady = true; }, 5500);
   });
 
-  /* Phone paired */
+  /* Phone connected */
   socket.on('phone:connected', () => {
     pip.classList.add('connected');
-    statusText.textContent = 'Phone connected';
-    panel.classList.add('phone-active');
-    panelHint.style.display = 'none';
-    cursorEl.style.display  = 'block';
+    statusText.textContent = 'connected';
+    cursorEl.style.display = 'block';
     noCursorStyle.textContent = '*, *::before, *::after { cursor: none !important; }';
+    logoWrap.classList.remove('remote-open');
   });
 
   /* Phone left */
   socket.on('phone:disconnected', () => {
     pip.classList.remove('connected');
-    statusText.textContent = 'Waiting for phone';
-    panel.classList.remove('phone-active');
-    panelHint.style.display = '';
-    cursorEl.style.display  = 'none';
+    statusText.textContent = 'waiting';
+    cursorEl.style.display = 'none';
     noCursorStyle.textContent = '';
   });
 
-  /* Receive the drawn cursor image */
+  /* Cursor image */
   socket.on('cursor:set', ({ dataUrl }) => {
     cursorImg.src = dataUrl;
     cursorEl.style.display = 'block';
@@ -718,14 +656,14 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     tmp.src = dataUrl;
   });
 
-  /* Move cursor by delta */
+  /* Move */
   socket.on('cursor:move', ({ dx, dy }) => {
     curX = Math.max(0, Math.min(window.innerWidth  - 20, curX + dx));
     curY = Math.max(0, Math.min(window.innerHeight - 20, curY + dy));
     cursorEl.style.transform = `translate(${curX}px, ${curY}px)`;
   });
 
-  /* Click — ripple + dispatch real click to whatever is under cursor */
+  /* Click */
   socket.on('cursor:click', () => {
     const ripple = document.createElement('div');
     ripple.className  = 'rc-ripple';
@@ -733,7 +671,6 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     ripple.style.top  = curY + 'px';
     document.body.appendChild(ripple);
     setTimeout(() => ripple.remove(), 650);
-
     const target = document.elementFromPoint(curX, curY);
     if (target) {
       target.dispatchEvent(new MouseEvent('click', {
@@ -742,10 +679,6 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
       }));
     }
   });
-
-  /* Style tag to suppress native cursor while phone is in control */
-  const noCursorStyle = document.createElement('style');
-  document.head.appendChild(noCursorStyle);
 
 })();
 </script>
