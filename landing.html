@@ -12,6 +12,10 @@
   <link rel="preload" href="Dante/1.webp" as="image" fetchpriority="high">
   <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
   <link rel="stylesheet" href="design.css">
+
+  <!-- Socket.io (served by remote-server.js) -->
+  <script src="/socket.io/socket.io.js"></script>
+
   <style>
 
     h1, h2, h3, h4, h5, h6{
@@ -284,50 +288,188 @@
     body.dark .char-profile-text .reveal-name{
       color:#0d0d0d;
     }
+
     @media (max-width: 900px) {
-  .profiles-section{
-    grid-template-columns: 1fr;
-    padding: 40px 20px 80px 20px;
-    gap: 24px;
-    position: static;
-  }
+      .profiles-section{
+        grid-template-columns: 1fr;
+        padding: 40px 20px 80px 20px;
+        gap: 24px;
+        position: static;
+      }
+      .char-card{
+        grid-template-columns: 1fr;
+      }
+      .char-img-wrap{
+        height: 260px;
+      }
+      .char-info{
+        border-left: none;
+        border-top: 1px solid rgba(93,20,30,0.12);
+      }
+      body.dark .char-info{
+        border-top-color: rgba(0,0,0,0.2);
+        border-left: none;
+      }
+      .char-name-en{
+        font-size: 40px;
+      }
+    }
 
-  .char-card{
-    grid-template-columns: 1fr;
-  }
+    @media (max-width: 480px) {
+      .char-img-wrap{
+        height: 200px;
+      }
+      .char-name-en{
+        font-size: 32px;
+      }
+      .char-stats{
+        grid-template-columns: 1fr;
+      }
+    }
 
-  .char-img-wrap{
-    height: 260px;
-  }
+    /* ================= REMOTE CURSOR SYSTEM ================= */
 
-  .char-info{
-    border-left: none;
-    border-top: 1px solid rgba(93,20,30,0.12);
-  }
+    /* Remote panel — desktop top-right corner */
+    #remotePanel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9000;
+      width: 200px;
+      background: rgba(255,248,248,0.92);
+      border: 1px solid rgba(93,20,30,0.14);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    #remotePanel.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    body.dark #remotePanel {
+      background: rgba(10,0,0,0.88);
+      border-color: rgba(181,0,8,0.25);
+    }
+    #remotePanel .rp-eye {
+      font-family: "Switzer", sans-serif;
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(93,20,30,0.4);
+    }
+    body.dark #remotePanel .rp-eye { color: rgba(255,200,200,0.35); }
+    #remoteCode {
+      font-family: "fayte-pixel-hard", sans-serif;
+      font-size: 22px;
+      letter-spacing: 4px;
+      color: #3d0d14;
+      text-align: center;
+    }
+    body.dark #remoteCode { color: #fff8f8; }
+    #remoteQR {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+    }
+    #remoteQR img { width: 100%; height: 100%; }
+    #remotePanel .rp-status {
+      font-family: "Switzer", sans-serif;
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(93,20,30,0.4);
+    }
+    body.dark #remotePanel .rp-status { color: rgba(255,200,200,0.35); }
+    .rp-pip {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(93,20,30,0.2);
+      transition: background 0.4s;
+    }
+    .rp-pip.connected { background: #1D9E75; animation: pipblink 2s ease-in-out infinite; }
+    @keyframes pipblink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #remotePanel .rp-hint {
+      font-family: "Switzer", sans-serif;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: rgba(93,20,30,0.3);
+      text-align: center;
+      line-height: 1.6;
+    }
+    body.dark #remotePanel .rp-hint { color: rgba(255,200,200,0.25); }
+    #remotePanel.phone-active .rp-hint { display: none; }
 
-  body.dark .char-info{
-    border-top-color: rgba(0,0,0,0.2);
-    border-left: none;
-  }
+    /* Custom cursor layer */
+    #remoteCursorLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 8999;
+      overflow: hidden;
+    }
+    #remoteCursorEl {
+      position: absolute;
+      top: 0; left: 0;
+      width: 48px;
+      height: 48px;
+      will-change: transform;
+      display: none;
+    }
+    #remoteCursorEl img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    #remoteCursorEl .rc-name {
+      position: absolute;
+      top: calc(100% + 3px);
+      left: 0;
+      font-family: "Switzer", sans-serif;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      background: #3d0d14;
+      color: #fff8f8;
+      padding: 2px 7px;
+    }
+    body.dark #remoteCursorEl .rc-name {
+      background: #fff8f8;
+      color: #3d0d14;
+    }
 
-  .char-name-en{
-    font-size: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .char-img-wrap{
-    height: 200px;
-  }
-
-  .char-name-en{
-    font-size: 32px;
-  }
-
-  .char-stats{
-    grid-template-columns: 1fr;
-  }
-}
+    /* Click ripple */
+    .rc-ripple {
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(93,20,30,0.4);
+      transform: translate(-50%, -50%) scale(0);
+      pointer-events: none;
+      z-index: 8998;
+      animation: rcRipple 0.55s ease-out forwards;
+    }
+    body.dark .rc-ripple { border-color: rgba(255,200,200,0.5); }
+    @keyframes rcRipple {
+      to { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
+    }
 
   </style>
 </head>
@@ -351,6 +493,30 @@
     <button class="modal-close" id="closeModal">✕</button>
     <h2>404</h2>
     <p>This page does not exist yet.<br>Still under some construction i guess.</p>
+  </div>
+</div>
+
+<!-- Remote cursor layer (always in DOM, invisible until phone pairs) -->
+<div id="remoteCursorLayer">
+  <div id="remoteCursorEl">
+    <img id="remoteCursorImg" src="" alt="">
+    <div class="rc-name" id="remoteCursorName">Remote</div>
+  </div>
+</div>
+
+<!-- Remote panel (desktop top-right, fades in after intro) -->
+<div id="remotePanel">
+  <div class="rp-eye">Remote</div>
+  <div id="remoteCode">——</div>
+  <div id="remoteQR">
+    <img id="remoteQRImg" src="" alt="QR code">
+  </div>
+  <div class="rp-status">
+    <div class="rp-pip" id="remotePip"></div>
+    <span id="remoteStatusText">Waiting for phone</span>
+  </div>
+  <div class="rp-hint" id="remotePanelHint">
+    Scan QR or type code<br>into phone.html
   </div>
 </div>
 
@@ -385,6 +551,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   </div>
   <div></div>
 </div>
+
 <!-- Character Profiles -->
 <section class="profiles-section">
 
@@ -471,6 +638,116 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     });
   }, { threshold: 0.15 });
   cards.forEach(c => cardObserver.observe(c));
+</script>
+
+<!-- ================= REMOTE CURSOR SYSTEM ================= -->
+<script>
+(function () {
+
+  /* ── Mobile redirect ──────────────────────────────────────
+     Touch / small-screen visitors go straight to phone.html.
+     The intro animation, parallax, and character cards are
+     replaced entirely by the drawing + remote experience.
+  ──────────────────────────────────────────────────────────── */
+  const isMobile = window.matchMedia('(hover: none), (pointer: coarse)').matches
+                   || window.innerWidth < 768;
+
+  if (isMobile) {
+    window.location.replace('phone.html' + location.search);
+    return;
+  }
+
+  /* ── Desktop only from here ───────────────────────────── */
+
+  const socket = io();
+
+  let curX = window.innerWidth  / 2;
+  let curY = window.innerHeight / 2;
+
+  const panel      = document.getElementById('remotePanel');
+  const codeEl     = document.getElementById('remoteCode');
+  const qrImg      = document.getElementById('remoteQRImg');
+  const pip        = document.getElementById('remotePip');
+  const statusText = document.getElementById('remoteStatusText');
+  const panelHint  = document.getElementById('remotePanelHint');
+  const cursorEl   = document.getElementById('remoteCursorEl');
+  const cursorImg  = document.getElementById('remoteCursorImg');
+
+  /* Request a room as soon as socket connects */
+  socket.emit('desktop:init');
+
+  socket.on('room:created', ({ code }) => {
+    codeEl.textContent = code;
+    qrImg.src = `/qr/${code}`;
+    /* Wait for the intro animation to finish before showing the panel.
+       Your intro runs ~4-5 s — we wait 5.5 s to be safe. */
+    setTimeout(() => panel.classList.add('visible'), 5500);
+  });
+
+  /* Phone paired */
+  socket.on('phone:connected', () => {
+    pip.classList.add('connected');
+    statusText.textContent = 'Phone connected';
+    panel.classList.add('phone-active');
+    panelHint.style.display = 'none';
+    cursorEl.style.display  = 'block';
+    noCursorStyle.textContent = '*, *::before, *::after { cursor: none !important; }';
+  });
+
+  /* Phone left */
+  socket.on('phone:disconnected', () => {
+    pip.classList.remove('connected');
+    statusText.textContent = 'Waiting for phone';
+    panel.classList.remove('phone-active');
+    panelHint.style.display = '';
+    cursorEl.style.display  = 'none';
+    noCursorStyle.textContent = '';
+  });
+
+  /* Receive the drawn cursor image */
+  socket.on('cursor:set', ({ dataUrl }) => {
+    cursorImg.src = dataUrl;
+    cursorEl.style.display = 'block';
+    const tmp = new Image();
+    tmp.onload = () => {
+      const max   = 56;
+      const ratio = Math.min(max / tmp.width, max / tmp.height, 1);
+      cursorEl.style.width  = (tmp.width  * ratio) + 'px';
+      cursorEl.style.height = (tmp.height * ratio) + 'px';
+    };
+    tmp.src = dataUrl;
+  });
+
+  /* Move cursor by delta */
+  socket.on('cursor:move', ({ dx, dy }) => {
+    curX = Math.max(0, Math.min(window.innerWidth  - 20, curX + dx));
+    curY = Math.max(0, Math.min(window.innerHeight - 20, curY + dy));
+    cursorEl.style.transform = `translate(${curX}px, ${curY}px)`;
+  });
+
+  /* Click — ripple + dispatch real click to whatever is under cursor */
+  socket.on('cursor:click', () => {
+    const ripple = document.createElement('div');
+    ripple.className  = 'rc-ripple';
+    ripple.style.left = curX + 'px';
+    ripple.style.top  = curY + 'px';
+    document.body.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 650);
+
+    const target = document.elementFromPoint(curX, curY);
+    if (target) {
+      target.dispatchEvent(new MouseEvent('click', {
+        bubbles: true, cancelable: true,
+        clientX: curX, clientY: curY
+      }));
+    }
+  });
+
+  /* Style tag to suppress native cursor while phone is in control */
+  const noCursorStyle = document.createElement('style');
+  document.head.appendChild(noCursorStyle);
+
+})();
 </script>
 
 </body>
