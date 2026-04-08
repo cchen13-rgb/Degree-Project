@@ -10,6 +10,22 @@
   z-index: 10;
 }
 
+/* Force the body gradient to show fully on the captcha page */
+body {
+  background: linear-gradient(
+    to bottom,
+    #ffb4ba 0%,
+    #ffcacf 20%,
+    #ffdbdf 50%,
+    #ffebee 100%
+  );
+  min-height: 100vh;
+}
+
+body.dark {
+  background: #b50008;
+}
+
 /* ================= CARD ================= */
 
 .captcha-card {
@@ -284,6 +300,7 @@ body.dark .captcha-feedback-box p {
 .captcha-card.success {
   animation: successPulse 0.6s ease;
 }
+
 /* ================= DARK MODE IMAGES ================= */
 
 .captcha-tile img {

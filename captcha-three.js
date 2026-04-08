@@ -88,8 +88,10 @@ const CaptchaThree = (() => {
     ].join(";");
     document.body.prepend(bgCanvas);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias: true, alpha: false });
+    /* alpha:true so the canvas is transparent — CSS gradient shows through */
+    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0); /* fully transparent */
 
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
@@ -104,10 +106,7 @@ const CaptchaThree = (() => {
     resize();
     window.addEventListener("resize", resize);
 
-    /* Background colour + fog track dark mode */
-    function bgColor() {
-      return document.body.classList.contains("dark") ? 0x0a0000 : 0xfff8f8;
-    }
+    /* Fog tracks dark mode but renderer background stays transparent */
     function fogColor() {
       return document.body.classList.contains("dark") ? 0x1a0408 : 0xffe8ea;
     }
@@ -115,7 +114,6 @@ const CaptchaThree = (() => {
       return document.body.classList.contains("dark") ? 0xb50008 : 0x3d0d14;
     }
 
-    renderer.setClearColor(bgColor(), 1);
     scene.fog = new THREE.FogExp2(fogColor(), 0.022);
 
     /* Ambient drifting particles */
@@ -253,11 +251,10 @@ const CaptchaThree = (() => {
       lastTime  = now;
       clock    += dt;
 
-      /* Palette hot-swap */
+      /* Palette hot-swap — only fog and particles, renderer stays transparent */
       const isDark = document.body.classList.contains("dark");
       if (lastPalette !== isDark) {
         lastPalette = isDark;
-        renderer.setClearColor(bgColor(), 1);
         scene.fog.color.set(fogColor());
         pMat.color.set(particleColor());
       }
