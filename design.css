@@ -1201,8 +1201,9 @@ display:block;
     right:0;
   }
 
+  /* ── LOGO: bigger on mobile ── */
   .logo{
-    font-size:26px;
+    font-size:34px;
   }
 
   .center{
@@ -1227,6 +1228,8 @@ display:block;
     perspective:none !important;
     margin:0 !important;
     margin-top:10px !important;
+    /* Extra bottom margin so the section below doesn't crowd the portal */
+    margin-bottom:48px !important;
     background:linear-gradient(to bottom, #ffb4ba 0%, #ffcacf 15%, #ffdbdf 35%, #ffebee 55%);
     display:block !important;
     padding:0 !important;
@@ -1415,12 +1418,13 @@ display:block;
   }
 
   .logo{
-    font-size:22px;
+    font-size:28px;
   }
 
   .portal{
     height:88vw !important;
     max-height:88vw !important;
+    margin-bottom:40px !important;
   }
 
   .dante-parallax{
@@ -1446,9 +1450,14 @@ display:block;
 
 @media (max-width: 600px) {
 
+  .logo{
+    font-size:24px;
+  }
+
   .portal{
     height:95vw !important;
     max-height:95vw !important;
+    margin-bottom:36px !important;
   }
 
   .dante-parallax{
@@ -1483,9 +1492,14 @@ display:block;
 
 @media (max-width: 400px) {
 
+  .logo{
+    font-size:20px;
+  }
+
   .portal{
     height:100vw !important;
     max-height:100vw !important;
+    margin-bottom:32px !important;
   }
 
   .dante-parallax{
@@ -1505,10 +1519,6 @@ display:block;
 
   .profiles-section{
     padding-top:20px !important;
-  }
-
-  .logo{
-    font-size:18px;
   }
 }
 
