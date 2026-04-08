@@ -12,10 +12,17 @@ const crypto    = require('crypto');
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
+  cors: {
+    origin: ['https://cchen13-rgb.github.io', 'http://localhost:3000'],
+    methods: ['GET', 'POST']
+  }
 });
 
 app.use(express.static('.'));
+app.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  next();
+});
 
 /* ── Room registry ──────────────────────────────────────────────
    rooms[code] = { desktop: socketId|null, phone: socketId|null,
@@ -29,6 +36,7 @@ function makeCode() {
 
 /* ── QR endpoint ─────────────────────────────────────────────── */
 app.get('/qr/:code', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   const code = req.params.code.toUpperCase();
   /* Point to GitHub Pages where phone.html is hosted */
   const phoneUrl = `https://cchen13-rgb.github.io/Degree-Project/phone.html?room=${code}`;
