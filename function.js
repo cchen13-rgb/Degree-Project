@@ -236,8 +236,9 @@ window.addEventListener("load", () => {
       if (el.classList.contains('star2')) {
         el.style.opacity = '0';
       } else {
+        const isMobileStar = el.classList.contains('star') && window.innerWidth <= 1024;
         el.style.transition = 'none';
-        el.style.transform  = 'translateY(120px)';
+        el.style.transform  = isMobileStar ? 'translate(-50%, calc(-60% + 120px))' : 'translateY(120px)';
         el.style.opacity    = '0';
       }
     });
@@ -269,7 +270,8 @@ window.addEventListener("load", () => {
         } else {
           el.style.transition = 'opacity 2s ease 0s, transform 2s cubic-bezier(0.16,1,0.3,1), filter 0.6s ease';
           setTimeout(() => {
-            el.style.transform = 'translateY(0px)';
+            const isMobileStar = el.classList.contains('star') && window.innerWidth <= 1024;
+            el.style.transform = isMobileStar ? 'translate(-50%, -60%)' : 'translateY(0px)';
             el.style.opacity   = '1';
           }, 50);
         }

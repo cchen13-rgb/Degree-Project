@@ -1255,7 +1255,7 @@ display:block;
     height:10vw !important;
     top:50% !important;
     left:50% !important;
-    transform:translate(-50%, -60%) !important;
+    /* transform is intentionally omitted — JS owns it during the entry animation */
   }
 
   .dante-parallax .star2{
@@ -1432,6 +1432,7 @@ display:block;
   .dante-parallax .star{
     width:10vw !important;
     height:10vw !important;
+    /* transform omitted — JS owns it */
   }
 
   .profiles-section{
@@ -1459,6 +1460,7 @@ display:block;
   .dante-parallax .star{
     width:11vw !important;
     height:11vw !important;
+    /* transform omitted — JS owns it */
   }
 
   .center .login{
@@ -1494,6 +1496,7 @@ display:block;
   .dante-parallax .star{
     width:12vw !important;
     height:12vw !important;
+    /* transform omitted — JS owns it */
   }
 
   .center .login{
