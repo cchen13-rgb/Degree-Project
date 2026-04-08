@@ -1,9 +1,8 @@
 /* ===================== CAPTCHA — STANDALONE ===================== */
 /* Do NOT load function.js on captcha.html — this file handles everything */
 
-const TOTAL_TILES    = 12;
-const IMAGE_COUNT    = 12;
-const REAL_PER_ROUND = 9;
+const TOTAL_TILES  = 12;
+const IMAGE_COUNT  = 12;
 
 const DECOY_COLOURS = [
   "#1a0a0c","#2d0810","#3b0d17",
@@ -21,6 +20,7 @@ const PROMPTS = [
 let lives         = 3;
 let selectedTiles = new Set();
 let tileData      = [];
+let heartIndex    = -1; /* which tile slot holds the heart.gif */
 
 /* ===================== BOOT ===================== */
 
@@ -71,47 +71,36 @@ function buildRound() {
   const prompt = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
   document.querySelector(".captcha-title").textContent = prompt;
 
-  const allIndices = shuffle([...Array(TOTAL_TILES).keys()]);
-  const realSlots  = new Set(allIndices.slice(0, REAL_PER_ROUND));
+  /* Pick one random slot for the heart — the only correct answer */
+  heartIndex = Math.floor(Math.random() * TOTAL_TILES);
 
+  /* Shuffle the PNG pool for the decoy tiles */
   const imagePool = shuffle([...Array(IMAGE_COUNT).keys()].map(i => i + 1));
   let imageIdx = 0;
 
   for (let i = 0; i < TOTAL_TILES; i++) {
-    const isReal = realSlots.has(i);
-    tileData.push({ index: i, isReal });
+    const isHeart = (i === heartIndex);
+    tileData.push({ index: i, isReal: isHeart });
 
     const tile = document.createElement("div");
     tile.classList.add("captcha-tile");
     tile.dataset.index = i;
 
-    if (isReal) {
-      const img = document.createElement("img");
-      img.src = `Captcha/Captcha${imagePool[imageIdx++]}.png`;
-      img.alt = "";
-      img.draggable = false;
-      tile.appendChild(img);
+    const img = document.createElement("img");
+    img.alt       = "";
+    img.draggable = false;
+
+    if (isHeart) {
+      /* The single correct tile — always visible, dark background */
+      img.src = "Captcha/heart.gif";
+      img.classList.add("heart-tile-img");
     } else {
-      const canvas = document.createElement("canvas");
-      canvas.width  = 200;
-      canvas.height = 200;
-      const ctx = canvas.getContext("2d");
-      const col = DECOY_COLOURS[Math.floor(Math.random() * DECOY_COLOURS.length)];
-      ctx.fillStyle = col;
-      ctx.fillRect(0, 0, 200, 200);
-      for (let n = 0; n < 800; n++) {
-        const x = Math.random() * 200;
-        const y = Math.random() * 200;
-        ctx.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.08)";
-        ctx.fillRect(x, y, 2, 2);
-      }
-      const img = document.createElement("img");
-      img.src = canvas.toDataURL();
-      img.alt = "";
-      img.draggable = false;
-      tile.appendChild(img);
+      /* Decoy: PNG hidden in light mode, revealed in dark mode */
+      img.src = `Captcha/Captcha${imagePool[imageIdx++]}.png`;
+      img.classList.add("decoy-tile-img");
     }
 
+    tile.appendChild(img);
     tile.addEventListener("click", () => toggleTile(tile, i));
     grid.appendChild(tile);
   }
@@ -136,18 +125,15 @@ function toggleTile(tile, index) {
 function handleVerify() {
   const card = document.querySelector(".captcha-card");
 
-  const realIndices  = tileData.filter(t =>  t.isReal).map(t => t.index);
-  const decoyIndices = tileData.filter(t => !t.isReal).map(t => t.index);
-
-  const allRealSelected = realIndices.every(i => selectedTiles.has(i));
-  const noDecoySelected = decoyIndices.every(i => !selectedTiles.has(i));
-  const correct = allRealSelected && noDecoySelected;
+  /* Correct = only the heart tile selected, nothing else */
+  const correct =
+    selectedTiles.size === 1 &&
+    selectedTiles.has(heartIndex);
 
   if (correct) {
     card.classList.add("success");
     card.addEventListener("animationend", () => card.classList.remove("success"), { once: true });
 
-    /* ── Three.js: bloom on success ── */
     if (typeof CaptchaThree !== "undefined") CaptchaThree.onSuccess();
 
     setTimeout(() => morphToDoor(), 400);
@@ -156,7 +142,6 @@ function handleVerify() {
     lives--;
     renderLives();
 
-    /* ── Three.js: shockwave on wrong ── */
     if (typeof CaptchaThree !== "undefined") CaptchaThree.onWrong();
 
     card.classList.add("shake");
@@ -165,7 +150,7 @@ function handleVerify() {
     if (lives <= 0) {
       showFeedback(false, true);
     } else {
-      highlightWrong(realIndices, decoyIndices);
+      highlightWrong();
       setTimeout(() => buildRound(), 1200);
     }
   }
@@ -249,8 +234,7 @@ function buildDoorHTML(w, h) {
     </g>
   </svg>`;
 
-  const outerDiv = `<div id="doorWrapper" style="width:100%;height:100%;position:relative;cursor:pointer;">${svgContent}</div>`;
-  return outerDiv;
+  return `<div id="doorWrapper" style="width:100%;height:100%;position:relative;cursor:pointer;">${svgContent}</div>`;
 }
 
 /* ===================== PAGE TRANSITION ===================== */
@@ -273,13 +257,16 @@ document.addEventListener("click", (e) => {
 
 /* ===================== HIGHLIGHT WRONG ===================== */
 
-function highlightWrong(realIndices, decoyIndices) {
+function highlightWrong() {
   document.querySelectorAll(".captcha-tile").forEach(tile => {
     const idx      = parseInt(tile.dataset.index);
-    const isReal   = realIndices.includes(idx);
+    const isHeart  = idx === heartIndex;
     const selected = selectedTiles.has(idx);
-    if (isReal && !selected)    tile.style.outline = "3px solid #b50008";
-    else if (!isReal && selected) tile.style.outline = "3px solid #ff3a1a";
+
+    /* Missed the heart */
+    if (isHeart && !selected) tile.style.outline = "3px solid #b50008";
+    /* Selected a decoy */
+    if (!isHeart && selected) tile.style.outline = "3px solid #ff3a1a";
   });
 }
 

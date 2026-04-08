@@ -108,6 +108,52 @@ body.dark .captcha-grid {
   pointer-events: none;
 }
 
+/* ── Decoy PNGs: hidden in light mode, revealed in dark mode ── */
+.decoy-tile-img {
+  filter: brightness(0) saturate(0);
+  transition: filter 0.6s ease;
+}
+
+body.dark .decoy-tile-img {
+  filter: brightness(1) saturate(1);
+}
+
+body.dark .captcha-tile:hover .decoy-tile-img {
+  filter: brightness(1.08) saturate(1);
+}
+
+body.dark .captcha-tile.selected .decoy-tile-img {
+  filter: brightness(0.95) saturate(1);
+}
+
+/* ── Heart gif: hidden in light mode, revealed in dark mode ── */
+.heart-tile-img {
+  object-fit: contain !important;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #0d0005;
+  filter: brightness(0) saturate(0);
+  transition: filter 0.6s ease;
+  display: block;
+  margin: auto;
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.dark .heart-tile-img {
+  filter: brightness(1) saturate(1);
+}
+
+body.dark .captcha-tile:hover .heart-tile-img {
+  filter: brightness(1.1) saturate(1);
+}
+
+body.dark .captcha-tile.selected .heart-tile-img {
+  filter: brightness(0.95) saturate(1);
+}
+
 /* Selected state */
 .captcha-tile.selected::after {
   content: "";
@@ -135,14 +181,6 @@ body.dark .captcha-tile.selected::after {
   z-index: 2;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   pointer-events: none;
-}
-
-.captcha-tile:hover img {
-  filter: brightness(1.08);
-}
-
-.captcha-tile.selected:hover img {
-  filter: brightness(0.95);
 }
 
 /* ================= FOOTER ================= */
@@ -299,23 +337,4 @@ body.dark .captcha-feedback-box p {
 
 .captcha-card.success {
   animation: successPulse 0.6s ease;
-}
-
-/* ================= DARK MODE IMAGES ================= */
-
-.captcha-tile img {
-  transition: filter 0.6s ease;
-  filter: brightness(0) saturate(0); /* hidden in light mode */
-}
-
-body.dark .captcha-tile img {
-  filter: brightness(1) saturate(1); /* revealed in dark mode */
-}
-
-body.dark .captcha-tile:hover img {
-  filter: brightness(1.08) saturate(1);
-}
-
-body.dark .captcha-tile.selected img {
-  filter: brightness(0.95) saturate(1);
 }
