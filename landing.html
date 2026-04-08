@@ -620,9 +620,12 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 
   socket.on('room:created', ({ code }) => {
     codeEl.textContent = code;
-    qrImg.src = `/qr/${code}`;
+    qrImg.src = `https://degree-project-production-7b91.up.railway.app/qr/${code}`;
     /* Unlock after intro */
-    setTimeout(() => { remoteReady = true; }, 5500);
+    setTimeout(() => {
+      remoteReady = true;
+      logoWrap.classList.add('remote-ready');
+    }, 5500);
   });
 
   /* Phone connected */
