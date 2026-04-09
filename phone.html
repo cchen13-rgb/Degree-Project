@@ -682,10 +682,8 @@ document.getElementById('useCursorBtn').addEventListener('click', () => {
 
 function snapshotCursor() {
   const dpr = window.devicePixelRatio || 1;
-  const w   = drawCanvas.width / dpr;
-  const h   = drawCanvas.height / dpr;
 
-  /* Crop to drawn content */
+  /* Capture at physical pixel resolution */
   const tmp  = document.createElement('canvas');
   tmp.width  = drawCanvas.width;
   tmp.height = drawCanvas.height;
@@ -703,13 +701,19 @@ function snapshotCursor() {
     }
   }
   if (maxX <= minX || maxY <= minY) return null;
-  const pad = 6;
+  const pad = 6 * dpr;  /* scale padding by DPR */
   minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
-  maxX = Math.min(tmp.width, maxX + pad); maxY = Math.min(tmp.height, maxY + pad);
+  maxX = Math.min(tmp.width,  maxX + pad);
+  maxY = Math.min(tmp.height, maxY + pad);
+  /* Output at LOGICAL pixel size (divide by DPR) so it isn't 2-3x too large */
   const out = document.createElement('canvas');
-  out.width  = maxX - minX;
-  out.height = maxY - minY;
-  out.getContext('2d').drawImage(tmp, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
+  out.width  = (maxX - minX) / dpr;
+  out.height = (maxY - minY) / dpr;
+  out.getContext('2d').drawImage(
+    tmp,
+    minX, minY, maxX - minX, maxY - minY,  /* source: physical pixels */
+    0, 0, out.width, out.height             /* dest:   logical pixels  */
+  );
   return out;
 }
 
@@ -838,4 +842,3 @@ socket.on('phone:disconnected', () => {
 </script>
 </body>
 </html>
-
