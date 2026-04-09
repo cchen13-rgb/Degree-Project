@@ -7,12 +7,22 @@
   <link rel="preload" href="fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
   <link rel="stylesheet" href="design.css">
+  <style>
+    #remoteCursorLayer { position:fixed; inset:0; pointer-events:none; z-index:8999; overflow:hidden; }
+    .rc-cursor { position:absolute; top:0; left:0; will-change:transform; display:none; }
+    .rc-cursor img { display:block; object-fit:contain; }
+    .rc-cursor .rc-name { position:absolute; top:calc(100% + 3px); left:0; font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; white-space:nowrap; background:#3d0d14; color:#fff8f8; padding:2px 7px; }
+    .rc-ripple { position:fixed; width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(93,20,30,0.4); transform:translate(-50%,-50%) scale(0); pointer-events:none; z-index:8998; animation:rcRipple 0.55s ease-out forwards; }
+    @keyframes rcRipple { to { transform:translate(-50%,-50%) scale(2.5); opacity:0; } }
+  </style>
 </head>
 
 <body class="portal-page">
 
 <!-- Particles -->
 <div id="particles"></div>
+
+<div id="remoteCursorLayer"></div>
 
 <div class="entrance">
 
@@ -35,6 +45,8 @@
 
 <script defer src="js/gsap.js"></script>
 <script defer src="function.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="remote-cursor.js"></script>
 
 </body>
 </html>

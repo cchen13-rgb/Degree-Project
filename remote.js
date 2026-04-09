@@ -42,89 +42,64 @@ io.on('connection', socket => {
   socket.on('desktop:init', () => {
     let code;
     do { code = makeCode(); } while (rooms[code]);
-    // phones is now always an array
-    rooms[code] = { desktop: socket.id, phones: [], cursorDataUrl: null, phoneName: null };
+    rooms[code] = { desktop: socket.id, phones: [], cursors: {}, phoneName: null };
     socket.join(code);
     socket.data.role = 'desktop';
     socket.data.code = code;
     socket.emit('room:created', { code });
   });
 
-  // Desktop rejoins after page navigation (index → captcha, etc.)
   socket.on('desktop:rejoin', ({ code }) => {
     const room = rooms[code];
-    if (!room) {
-      // Room expired — start fresh
-      socket.emit('desktop:init');
-      return;
-    }
-    // Update desktop socket ID to the new connection
+    if (!room) { socket.emit('desktop:init'); return; }
     room.desktop = socket.id;
     socket.join(code);
     socket.data.role = 'desktop';
     socket.data.code = code;
     socket.emit('room:created', { code });
-
-    // FIX: emit cursor:set to THIS socket (socket, not io.to(room.desktop))
-    // room.desktop was just set to socket.id above, but being explicit is safer
-    if (room.cursorDataUrl) {
-      socket.emit('cursor:set', { dataUrl: room.cursorDataUrl });
-    }
-    // Tell desktop if any phones are connected
-    if (room.phones.length > 0) {
-      socket.emit('phone:connected');
-    }
-    if (room.phoneName) {
-      socket.emit('phone:name', { name: room.phoneName });
-    }
+    /* Re-send each phone's cursor */
+    Object.entries(room.cursors).forEach(([phoneId, dataUrl]) => {
+      socket.emit('cursor:set', { dataUrl, id: phoneId });
+    });
+    if (room.phones.length > 0) socket.emit('phone:connected');
+    if (room.phoneName) socket.emit('phone:name', { name: room.phoneName, id: room.phones[0] || '' });
   });
 
-  // FIX: fully migrated to room.phones array
   socket.on('phone:join', ({ code }) => {
     const room = rooms[code];
-    if (!room) {
-      socket.emit('room:error', 'Room not found');
-      return;
-    }
-
+    if (!room) { socket.emit('room:error', 'Room not found'); return; }
     room.phones.push(socket.id);
     socket.join(code);
     socket.data.role = 'phone';
     socket.data.code = code;
-
     socket.emit('room:joined', { code });
-
-    // Send existing cursor to this new phone
-    if (room.cursorDataUrl) {
-      socket.emit('cursor:set', { dataUrl: room.cursorDataUrl });
+    /* Send this phone its own stored cursor if it reconnected */
+    if (room.cursors[socket.id]) {
+      socket.emit('cursor:set', { dataUrl: room.cursors[socket.id], id: socket.id });
     }
-
-    // Tell desktop a phone connected
-    if (room.desktop) {
-      io.to(room.desktop).emit('phone:connected');
-    }
+    if (room.desktop) io.to(room.desktop).emit('phone:connected');
   });
 
   socket.on('cursor:upload', ({ dataUrl }) => {
     const code = socket.data.code;
     const room = rooms[code];
     if (!room) return;
-    room.cursorDataUrl = dataUrl;
-    if (room.desktop) io.to(room.desktop).emit('cursor:set', { dataUrl });
+    room.cursors[socket.id] = dataUrl;
+    if (room.desktop) io.to(room.desktop).emit('cursor:set', { dataUrl, id: socket.id });
   });
 
   socket.on('cursor:move', ({ dx, dy }) => {
     const code = socket.data.code;
     const room = rooms[code];
     if (!room || !room.desktop) return;
-    io.to(room.desktop).emit('cursor:move', { dx, dy });
+    io.to(room.desktop).emit('cursor:move', { dx, dy, id: socket.id });
   });
 
   socket.on('cursor:click', () => {
     const code = socket.data.code;
     const room = rooms[code];
     if (!room || !room.desktop) return;
-    io.to(room.desktop).emit('cursor:click');
+    io.to(room.desktop).emit('cursor:click', { id: socket.id });
   });
 
   socket.on('phone:type', ({ text }) => {
@@ -145,7 +120,7 @@ io.on('connection', socket => {
     const code = socket.data.code;
     const room = rooms[code];
     if (!room || !room.desktop) return;
-    io.to(room.desktop).emit('phone:focusinput');
+    io.to(room.desktop).emit('phone:focusinput', { id: socket.id });
   });
 
   socket.on('phone:name', ({ name }) => {
@@ -153,7 +128,7 @@ io.on('connection', socket => {
     const room = rooms[code];
     if (!room || !room.desktop) return;
     room.phoneName = name;
-    io.to(room.desktop).emit('phone:name', { name });
+    io.to(room.desktop).emit('phone:name', { name, id: socket.id });
   });
 
   socket.on('disconnect', () => {
@@ -163,17 +138,14 @@ io.on('connection', socket => {
     const room = rooms[code];
 
     if (role === 'desktop') {
-      // Notify all connected phones that the desktop closed
-      room.phones.forEach(phoneId => {
-        io.to(phoneId).emit('room:closed');
-      });
+      room.phones.forEach(phoneId => io.to(phoneId).emit('room:closed'));
       delete rooms[code];
     } else if (role === 'phone') {
-      // FIX: remove just this phone from the array
       room.phones = room.phones.filter(id => id !== socket.id);
-      // Only tell desktop "disconnected" if NO phones remain
-      if (room.phones.length === 0 && room.desktop) {
-        io.to(room.desktop).emit('phone:disconnected');
+      delete room.cursors[socket.id];
+      if (room.desktop) {
+        io.to(room.desktop).emit('cursor:remove', { id: socket.id });
+        if (room.phones.length === 0) io.to(room.desktop).emit('phone:disconnected');
       }
     }
   });
