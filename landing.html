@@ -278,19 +278,6 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     cursorEl.style.display = 'none';
   });
 
-  socket.on('cursor:set', ({ dataUrl }) => {
-    cursorImg.src = dataUrl;
-    cursorEl.style.display = 'block';
-    const tmp = new Image();
-    tmp.onload = () => {
-      const max = 56;
-      const ratio = Math.min(max / tmp.width, max / tmp.height, 1);
-      cursorEl.style.width  = (tmp.width  * ratio) + 'px';
-      cursorEl.style.height = (tmp.height * ratio) + 'px';
-    };
-    tmp.src = dataUrl;
-  });
-
   socket.on('cursor:move', ({ dx, dy }) => {
     curX = Math.max(0, Math.min(window.innerWidth  - 20, curX + dx));
     curY = Math.max(0, Math.min(window.innerHeight - 20, curY + dy));
@@ -306,7 +293,6 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     document.body.appendChild(ripple);
     setTimeout(() => ripple.remove(), 650);
 
-    /* Temporarily hide cursor layer so it doesn't intercept the hit test */
     const layer = document.getElementById('remoteCursorLayer');
     layer.style.display = 'none';
     const target = document.elementFromPoint(curX, curY);
@@ -317,18 +303,23 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
       target.dispatchEvent(new MouseEvent('mousedown', opts));
       target.dispatchEvent(new MouseEvent('mouseup',   opts));
       target.dispatchEvent(new MouseEvent('click',     opts));
+      /* Focus inputs/textareas so phone typing works immediately after clicking */
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        target.focus();
+      }
     }
   });
 
-  /* Phone typing */
+  /* Phone typing — insert into focused element */
   socket.on('phone:type', ({ text }) => {
     const el = document.activeElement;
     if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-      const start = el.selectionStart;
-      const end   = el.selectionEnd;
+      const start = el.selectionStart ?? el.value.length;
+      const end   = el.selectionEnd   ?? el.value.length;
       el.value = el.value.slice(0, start) + text + el.value.slice(end);
       el.selectionStart = el.selectionEnd = start + text.length;
       el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
     }
   });
 
@@ -338,19 +329,38 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
     el.dispatchEvent(new KeyboardEvent('keyup',   { key, bubbles: true }));
     if (key === 'Backspace' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-      const start = el.selectionStart;
+      const start = el.selectionStart ?? el.value.length;
       if (start > 0) {
-        el.value = el.value.slice(0, start - 1) + el.value.slice(el.selectionEnd);
+        el.value = el.value.slice(0, start - 1) + el.value.slice(el.selectionEnd ?? start);
         el.selectionStart = el.selectionEnd = start - 1;
         el.dispatchEvent(new Event('input', { bubbles: true }));
       }
     }
   });
 
-  /* Phone name */
+  /* Phone name — update cursor label and store it */
+  let phoneName = 'Remote';
   socket.on('phone:name', ({ name }) => {
+    phoneName = name || 'Remote';
     const label = document.getElementById('remoteCursorName');
-    if (label) label.textContent = name;
+    if (label) label.textContent = phoneName;
+  });
+
+  /* Re-apply name when cursor image updates */
+  socket.on('cursor:set', ({ dataUrl }) => {
+    cursorImg.src = dataUrl;
+    cursorEl.style.display = 'block';
+    const tmp = new Image();
+    tmp.onload = () => {
+      const max = 56;
+      const ratio = Math.min(max / tmp.width, max / tmp.height, 1);
+      cursorEl.style.width  = (tmp.width  * ratio) + 'px';
+      cursorEl.style.height = (tmp.height * ratio) + 'px';
+      /* Reapply stored name */
+      const label = document.getElementById('remoteCursorName');
+      if (label) label.textContent = phoneName;
+    };
+    tmp.src = dataUrl;
   });
 
 })();
