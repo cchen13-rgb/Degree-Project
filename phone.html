@@ -472,7 +472,10 @@
 
   <!-- Type panel -->
   <div style="width:100%;margin-top:12px;display:flex;flex-direction:column;gap:8px;">
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;">Type on web screen</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;">Type on web screen</div>
+      <button class="btn ghost" id="focusInputBtn" style="font-size:10px;padding:3px 8px;">Focus input</button>
+    </div>
     <div style="display:flex;gap:8px;">
       <input id="typeInput" type="text"
         placeholder="type here..."
@@ -561,6 +564,9 @@ socket.on('room:joined', ({ code }) => {
   document.getElementById('drawRoomCode').textContent = code;
   document.getElementById('remoteRoomCode').textContent = code;
   showScreen('drawScreen');
+  /* Auto-send name if already set */
+  const savedName = document.getElementById('nameInput').value.trim();
+  if (savedName) socket.emit('phone:name', { name: savedName });
 });
 
 socket.on('room:error', msg => showError(msg));
@@ -668,6 +674,9 @@ document.getElementById('useCursorBtn').addEventListener('click', () => {
   const dataUrl  = snap.toDataURL('image/png');
   socket.emit('cursor:upload', { dataUrl });
   document.getElementById('cursorThumb').src = dataUrl;
+  /* Resend name so it updates on web screen after cursor changes */
+  const name = document.getElementById('nameInput').value.trim();
+  if (name) setTimeout(() => socket.emit('phone:name', { name }), 300);
   showScreen('remoteScreen');
 });
 
@@ -776,10 +785,9 @@ document.getElementById('disconnectBtn').addEventListener('click', () => {
 document.getElementById('setNameBtn').addEventListener('click', () => {
   const name = document.getElementById('nameInput').value.trim() || 'anonymous';
   socket.emit('phone:name', { name });
-  /* Visual confirmation */
   const btn = document.getElementById('setNameBtn');
-  btn.textContent = '✓';
-  setTimeout(() => { btn.textContent = 'Set'; }, 1500);
+  btn.textContent = '✓ sent';
+  setTimeout(() => { btn.textContent = 'Set'; }, 2000);
 });
 
 /* ── Typing ──────────────────────────────────────────────── */
@@ -793,6 +801,13 @@ document.getElementById('sendTypeBtn').addEventListener('click', () => {
   const btn = document.getElementById('sendTypeBtn');
   btn.textContent = '✓';
   setTimeout(() => { btn.textContent = 'Send'; }, 1000);
+});
+
+document.getElementById('focusInputBtn').addEventListener('click', () => {
+  socket.emit('phone:focusinput');
+  const btn = document.getElementById('focusInputBtn');
+  btn.textContent = '✓';
+  setTimeout(() => { btn.textContent = 'Focus input'; }, 1500);
 });
 
 document.getElementById('typeInput').addEventListener('keydown', e => {

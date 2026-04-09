@@ -339,7 +339,34 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     }
   });
 
-  /* Phone name — update cursor label and store it */
+  /* Phone focus input — focus whatever input is at cursor position */
+  socket.on('phone:focusinput', () => {
+    const layer = document.getElementById('remoteCursorLayer');
+    layer.style.display = 'none';
+    const target = document.elementFromPoint(curX, curY);
+    layer.style.display = '';
+    if (target) {
+      /* Walk up the DOM to find a focusable element */
+      let el = target;
+      while (el && el !== document.body) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.focus();
+          break;
+        }
+        el = el.parentElement;
+      }
+      /* If no input found at cursor, focus first visible input on page */
+      if (!el || el === document.body) {
+        const inputs = document.querySelectorAll('input:not([type=hidden]):not([disabled]), textarea');
+        for (const input of inputs) {
+          const rect = input.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) { input.focus(); break; }
+        }
+      }
+    }
+  });
+
+  /* Phone name */
   let phoneName = 'Remote';
   socket.on('phone:name', ({ name }) => {
     phoneName = name || 'Remote';

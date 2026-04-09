@@ -112,6 +112,13 @@ io.on('connection', socket => {
     io.to(room.desktop).emit('phone:key', { key });
   });
 
+  socket.on('phone:focusinput', () => {
+    const code = socket.data.code;
+    const room = rooms[code];
+    if (!room || !room.desktop) return;
+    io.to(room.desktop).emit('phone:focusinput');
+  });
+
   socket.on('phone:name', ({ name }) => {
     const code = socket.data.code;
     const room = rooms[code];
