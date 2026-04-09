@@ -1,512 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Hello World · Remote</title>
-  <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ink:    #3d0d14;
-      --paper:  #fff8f8;
-      --blush:  #ffb4ba;
-      --rose:   #a8324a;
-      --deep:   #5d141e;
-      --dim:    rgba(61,13,20,0.18);
-      --dimmer: rgba(61,13,20,0.08);
-    }
-
-    html, body {
-      height: 100%; width: 100%;
-      overflow: hidden;
-      background: linear-gradient(160deg, #ffb4ba 0%, #ffdbdf 40%, #fff8f8 100%);
-      font-family: "Switzer", "Montserrat", sans-serif;
-      color: var(--ink);
-      -webkit-font-smoothing: antialiased;
-      touch-action: none;
-      user-select: none;
-    }
-
-    /* ── Screens ──────────────────────────────────────────── */
-    .screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: env(safe-area-inset-top, 20px) 28px env(safe-area-inset-bottom, 20px) 28px;
-      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1);
-    }
-    .screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(24px);
-    }
-
-    /* ── Typography ───────────────────────────────────────── */
-    .pixel {
-      font-family: "fayte-pixel-hard", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-    }
-    .eyebrow {
-      font-size: 9px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: rgba(61,13,20,0.4);
-      margin-bottom: 10px;
-    }
-    .title {
-      font-size: 38px;
-      line-height: 1;
-      color: var(--ink);
-      margin-bottom: 6px;
-    }
-    .subtitle {
-      font-size: 11px;
-      letter-spacing: 0.3px;
-      line-height: 1.7;
-      color: rgba(61,13,20,0.55);
-      text-align: center;
-      max-width: 260px;
-    }
-    .rule {
-      width: 28px; height: 1px;
-      background: var(--dim);
-      margin: 16px auto;
-    }
-
-    /* ── Buttons ──────────────────────────────────────────── */
-    .btn {
-      border: none;
-      background: var(--ink);
-      color: var(--paper);
-      font-family: "Switzer", sans-serif;
-      font-size: 11px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      padding: 13px 32px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn:active { transform: scale(0.97); }
-    .btn.ghost {
-      background: transparent;
-      color: var(--ink);
-      border: 1px solid var(--dim);
-    }
-    .btn.ghost:active { background: var(--dimmer); }
-    .btn.rose {
-      background: var(--rose);
-    }
-
-    /* ── Join screen ──────────────────────────────────────── */
-    #joinScreen { gap: 0; text-align: center; }
-
-    .code-input-wrap {
-      margin: 24px 0 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-    .code-input {
-      width: 100%;
-      max-width: 240px;
-      text-align: center;
-      font-family: "fayte-pixel-hard", sans-serif;
-      font-size: 26px;
-      letter-spacing: 6px;
-      border: none;
-      border-bottom: 1px solid var(--dim);
-      background: transparent;
-      color: var(--ink);
-      padding: 8px 0 12px;
-      outline: none;
-      text-transform: uppercase;
-      -webkit-appearance: none;
-    }
-    .code-input::placeholder { color: var(--dim); letter-spacing: 4px; }
-    .code-error {
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: var(--rose);
-      min-height: 16px;
-      text-align: center;
-    }
-
-    /* ── Draw screen ──────────────────────────────────────── */
-    #drawScreen { justify-content: flex-start; padding-top: max(env(safe-area-inset-top), 20px); gap: 0; }
-
-    .draw-header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--dim);
-      margin-bottom: 16px;
-    }
-    .draw-header .left { display: flex; flex-direction: column; gap: 2px; }
-
-    .canvas-frame {
-      width: 100%;
-      flex: 1;
-      position: relative;
-      border: 1px solid var(--dim);
-      background: var(--paper);
-      overflow: hidden;
-      touch-action: none;
-    }
-    #drawCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    .canvas-hint {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      flex-direction: column;
-      gap: 6px;
-      opacity: 1;
-      transition: opacity 0.3s;
-    }
-    .canvas-hint.gone { opacity: 0; }
-    .canvas-hint-icon {
-      width: 32px; height: 32px;
-      border: 1px solid var(--dim);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .canvas-hint span {
-      font-size: 9px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-
-    .draw-tools {
-      width: 100%;
-      margin-top: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .swatch {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-    .swatch:active { transform: scale(0.88); }
-    .swatch.active { border-color: var(--ink); }
-
-    .sz-btn {
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border: 1px solid var(--dim);
-      background: transparent;
-      color: rgba(61,13,20,0.5);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      font-family: "Switzer", sans-serif;
-    }
-    .sz-btn.active {
-      background: var(--ink);
-      color: var(--paper);
-      border-color: var(--ink);
-    }
-
-    .draw-actions {
-      width: 100%;
-      margin-top: 14px;
-      display: flex;
-      gap: 10px;
-    }
-    .draw-actions .btn { flex: 1; text-align: center; }
-
-    /* ── Remote screen ────────────────────────────────────── */
-    #remoteScreen { justify-content: flex-start; padding-top: max(env(safe-area-inset-top), 20px); gap: 0; }
-
-    .remote-header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--dim);
-      margin-bottom: 20px;
-    }
-    .status-pip {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(61,13,20,0.4);
-    }
-    .pip-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #1D9E75;
-      animation: pipblink 2s ease-in-out infinite;
-    }
-    @keyframes pipblink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-    .cursor-preview-wrap {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .cursor-preview-label {
-      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(61,13,20,0.35);
-    }
-    .cursor-preview-img {
-      width: 64px; height: 64px;
-      border: 1px solid var(--dim);
-      background: var(--paper);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .cursor-preview-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-    .trackpad-label {
-      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(61,13,20,0.35);
-      align-self: flex-start;
-      margin-bottom: 8px;
-    }
-    .trackpad {
-      width: 100%;
-      flex: 1;
-      background: var(--paper);
-      border: 1px solid var(--dim);
-      position: relative;
-      touch-action: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .trackpad-hint-text {
-      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--dim);
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .trackpad-hint-text.gone { opacity: 0; }
-    .trackpad-ripple {
-      position: absolute;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: rgba(61,13,20,0.08);
-      transform: translate(-50%, -50%) scale(0);
-      pointer-events: none;
-      animation: ripple 0.5s ease-out forwards;
-    }
-    @keyframes ripple { to { transform: translate(-50%,-50%) scale(3); opacity: 0; } }
-
-    .click-btn {
-      width: 100%;
-      margin-top: 14px;
-      padding: 16px;
-      background: var(--paper);
-      border: 1px solid var(--dim);
-      font-family: "Switzer", sans-serif;
-      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--ink);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s, transform 0.1s;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .click-btn:active { background: var(--ink); color: var(--paper); transform: scale(0.98); }
-    .click-icon {
-      width: 14px; height: 14px;
-      border: 1px solid currentColor;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .remote-actions {
-      width: 100%;
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-    }
-    .remote-actions .btn { flex: 1; font-size: 10px; padding: 10px; text-align: center; }
-
-    /* ── Waiting overlay ──────────────────────────────────── */
-    .waiting-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: rgba(61,13,20,0.45);
-      border: 1px solid var(--dim);
-      padding: 6px 14px;
-      margin-top: 24px;
-    }
-    .waiting-spin {
-      width: 8px; height: 8px;
-      border: 1px solid var(--dim);
-      border-top-color: var(--rose);
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-  </style>
-</head>
-<body>
-
-<!-- ══ 1. JOIN SCREEN ══════════════════════════════════════════ -->
-<div class="screen" id="joinScreen">
-  <div class="eyebrow">Hello World · Remote</div>
-  <div class="title pixel">Enter</div>
-  <div class="rule"></div>
-  <div class="subtitle">Type the room code shown on the web screen, or scan the QR code.</div>
-
-  <div class="code-input-wrap">
-    <input class="code-input" id="codeInput" type="text"
-           maxlength="6" placeholder="XXXXXX"
-           autocomplete="off" autocorrect="off"
-           spellcheck="false" inputmode="text">
-    <div class="code-error" id="codeError"></div>
-  </div>
-
-  <button class="btn" id="joinBtn">Connect</button>
-</div>
-
-<!-- ══ 2. DRAW SCREEN ══════════════════════════════════════════ -->
-<div class="screen hidden" id="drawScreen">
-  <div class="draw-header">
-    <div class="left">
-      <div class="eyebrow" style="margin:0">Draw your cursor</div>
-      <div style="font-size:11px;color:rgba(61,13,20,0.5);margin-top:2px;">It will appear on the web screen</div>
-    </div>
-    <div class="status-pip">
-      <div class="pip-dot"></div>
-      <span id="drawRoomCode">——</span>
-    </div>
-  </div>
-
-  <div class="canvas-frame">
-    <canvas id="drawCanvas"></canvas>
-    <div class="canvas-hint" id="canvasHint">
-      <div class="canvas-hint-icon">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 12L5 9M5 9L11 3L12 4L6 10M5 9L6 10" stroke="rgba(61,13,20,0.3)" stroke-width="1" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span>Draw anything</span>
-    </div>
-  </div>
-
-  <div class="draw-tools">
-    <div class="swatch active" style="background:#3d0d14" data-c="#3d0d14"></div>
-    <div class="swatch" style="background:#a8324a" data-c="#a8324a"></div>
-    <div class="swatch" style="background:#7F77DD" data-c="#7F77DD"></div>
-    <div class="swatch" style="background:#1D9E75" data-c="#1D9E75"></div>
-    <div class="swatch" style="background:#EF9F27" data-c="#EF9F27"></div>
-    <div class="swatch" style="background:#D4537E" data-c="#D4537E"></div>
-    <button class="sz-btn active" data-s="3">S</button>
-    <button class="sz-btn" data-s="6">M</button>
-    <button class="sz-btn" data-s="12">L</button>
-  </div>
-
-  <div class="draw-actions">
-    <button class="btn ghost" id="clearBtn">Clear</button>
-    <button class="btn rose" id="useCursorBtn">Use as cursor →</button>
-  </div>
-</div>
-
-<!-- ══ 3. REMOTE SCREEN ════════════════════════════════════════ -->
-<div class="screen hidden" id="remoteScreen">
-  <div class="remote-header">
-    <div class="left">
-      <div class="eyebrow" style="margin:0">Remote active</div>
-      <div style="font-size:11px;color:rgba(61,13,20,0.5);margin-top:2px;" id="socketStatus">connecting...</div>
-    </div>
-    <div class="status-pip">
-      <div class="pip-dot"></div>
-      <span id="remoteRoomCode">——</span>
-    </div>
-  </div>
-
-  <div class="cursor-preview-wrap">
-    <div class="cursor-preview-label">Your cursor</div>
-    <div class="cursor-preview-img">
-      <img id="cursorThumb" src="" alt="">
-    </div>
-  </div>
-
-  <div class="trackpad-label">Trackpad</div>
-  <div class="trackpad" id="trackpad">
-    <div class="trackpad-hint-text" id="tpHint">drag to move</div>
-  </div>
-
-  <button class="click-btn" id="clickBtn">
-    <div class="click-icon">
-      <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2.5" fill="currentColor"/></svg>
-    </div>
-    Tap to click
-  </button>
-
-  <!-- Type panel -->
-  <div style="width:100%;margin-top:12px;display:flex;flex-direction:column;gap:8px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;">Type on web screen</div>
-      <button class="btn ghost" id="focusInputBtn" style="font-size:10px;padding:3px 8px;">Focus input</button>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <input id="typeInput" type="text"
-        placeholder="type here..."
-        style="flex:1;font-size:16px;padding:8px 12px;border:1px solid rgba(61,13,20,0.2);background:rgba(255,248,248,0.8);color:#3d0d14;font-family:'Switzer',sans-serif;outline:none;-webkit-appearance:none;border-radius:0;"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <button class="btn rose" id="sendTypeBtn" style="padding:8px 14px;font-size:10px;">Send</button>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="btn ghost" data-key="Backspace" style="font-size:10px;padding:4px 10px;">⌫</button>
-      <button class="btn ghost" data-key="Enter" style="font-size:10px;padding:4px 10px;">↵</button>
-      <button class="btn ghost" data-key="Escape" style="font-size:10px;padding:4px 10px;">Esc</button>
-      <button class="btn ghost" data-key="ArrowLeft" style="font-size:10px;padding:4px 10px;">←</button>
-      <button class="btn ghost" data-key="ArrowRight" style="font-size:10px;padding:4px 10px;">→</button>
-    </div>
-  </div>
-
-  <!-- Name input -->
-  <div style="width:100%;margin-top:10px;display:flex;gap:8px;align-items:center;">
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;white-space:nowrap;">Your name</div>
-    <input id="nameInput" type="text" maxlength="16" placeholder="anonymous"
-      style="flex:1;font-size:14px;padding:6px 10px;border:none;border-bottom:1px solid rgba(61,13,20,0.2);background:transparent;color:#3d0d14;font-family:'fayte-pixel-hard',sans-serif;outline:none;"
-      autocomplete="off">
-    <button class="btn ghost" id="setNameBtn" style="font-size:10px;padding:4px 10px;">Set</button>
-  </div>
-
-  <div class="remote-actions">
-    <button class="btn ghost" id="redrawBtn">Redraw cursor</button>
-    <button class="btn ghost" id="disconnectBtn">Disconnect</button>
-  </div>
-</div>
-
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 /* ── State ───────────────────────────────────────────────── */
@@ -516,14 +7,15 @@ const socket = io('https://degree-project-r25d.onrender.com', {
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000
 });
-let roomCode    = null;
-let penColor    = '#3d0d14';
-let penSize     = 3;
-let drawing     = false;
+
+let roomCode = null;
+let penColor = '#3d0d14';
+let penSize  = 3;
+let drawing  = false;
 let dlx = 0, dly = 0;
-let tpActive    = false;
+let tpActive = false;
 let tpLX = 0, tpLY = 0;
-let hasDrawn    = false;
+let hasDrawn = false;
 
 /* ── Screen helpers ──────────────────────────────────────── */
 function showScreen(id) {
@@ -532,31 +24,13 @@ function showScreen(id) {
   });
 }
 
-/* ── Pre-fill room code from URL ?room=XXXXXX ────────────── */
-const urlCode = new URLSearchParams(location.search).get('room');
-if (urlCode) {
-  document.getElementById('codeInput').value = urlCode.toUpperCase();
-}
-
 /* ── Join ────────────────────────────────────────────────── */
 document.getElementById('joinBtn').addEventListener('click', doJoin);
-document.getElementById('codeInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doJoin();
-});
-document.getElementById('codeInput').addEventListener('input', e => {
-  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-});
 
 function doJoin() {
   const code = document.getElementById('codeInput').value.trim().toUpperCase();
-  if (code.length < 6) { showError('Enter the 6-character room code'); return; }
+  if (code.length < 6) return;
   socket.emit('phone:join', { code });
-}
-
-function showError(msg) {
-  const el = document.getElementById('codeError');
-  el.textContent = msg;
-  setTimeout(() => { el.textContent = ''; }, 3000);
 }
 
 socket.on('room:joined', ({ code }) => {
@@ -564,305 +38,137 @@ socket.on('room:joined', ({ code }) => {
   document.getElementById('drawRoomCode').textContent = code;
   document.getElementById('remoteRoomCode').textContent = code;
   showScreen('drawScreen');
-  /* Auto-send name if already set */
-  const savedName = document.getElementById('nameInput').value.trim();
-  if (savedName) socket.emit('phone:name', { name: savedName });
 });
 
-socket.on('room:error', msg => showError(msg));
-socket.on('room:closed', () => {
-  alert('The web screen disconnected.');
-  showScreen('joinScreen');
-});
+socket.on('room:error', msg => alert(msg));
 
-/* ── Draw canvas ─────────────────────────────────────────── */
-const drawCanvas  = document.getElementById('drawCanvas');
-const dCtx        = drawCanvas.getContext('2d');
-const canvasHint  = document.getElementById('canvasHint');
+/* ── Canvas ──────────────────────────────────────────────── */
+const canvas = document.getElementById('drawCanvas');
+const ctx    = canvas.getContext('2d');
 
-function resizeDrawCanvas() {
-  const frame = drawCanvas.parentElement;
-  const dpr   = window.devicePixelRatio || 1;
-  const w     = frame.clientWidth;
-  const h     = frame.clientHeight;
-  const imgData = dCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
-  drawCanvas.width  = w * dpr;
-  drawCanvas.height = h * dpr;
-  drawCanvas.style.width  = w + 'px';
-  drawCanvas.style.height = h + 'px';
-  dCtx.scale(dpr, dpr);
-  dCtx.lineCap  = 'round';
-  dCtx.lineJoin = 'round';
-}
-resizeDrawCanvas();
-window.addEventListener('resize', resizeDrawCanvas);
+function resizeCanvas() {
+  const rect = canvas.parentElement;
+  const dpr  = window.devicePixelRatio || 1;
 
-function getDrawPos(e) {
-  const r   = drawCanvas.getBoundingClientRect();
-  const src = e.touches ? e.touches[0] : e;
-  return [src.clientX - r.left, src.clientY - r.top];
+  canvas.width  = rect.clientWidth  * dpr;
+  canvas.height = rect.clientHeight * dpr;
+  canvas.style.width  = rect.clientWidth + 'px';
+  canvas.style.height = rect.clientHeight + 'px';
+
+  ctx.scale(dpr, dpr);
+  ctx.lineCap = 'round';
 }
 
-drawCanvas.addEventListener('touchstart', e => {
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return [t.clientX - r.left, t.clientY - r.top];
+}
+
+canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   drawing = true;
-  [dlx, dly] = getDrawPos(e);
-  if (!hasDrawn) { hasDrawn = true; canvasHint.classList.add('gone'); }
-}, { passive: false });
+  [dlx, dly] = getPos(e);
+});
 
-drawCanvas.addEventListener('touchmove', e => {
+canvas.addEventListener('touchmove', e => {
   e.preventDefault();
   if (!drawing) return;
-  const [x, y] = getDrawPos(e);
-  dCtx.strokeStyle = penColor;
-  dCtx.lineWidth   = penSize;
-  dCtx.beginPath();
-  dCtx.moveTo(dlx, dly);
-  dCtx.lineTo(x, y);
-  dCtx.stroke();
-  dlx = x; dly = y;
-}, { passive: false });
 
-drawCanvas.addEventListener('touchend', () => { drawing = false; });
+  const [x, y] = getPos(e);
 
-/* Mouse fallback for desktop testing */
-drawCanvas.addEventListener('mousedown', e => {
-  drawing = true; [dlx, dly] = getDrawPos(e);
-  if (!hasDrawn) { hasDrawn = true; canvasHint.classList.add('gone'); }
-});
-drawCanvas.addEventListener('mousemove', e => {
-  if (!drawing) return;
-  const [x, y] = getDrawPos(e);
-  dCtx.strokeStyle = penColor; dCtx.lineWidth = penSize;
-  dCtx.beginPath(); dCtx.moveTo(dlx, dly); dCtx.lineTo(x, y); dCtx.stroke();
-  dlx = x; dly = y;
-});
-drawCanvas.addEventListener('mouseup', () => { drawing = false; });
-drawCanvas.addEventListener('mouseleave', () => { drawing = false; });
+  ctx.strokeStyle = penColor;
+  ctx.lineWidth   = penSize;
 
-/* Swatches */
-document.querySelectorAll('.swatch').forEach(s => {
-  s.addEventListener('click', () => {
-    document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
-    s.classList.add('active');
-    penColor = s.dataset.c;
-  });
+  ctx.beginPath();
+  ctx.moveTo(dlx, dly);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+
+  dlx = x;
+  dly = y;
 });
 
-/* Size buttons */
-document.querySelectorAll('.sz-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.sz-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    penSize = parseInt(b.dataset.s);
-  });
-});
+canvas.addEventListener('touchend', () => drawing = false);
 
-/* Clear */
-document.getElementById('clearBtn').addEventListener('click', () => {
-  const dpr = window.devicePixelRatio || 1;
-  dCtx.clearRect(0, 0, drawCanvas.width / dpr, drawCanvas.height / dpr);
-  hasDrawn = false;
-  canvasHint.classList.remove('gone');
-});
-
-/* Use as cursor */
+/* ── Cursor Upload ───────────────────────────────────────── */
 document.getElementById('useCursorBtn').addEventListener('click', () => {
-  if (!hasDrawn) { return; }
-  const snap     = snapshotCursor();
-  if (!snap) return;
-  const dataUrl  = snap.toDataURL('image/png');
+  const dataUrl = canvas.toDataURL('image/png');
   socket.emit('cursor:upload', { dataUrl });
-  document.getElementById('cursorThumb').src = dataUrl;
-  /* Resend name so it updates on web screen after cursor changes */
-  const name = document.getElementById('nameInput').value.trim();
-  if (name) setTimeout(() => socket.emit('phone:name', { name }), 300);
   showScreen('remoteScreen');
 });
 
-function snapshotCursor() {
-  const dpr = window.devicePixelRatio || 1;
-  const w   = drawCanvas.width / dpr;
-  const h   = drawCanvas.height / dpr;
-
-  /* Crop to drawn content */
-  const tmp  = document.createElement('canvas');
-  tmp.width  = drawCanvas.width;
-  tmp.height = drawCanvas.height;
-  tmp.getContext('2d').drawImage(drawCanvas, 0, 0);
-  const tCtx = tmp.getContext('2d');
-  const img  = tCtx.getImageData(0, 0, tmp.width, tmp.height);
-  const d    = img.data;
-  let minX = tmp.width, minY = tmp.height, maxX = 0, maxY = 0;
-  for (let y = 0; y < tmp.height; y++) {
-    for (let x = 0; x < tmp.width; x++) {
-      if (d[(y * tmp.width + x) * 4 + 3] > 10) {
-        if (x < minX) minX = x; if (x > maxX) maxX = x;
-        if (y < minY) minY = y; if (y > maxY) maxY = y;
-      }
-    }
-  }
-  if (maxX <= minX || maxY <= minY) return null;
-  const pad = 6;
-  minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
-  maxX = Math.min(tmp.width, maxX + pad); maxY = Math.min(tmp.height, maxY + pad);
-  const out = document.createElement('canvas');
-  out.width  = maxX - minX;
-  out.height = maxY - minY;
-  out.getContext('2d').drawImage(tmp, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
-  return out;
-}
-
 /* ── Trackpad ────────────────────────────────────────────── */
 const trackpad = document.getElementById('trackpad');
-const tpHint   = document.getElementById('tpHint');
-let tpHintGone = false;
 
-function getTPPos(e) {
-  const r   = trackpad.getBoundingClientRect();
-  const src = e.touches ? e.touches[0] : e;
-  return [src.clientX - r.left, src.clientY - r.top];
+function getTP(e) {
+  const r = trackpad.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return [t.clientX - r.left, t.clientY - r.top];
 }
 
 trackpad.addEventListener('touchstart', e => {
-  e.preventDefault();
   tpActive = true;
-  [tpLX, tpLY] = getTPPos(e);
-  if (!tpHintGone) { tpHintGone = true; tpHint.classList.add('gone'); }
-}, { passive: false });
+  [tpLX, tpLY] = getTP(e);
+});
 
 trackpad.addEventListener('touchmove', e => {
-  e.preventDefault();
   if (!tpActive) return;
-  const [x, y] = getTPPos(e);
+
+  const [x, y] = getTP(e);
+
   const dx = (x - tpLX) * 2.8;
   const dy = (y - tpLY) * 2.8;
-  tpLX = x; tpLY = y;
-  socket.emit('cursor:move', { dx, dy });
-}, { passive: false });
 
-trackpad.addEventListener('touchend', () => { tpActive = false; });
+  tpLX = x;
+  tpLY = y;
 
-/* Mouse fallback */
-trackpad.addEventListener('mousedown', e => {
-  tpActive = true; [tpLX, tpLY] = getTPPos(e);
-  if (!tpHintGone) { tpHintGone = true; tpHint.classList.add('gone'); }
-});
-trackpad.addEventListener('mousemove', e => {
-  if (!tpActive) return;
-  const [x, y] = getTPPos(e);
-  const dx = (x - tpLX) * 2.8, dy = (y - tpLY) * 2.8;
-  tpLX = x; tpLY = y;
   socket.emit('cursor:move', { dx, dy });
 });
-trackpad.addEventListener('mouseup', () => { tpActive = false; });
-trackpad.addEventListener('mouseleave', () => { tpActive = false; });
 
-/* ── Click button ────────────────────────────────────────── */
+trackpad.addEventListener('touchend', () => tpActive = false);
+
+/* ── Click ───────────────────────────────────────────────── */
 document.getElementById('clickBtn').addEventListener('click', () => {
   socket.emit('cursor:click');
-  /* Ripple */
-  const r    = document.createElement('div');
-  r.className = 'trackpad-ripple';
-  r.style.left = '50%'; r.style.top = '50%';
-  trackpad.appendChild(r);
-  setTimeout(() => r.remove(), 600);
 });
 
-/* ── Redraw / Disconnect ─────────────────────────────────── */
-document.getElementById('redrawBtn').addEventListener('click', () => {
-  showScreen('drawScreen');
-});
+/* ── NAME (FIXED) ────────────────────────────────────────── */
+const nameInput = document.getElementById('nameInput');
+const nameBtn   = document.getElementById('setNameBtn');
 
-document.getElementById('disconnectBtn').addEventListener('click', () => {
-  socket.disconnect();
-  showScreen('joinScreen');
-  document.getElementById('codeInput').value = '';
-  roomCode = null;
-});
+function sendName() {
+  const name = nameInput.value.trim() || 'anonymous';
 
-/* ── Name ────────────────────────────────────────────────── */
-document.getElementById('setNameBtn').addEventListener('click', () => {
-  const name = document.getElementById('nameInput').value.trim() || 'anonymous';
+  if (!roomCode) {
+    console.warn("⚠️ not in room yet");
+    return;
+  }
+
+  console.log("📤 sending name:", name);
   socket.emit('phone:name', { name });
-  const btn = document.getElementById('setNameBtn');
-  btn.textContent = '✓ sent';
-  setTimeout(() => { btn.textContent = 'Set'; }, 2000);
+
+  nameBtn.textContent = '✓ sent';
+  setTimeout(() => { nameBtn.textContent = 'Set'; }, 2000);
+}
+
+nameBtn.addEventListener('click', sendName);
+
+nameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendName();
 });
 
-/* ── Typing ──────────────────────────────────────────────── */
-document.getElementById('sendTypeBtn').addEventListener('click', () => {
-  const input = document.getElementById('typeInput');
-  const text  = input.value;
-  if (!text) return;
-  socket.emit('phone:type', { text });
-  input.value = '';
-  /* Visual confirmation */
-  const btn = document.getElementById('sendTypeBtn');
-  btn.textContent = '✓';
-  setTimeout(() => { btn.textContent = 'Send'; }, 1000);
-});
-
-document.getElementById('focusInputBtn').addEventListener('click', () => {
-  socket.emit('phone:focusinput');
-  const btn = document.getElementById('focusInputBtn');
-  btn.textContent = '✓';
-  setTimeout(() => { btn.textContent = 'Focus input'; }, 1500);
-});
-
-document.getElementById('typeInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('sendTypeBtn').click();
-});
-
-document.querySelectorAll('[data-key]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    socket.emit('phone:key', { key: btn.dataset.key });
-  });
-});
-
+/* ── STATUS ──────────────────────────────────────────────── */
 socket.on('connect', () => {
   const s = document.getElementById('socketStatus');
-  if (s) s.textContent = 'connected · drag to move';
+  if (s) s.textContent = 'connected';
 });
 
 socket.on('disconnect', () => {
   const s = document.getElementById('socketStatus');
   if (s) s.textContent = 'reconnecting...';
 });
-
-socket.on('phone:disconnected', () => {
-  alert('Connection lost. Reconnect from the web screen.');
-  showScreen('joinScreen');
-});
-
-/* ===== FIX: Name send button ===== */
-(function () {
-  const input = document.getElementById('nameInput');
-  const btn   = document.getElementById('setNameBtn');
-
-  if (!input || !btn) {
-    console.warn("Name input or button not found");
-    return;
-  }
-
-  function sendName() {
-    const name = input.value.trim();
-    if (!name) return;
-
-    console.log("📤 sending name:", name);
-    socket.emit('phone:name', { name });
-  }
-
-  // Click button
-  btn.addEventListener('click', sendName);
-
-  // Press Enter
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendName();
-  });
-
-})();
 </script>
-</body>
-</html>
-
