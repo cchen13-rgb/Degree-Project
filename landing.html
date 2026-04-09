@@ -223,11 +223,16 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   const statusText = document.getElementById('remoteStatusText');
   const cursorEl   = document.getElementById('remoteCursorEl');
   const cursorImg  = document.getElementById('remoteCursorImg');
-  const noCursorStyle = document.createElement('style');
-  document.head.appendChild(noCursorStyle);
 
   socket.on('connect', () => {
-    console.log('Connected to Railway:', socket.id);
+    console.log('Connected to Render:', socket.id);
+    socket.emit('desktop:init');
+  });
+
+  socket.on('reconnect', () => {
+    console.log('Reconnected — requesting new room');
+    remoteReady = false;
+    logoWrap.classList.remove('remote-ready');
     socket.emit('desktop:init');
   });
 
@@ -249,17 +254,21 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     console.log('Room created:', code);
     codeEl.textContent = code;
     qrImg.src = RAILWAY + '/qr/' + code;
-    setTimeout(() => {
+    if (!remoteReady) {
+      setTimeout(() => {
+        remoteReady = true;
+        logoWrap.classList.add('remote-ready');
+      }, 5500);
+    } else {
       remoteReady = true;
       logoWrap.classList.add('remote-ready');
-    }, 5500);
+    }
   });
 
   socket.on('phone:connected', () => {
     pip.classList.add('connected');
     statusText.textContent = 'connected';
     cursorEl.style.display = 'block';
-    noCursorStyle.textContent = '*, *::before, *::after { cursor: none !important; }';
     logoWrap.classList.remove('remote-open');
   });
 
@@ -267,7 +276,6 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     pip.classList.remove('connected');
     statusText.textContent = 'waiting';
     cursorEl.style.display = 'none';
-    noCursorStyle.textContent = '';
   });
 
   socket.on('cursor:set', ({ dataUrl }) => {
