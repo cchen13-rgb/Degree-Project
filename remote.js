@@ -42,11 +42,25 @@ io.on('connection', socket => {
   socket.on('desktop:init', () => {
     let code;
     do { code = makeCode(); } while (rooms[code]);
-    rooms[code] = { desktop: socket.id, phone: null, cursorDataUrl: null };
+    rooms[code] = { desktop: socket.id, phone: null, cursorDataUrl: null, phoneName: null };
     socket.join(code);
     socket.data.role = 'desktop';
     socket.data.code = code;
     socket.emit('room:created', { code });
+  });
+
+  /* Desktop rejoins after page navigation */
+  socket.on('desktop:rejoin', ({ code }) => {
+    const room = rooms[code];
+    if (!room) { socket.emit('desktop:init'); return; }
+    room.desktop = socket.id;
+    socket.join(code);
+    socket.data.role = 'desktop';
+    socket.data.code = code;
+    socket.emit('room:created', { code });
+    if (room.cursorDataUrl) socket.emit('cursor:set', { dataUrl: room.cursorDataUrl });
+    if (room.phone) socket.emit('phone:connected');
+    if (room.phoneName) socket.emit('phone:name', { name: room.phoneName });
   });
 
   socket.on('phone:join', ({ code }) => {

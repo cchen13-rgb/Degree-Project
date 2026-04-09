@@ -252,6 +252,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 
   socket.on('room:created', ({ code }) => {
     console.log('Room created:', code);
+    sessionStorage.setItem('remoteRoomCode', code);
     codeEl.textContent = code;
     qrImg.src = RAILWAY + '/qr/' + code;
     if (!remoteReady) {
