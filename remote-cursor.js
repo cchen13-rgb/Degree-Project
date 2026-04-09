@@ -72,7 +72,7 @@
       c.el.style.display = 'block';
       const tmp = new Image();
       tmp.onload = () => {
-        const max = 80;  /* was 56 — bumped to match DPR-corrected source images */
+        const max = 48;  /* matches MAX_CURSOR cap in phone.html snapshotCursor */
         const ratio = Math.min(max / tmp.width, max / tmp.height, 1);
         c.el.style.width  = (tmp.width  * ratio) + 'px';
         c.el.style.height = (tmp.height * ratio) + 'px';

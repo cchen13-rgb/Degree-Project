@@ -705,14 +705,18 @@ function snapshotCursor() {
   minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
   maxX = Math.min(tmp.width,  maxX + pad);
   maxY = Math.min(tmp.height, maxY + pad);
-  /* Output at LOGICAL pixel size (divide by DPR) so it isn't 2-3x too large */
+  /* Output clamped to cursor size (max 48px on longest side) */
+  const MAX_CURSOR = 48;
+  const rawW = (maxX - minX) / dpr;
+  const rawH = (maxY - minY) / dpr;
+  const scale = Math.min(MAX_CURSOR / rawW, MAX_CURSOR / rawH, 1);
   const out = document.createElement('canvas');
-  out.width  = (maxX - minX) / dpr;
-  out.height = (maxY - minY) / dpr;
+  out.width  = Math.round(rawW * scale);
+  out.height = Math.round(rawH * scale);
   out.getContext('2d').drawImage(
     tmp,
     minX, minY, maxX - minX, maxY - minY,  /* source: physical pixels */
-    0, 0, out.width, out.height             /* dest:   logical pixels  */
+    0, 0, out.width, out.height             /* dest:   clamped cursor size */
   );
   return out;
 }
