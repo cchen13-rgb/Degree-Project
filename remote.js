@@ -100,3 +100,9 @@ io.on('connection', socket => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Remote server listening on :${PORT}`));
+
+/* Keep Render free tier alive — ping every 10 minutes */
+setInterval(() => {
+  const https = require('https');
+  https.get('https://degree-project-r25d.onrender.com').on('error', () => {});
+}, 10 * 60 * 1000);
