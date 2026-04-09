@@ -134,24 +134,6 @@
       }
     });
 
-    socket.on('phone:focusinput', () => {
-      layer.style.display = 'none';
-      const target = document.elementFromPoint(curX, curY);
-      layer.style.display = '';
-      let el = target;
-      while (el && el !== document.body) {
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { el.focus(); break; }
-        el = el.parentElement;
-      }
-      if (!el || el === document.body) {
-        const inputs = document.querySelectorAll('input:not([type=hidden]):not([disabled]), textarea');
-        for (const input of inputs) {
-          const rect = input.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) { input.focus(); break; }
-        }
-      }
-    });
-
     socket.on('phone:name', ({ name }) => {
       phoneName = name || 'Remote';
       document.getElementById('remoteCursorName').textContent = phoneName;
