@@ -63,19 +63,29 @@ io.on('connection', socket => {
     if (room.phoneName) socket.emit('phone:name', { name: room.phoneName });
   });
 
-  socket.on('phone:join', ({ code }) => {
-    const room = rooms[code];
-    if (!room) { socket.emit('room:error', 'Room not found'); return; }
-    if (room.phone) { socket.emit('room:error', 'Room already has a phone connected'); return; }
-    room.phone = socket.id;
-    socket.join(code);
-    socket.data.role = 'phone';
-    socket.data.code = code;
-    socket.emit('room:joined', { code });
-    if (room.cursorDataUrl) socket.emit('cursor:set', { dataUrl: room.cursorDataUrl });
-    io.to(room.desktop).emit('phone:connected');
-  });
+socket.on('phone:join', ({ code }) => {
+  const room = rooms[code];
+  if (!room) {
+    socket.emit('room:error', 'Room not found');
+    return;
+  }
 
+  // allow multiple phones
+  room.phones = room.phones || [];
+  room.phones.push(socket.id);
+
+  socket.join(code);
+  socket.data.role = 'phone';
+  socket.data.code = code;
+
+  socket.emit('room:joined', { code });
+
+  if (room.cursorDataUrl) {
+    socket.emit('cursor:set', { dataUrl: room.cursorDataUrl });
+  }
+
+  io.to(room.desktop).emit('phone:connected');
+});
   socket.on('cursor:upload', ({ dataUrl }) => {
     const code = socket.data.code;
     const room = rooms[code];
