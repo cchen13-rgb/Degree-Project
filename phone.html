@@ -443,7 +443,7 @@
   <div class="remote-header">
     <div class="left">
       <div class="eyebrow" style="margin:0">Remote active</div>
-      <div style="font-size:11px;color:rgba(61,13,20,0.5);margin-top:2px;">Drag trackpad to move cursor</div>
+      <div style="font-size:11px;color:rgba(61,13,20,0.5);margin-top:2px;" id="socketStatus">connecting...</div>
     </div>
     <div class="status-pip">
       <div class="pip-dot"></div>
@@ -772,6 +772,16 @@ document.getElementById('disconnectBtn').addEventListener('click', () => {
   roomCode = null;
 });
 
+/* ── Name ────────────────────────────────────────────────── */
+document.getElementById('setNameBtn').addEventListener('click', () => {
+  const name = document.getElementById('nameInput').value.trim() || 'anonymous';
+  socket.emit('phone:name', { name });
+  /* Visual confirmation */
+  const btn = document.getElementById('setNameBtn');
+  btn.textContent = '✓';
+  setTimeout(() => { btn.textContent = 'Set'; }, 1500);
+});
+
 /* ── Typing ──────────────────────────────────────────────── */
 document.getElementById('sendTypeBtn').addEventListener('click', () => {
   const input = document.getElementById('typeInput');
@@ -779,27 +789,30 @@ document.getElementById('sendTypeBtn').addEventListener('click', () => {
   if (!text) return;
   socket.emit('phone:type', { text });
   input.value = '';
+  /* Visual confirmation */
+  const btn = document.getElementById('sendTypeBtn');
+  btn.textContent = '✓';
+  setTimeout(() => { btn.textContent = 'Send'; }, 1000);
 });
 
 document.getElementById('typeInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    document.getElementById('sendTypeBtn').click();
-  }
+  if (e.key === 'Enter') document.getElementById('sendTypeBtn').click();
 });
 
-/* Special key buttons */
 document.querySelectorAll('[data-key]').forEach(btn => {
   btn.addEventListener('click', () => {
     socket.emit('phone:key', { key: btn.dataset.key });
   });
 });
 
-/* ── Name ────────────────────────────────────────────────── */
-document.getElementById('setNameBtn').addEventListener('click', () => {
-  const name = document.getElementById('nameInput').value.trim() || 'anonymous';
-  socket.emit('phone:name', { name });
-  document.getElementById('remoteCursorName') && 
-    (document.getElementById('remoteCursorName').textContent = name);
+socket.on('connect', () => {
+  const s = document.getElementById('socketStatus');
+  if (s) s.textContent = 'connected · drag to move';
+});
+
+socket.on('disconnect', () => {
+  const s = document.getElementById('socketStatus');
+  if (s) s.textContent = 'reconnecting...';
 });
 
 socket.on('phone:disconnected', () => {
