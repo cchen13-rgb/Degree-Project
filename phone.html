@@ -835,33 +835,7 @@ socket.on('phone:disconnected', () => {
   showScreen('joinScreen');
 });
 
-/* ===== FIX: Name send button ===== */
-(function () {
-  const input = document.getElementById('nameInput');
-  const btn   = document.getElementById('setNameBtn');
 
-  if (!input || !btn) {
-    console.warn("Name input or button not found");
-    return;
-  }
-
-  function sendName() {
-    const name = input.value.trim();
-    if (!name) return;
-
-    console.log("📤 sending name:", name);
-    socket.emit('phone:name', { name });
-  }
-
-  // Click button
-  btn.addEventListener('click', sendName);
-
-  // Press Enter
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendName();
-  });
-
-})();
 </script>
 </body>
 </html>
