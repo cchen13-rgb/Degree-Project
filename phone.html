@@ -470,6 +470,34 @@
     Tap to click
   </button>
 
+  <!-- Type panel -->
+  <div style="width:100%;margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;">Type on web screen</div>
+    <div style="display:flex;gap:8px;">
+      <input id="typeInput" type="text"
+        placeholder="type here..."
+        style="flex:1;font-size:16px;padding:8px 12px;border:1px solid rgba(61,13,20,0.2);background:rgba(255,248,248,0.8);color:#3d0d14;font-family:'Switzer',sans-serif;outline:none;-webkit-appearance:none;border-radius:0;"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <button class="btn rose" id="sendTypeBtn" style="padding:8px 14px;font-size:10px;">Send</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn ghost" data-key="Backspace" style="font-size:10px;padding:4px 10px;">⌫</button>
+      <button class="btn ghost" data-key="Enter" style="font-size:10px;padding:4px 10px;">↵</button>
+      <button class="btn ghost" data-key="Escape" style="font-size:10px;padding:4px 10px;">Esc</button>
+      <button class="btn ghost" data-key="ArrowLeft" style="font-size:10px;padding:4px 10px;">←</button>
+      <button class="btn ghost" data-key="ArrowRight" style="font-size:10px;padding:4px 10px;">→</button>
+    </div>
+  </div>
+
+  <!-- Name input -->
+  <div style="width:100%;margin-top:10px;display:flex;gap:8px;align-items:center;">
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(61,13,20,0.35);font-family:'Switzer',sans-serif;white-space:nowrap;">Your name</div>
+    <input id="nameInput" type="text" maxlength="16" placeholder="anonymous"
+      style="flex:1;font-size:14px;padding:6px 10px;border:none;border-bottom:1px solid rgba(61,13,20,0.2);background:transparent;color:#3d0d14;font-family:'fayte-pixel-hard',sans-serif;outline:none;"
+      autocomplete="off">
+    <button class="btn ghost" id="setNameBtn" style="font-size:10px;padding:4px 10px;">Set</button>
+  </div>
+
   <div class="remote-actions">
     <button class="btn ghost" id="redrawBtn">Redraw cursor</button>
     <button class="btn ghost" id="disconnectBtn">Disconnect</button>
@@ -744,8 +772,37 @@ document.getElementById('disconnectBtn').addEventListener('click', () => {
   roomCode = null;
 });
 
+/* ── Typing ──────────────────────────────────────────────── */
+document.getElementById('sendTypeBtn').addEventListener('click', () => {
+  const input = document.getElementById('typeInput');
+  const text  = input.value;
+  if (!text) return;
+  socket.emit('phone:type', { text });
+  input.value = '';
+});
+
+document.getElementById('typeInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    document.getElementById('sendTypeBtn').click();
+  }
+});
+
+/* Special key buttons */
+document.querySelectorAll('[data-key]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    socket.emit('phone:key', { key: btn.dataset.key });
+  });
+});
+
+/* ── Name ────────────────────────────────────────────────── */
+document.getElementById('setNameBtn').addEventListener('click', () => {
+  const name = document.getElementById('nameInput').value.trim() || 'anonymous';
+  socket.emit('phone:name', { name });
+  document.getElementById('remoteCursorName') && 
+    (document.getElementById('remoteCursorName').textContent = name);
+});
+
 socket.on('phone:disconnected', () => {
-  /* Desktop disconnected mid-session */
   alert('Connection lost. Reconnect from the web screen.');
   showScreen('joinScreen');
 });

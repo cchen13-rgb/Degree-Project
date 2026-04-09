@@ -84,6 +84,28 @@ io.on('connection', socket => {
     io.to(room.desktop).emit('cursor:click');
   });
 
+  socket.on('phone:type', ({ text }) => {
+    const code = socket.data.code;
+    const room = rooms[code];
+    if (!room || !room.desktop) return;
+    io.to(room.desktop).emit('phone:type', { text });
+  });
+
+  socket.on('phone:key', ({ key }) => {
+    const code = socket.data.code;
+    const room = rooms[code];
+    if (!room || !room.desktop) return;
+    io.to(room.desktop).emit('phone:key', { key });
+  });
+
+  socket.on('phone:name', ({ name }) => {
+    const code = socket.data.code;
+    const room = rooms[code];
+    if (!room || !room.desktop) return;
+    room.phoneName = name;
+    io.to(room.desktop).emit('phone:name', { name });
+  });
+
   socket.on('disconnect', () => {
     const code = socket.data.code;
     const role = socket.data.role;

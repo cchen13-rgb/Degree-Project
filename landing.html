@@ -308,6 +308,39 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     if (target) target.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, clientX:curX, clientY:curY }));
   });
 
+  /* Phone typing */
+  socket.on('phone:type', ({ text }) => {
+    const el = document.activeElement;
+    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+      const start = el.selectionStart;
+      const end   = el.selectionEnd;
+      el.value = el.value.slice(0, start) + text + el.value.slice(end);
+      el.selectionStart = el.selectionEnd = start + text.length;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
+
+  /* Phone special keys */
+  socket.on('phone:key', ({ key }) => {
+    const el = document.activeElement || document.body;
+    el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+    el.dispatchEvent(new KeyboardEvent('keyup',   { key, bubbles: true }));
+    if (key === 'Backspace' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+      const start = el.selectionStart;
+      if (start > 0) {
+        el.value = el.value.slice(0, start - 1) + el.value.slice(el.selectionEnd);
+        el.selectionStart = el.selectionEnd = start - 1;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  });
+
+  /* Phone name */
+  socket.on('phone:name', ({ name }) => {
+    const label = document.getElementById('remoteCursorName');
+    if (label) label.textContent = name;
+  });
+
 })();
 </script>
 
