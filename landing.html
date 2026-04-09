@@ -297,6 +297,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     cursorEl.style.transform = 'translate(' + curX + 'px, ' + curY + 'px)';
   });
 
+  /* Click — hide cursor layer so elementFromPoint finds the real target */
   socket.on('cursor:click', () => {
     const ripple = document.createElement('div');
     ripple.className  = 'rc-ripple';
@@ -304,8 +305,19 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
     ripple.style.top  = curY + 'px';
     document.body.appendChild(ripple);
     setTimeout(() => ripple.remove(), 650);
+
+    /* Temporarily hide cursor layer so it doesn't intercept the hit test */
+    const layer = document.getElementById('remoteCursorLayer');
+    layer.style.display = 'none';
     const target = document.elementFromPoint(curX, curY);
-    if (target) target.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, clientX:curX, clientY:curY }));
+    layer.style.display = '';
+
+    if (target) {
+      const opts = { bubbles: true, cancelable: true, clientX: curX, clientY: curY, view: window };
+      target.dispatchEvent(new MouseEvent('mousedown', opts));
+      target.dispatchEvent(new MouseEvent('mouseup',   opts));
+      target.dispatchEvent(new MouseEvent('click',     opts));
+    }
   });
 
   /* Phone typing */
