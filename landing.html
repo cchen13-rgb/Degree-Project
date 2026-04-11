@@ -14,69 +14,185 @@
   <link rel="stylesheet" href="design.css">
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <style>
-    h1, h2, h3, h4, h5, h6{ font-family:"fayte-pixel-hard",sans-serif; font-weight:400; font-style:normal; }
-    #loader{ position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; background:linear-gradient(to bottom, #ffb4ba 0%, #ffcacf 15%, #ffdbdf 35%, #ffebee 55%, #ffebee 75%, #ffffff 100%); opacity:1; transition:opacity 0.8s ease; pointer-events:none; }
-    body.dark #loader{ background:#b50008; }
-    #loader-text{ font-family:"fayte-pixel-hard",sans-serif; font-weight:400; font-style:normal; font-size:18px; letter-spacing:4px; color:#3d0d14; }
-    body.dark #loader-text{ color:#0d0d0d; }
-    #loader-bar-track{ width:200px; height:2px; background:rgba(93,20,30,0.15); border-radius:2px; overflow:hidden; }
-    body.dark #loader-bar-track{ background:rgba(0,0,0,0.2); }
-    #loader-bar-fill{ height:100%; width:0%; border-radius:2px; background:linear-gradient(to right, #ffb4ba, #d4637a, #a8324a); transition:width 0.3s ease; }
-    body.dark #loader-bar-fill{ background:linear-gradient(to right, #ff8a8a, #c0392b, #7a0000); }
-    .profiles-section{ padding:80px 60px 120px 60px; display:grid; grid-template-columns:1fr 1fr; gap:40px; position:relative; z-index:10; background:linear-gradient(to bottom, #ffebee 0%, #ffffff 100%); }
-    body.dark .profiles-section{ background:#b50008; }
-    .char-card{ display:grid; grid-template-columns:360px 1fr; min-height:0; position:relative; overflow:hidden; border:1px solid rgba(93,20,30,0.1); opacity:0; transform:translateY(28px); transition:opacity 0.8s ease, transform 0.8s ease; }
-    .char-card.visible{ opacity:1; transform:translateY(0); }
-    body.dark .char-card{ border-color:rgba(0,0,0,0.2); }
-    .char-card--flip{ direction:ltr; }
-    .char-img-wrap{ position:relative; overflow:hidden; background:rgba(93,20,30,0.04); }
-    body.dark .char-img-wrap{ background:rgba(0,0,0,0.15); }
-    .char-img-wrap img{ width:100%; height:100%; object-fit:cover; object-position:top center; display:block; transition:transform 0.7s ease; }
-    .char-card:hover .char-img-wrap img{ transform:scale(1.04); }
-    .char-img-wrap::after{ content:attr(data-tag); position:absolute; bottom:20px; right:20px; font-family:"Switzer",sans-serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#fff8f8; background:rgba(61,13,20,0.75); padding:4px 12px; backdrop-filter:blur(4px); }
-    body.dark .char-img-wrap::after{ background:rgba(0,0,0,0.6); color:#ffcacf; }
-    .char-info{ padding:20px; display:flex; flex-direction:column; justify-content:flex-start; border-left:1px solid rgba(93,20,30,0.12); position:relative; overflow-y:auto; }
-    body.dark .char-info{ border-color:rgba(0,0,0,0.2); }
-    .char-id{ font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:4px; color:rgba(93,20,30,0.35); margin-bottom:8px; transition:opacity .6s; }
-    .char-name-en{ font-family:"fayte-pixel-hard",sans-serif; font-weight:400; font-style:normal; font-size:54px; line-height:1; color:#3d0d14; margin:0 0 2px 0; letter-spacing:1px; transition:color .6s; overflow:hidden; }
-    .char-name-sub{ font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:3px; color:rgba(93,20,30,0.5); margin-bottom:10px; text-transform:uppercase; transition:opacity .6s; }
-    .char-rule{ width:30px; height:1px; background:rgba(93,20,30,0.3); margin-bottom:10px; transition:opacity .6s; }
-    .char-stats{ display:grid; grid-template-columns:1fr 1fr; gap:0; margin-bottom:12px; border:1px solid rgba(93,20,30,0.1); transition:opacity .6s; }
-    .char-stat{ padding:6px 10px; border-bottom:1px solid rgba(93,20,30,0.08); border-right:1px solid rgba(93,20,30,0.08); }
-    .char-stat:nth-child(even){ border-right:none; }
-    .stat-label{ font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(93,20,30,0.4); margin-bottom:3px; }
-    .stat-value{ font-family:"Switzer",sans-serif; font-size:13.5px; color:#3d0d14; letter-spacing:0.5px; }
-    .char-profile-label{ font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:rgba(93,20,30,0.4); margin-bottom:8px; transition:opacity .6s; }
-    .char-profile-text{ font-family:"Montserrat",sans-serif; font-size:12.5px; line-height:1.9; color:#3d0d14; letter-spacing:0.3px; margin:0; transition:color .6s; }
-    body.dark .char-id{ opacity:0; } body.dark .char-rule{ opacity:0; } body.dark .char-stats{ opacity:0; } body.dark .char-profile-label{ opacity:0; }
-    body.dark .char-name-en, body.dark .char-name-sub, body.dark .char-profile-text{ color:transparent; }
-    body.dark .char-name-en .reveal-name, body.dark .char-name-sub .reveal-name, body.dark .char-profile-text .reveal-name{ color:#0d0d0d; }
-    @media (max-width: 900px) { .profiles-section{ grid-template-columns:1fr; padding:40px 20px 80px 20px; gap:24px; position:static; } .char-card{ grid-template-columns:1fr; } .char-img-wrap{ height:260px; } .char-info{ border-left:none; border-top:1px solid rgba(93,20,30,0.12); } body.dark .char-info{ border-top-color:rgba(0,0,0,0.2); border-left:none; } .char-name-en{ font-size:40px; } }
-    @media (max-width: 480px) { .char-img-wrap{ height:200px; } .char-name-en{ font-size:32px; } .char-stats{ grid-template-columns:1fr; } }
+    h1,h2,h3,h4,h5,h6{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;}
+    #loader{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:linear-gradient(to bottom,#ffb4ba 0%,#ffcacf 15%,#ffdbdf 35%,#ffebee 55%,#ffebee 75%,#ffffff 100%);opacity:1;transition:opacity 0.8s ease;pointer-events:none;}
+    body.dark #loader{background:#b50008;}
+    #loader-text{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:18px;letter-spacing:4px;color:#3d0d14;}
+    body.dark #loader-text{color:#0d0d0d;}
+    #loader-bar-track{width:200px;height:2px;background:rgba(93,20,30,0.15);border-radius:2px;overflow:hidden;}
+    body.dark #loader-bar-track{background:rgba(0,0,0,0.2);}
+    #loader-bar-fill{height:100%;width:0%;border-radius:2px;background:linear-gradient(to right,#ffb4ba,#d4637a,#a8324a);transition:width 0.3s ease;}
+    body.dark #loader-bar-fill{background:linear-gradient(to right,#ff8a8a,#c0392b,#7a0000);}
+    .profiles-section{padding:80px 60px 120px 60px;display:grid;grid-template-columns:1fr 1fr;gap:40px;position:relative;z-index:10;background:linear-gradient(to bottom,#ffebee 0%,#ffffff 100%);}
+    body.dark .profiles-section{background:#b50008;}
+    .char-card{display:grid;grid-template-columns:360px 1fr;min-height:0;position:relative;overflow:hidden;border:1px solid rgba(93,20,30,0.1);opacity:0;transform:translateY(28px);transition:opacity 0.8s ease,transform 0.8s ease;}
+    .char-card.visible{opacity:1;transform:translateY(0);}
+    body.dark .char-card{border-color:rgba(0,0,0,0.2);}
+    .char-card--flip{direction:ltr;}
+    .char-img-wrap{position:relative;overflow:hidden;background:rgba(93,20,30,0.04);}
+    body.dark .char-img-wrap{background:rgba(0,0,0,0.15);}
+    .char-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform 0.7s ease;}
+    .char-card:hover .char-img-wrap img{transform:scale(1.04);}
+    .char-img-wrap::after{content:attr(data-tag);position:absolute;bottom:20px;right:20px;font-family:"Switzer",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#fff8f8;background:rgba(61,13,20,0.75);padding:4px 12px;backdrop-filter:blur(4px);}
+    body.dark .char-img-wrap::after{background:rgba(0,0,0,0.6);color:#ffcacf;}
+    .char-info{padding:20px;display:flex;flex-direction:column;justify-content:flex-start;border-left:1px solid rgba(93,20,30,0.12);position:relative;overflow-y:auto;}
+    body.dark .char-info{border-color:rgba(0,0,0,0.2);}
+    .char-id{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:4px;color:rgba(93,20,30,0.35);margin-bottom:8px;transition:opacity .6s;}
+    .char-name-en{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:54px;line-height:1;color:#3d0d14;margin:0 0 2px 0;letter-spacing:1px;transition:color .6s;overflow:hidden;}
+    .char-name-sub{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;color:rgba(93,20,30,0.5);margin-bottom:10px;text-transform:uppercase;transition:opacity .6s;}
+    .char-rule{width:30px;height:1px;background:rgba(93,20,30,0.3);margin-bottom:10px;transition:opacity .6s;}
+    .char-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:12px;border:1px solid rgba(93,20,30,0.1);transition:opacity .6s;}
+    .char-stat{padding:6px 10px;border-bottom:1px solid rgba(93,20,30,0.08);border-right:1px solid rgba(93,20,30,0.08);}
+    .char-stat:nth-child(even){border-right:none;}
+    .stat-label{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:3px;}
+    .stat-value{font-family:"Switzer",sans-serif;font-size:13.5px;color:#3d0d14;letter-spacing:0.5px;}
+    .char-profile-label{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;transition:opacity .6s;}
+    .char-profile-text{font-family:"Montserrat",sans-serif;font-size:12.5px;line-height:1.9;color:#3d0d14;letter-spacing:0.3px;margin:0;transition:color .6s;}
+    body.dark .char-id{opacity:0;}body.dark .char-rule{opacity:0;}body.dark .char-stats{opacity:0;}body.dark .char-profile-label{opacity:0;}
+    body.dark .char-name-en,body.dark .char-name-sub,body.dark .char-profile-text{color:transparent;}
+    body.dark .char-name-en .reveal-name,body.dark .char-name-sub .reveal-name,body.dark .char-profile-text .reveal-name{color:#0d0d0d;}
+    @media(max-width:900px){.profiles-section{grid-template-columns:1fr;padding:40px 20px 80px 20px;gap:24px;position:static;}.char-card{grid-template-columns:1fr;}.char-img-wrap{height:260px;}.char-info{border-left:none;border-top:1px solid rgba(93,20,30,0.12);}body.dark .char-info{border-top-color:rgba(0,0,0,0.2);border-left:none;}.char-name-en{font-size:40px;}}
+    @media(max-width:480px){.char-img-wrap{height:200px;}.char-name-en{font-size:32px;}.char-stats{grid-template-columns:1fr;}}
+    .logo-wrap{position:relative;display:inline-block;cursor:url("pngs/cursor.png") 0 0,pointer !important;user-select:none;transition:opacity 0.2s;}
+    .logo-wrap.remote-ready:hover{opacity:0.65;}
+    #remoteQRDrop{position:fixed;top:0;left:0;z-index:8990;background:rgba(255,248,248,0.97);border:1px solid rgba(93,20,30,0.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity 0.35s ease,transform 0.35s ease;min-width:200px;}
+    .logo-wrap.remote-open #remoteQRDrop{opacity:1;transform:translateY(0);pointer-events:auto;}
+    body.dark #remoteQRDrop{background:rgba(10,0,0,0.94);border-color:rgba(181,0,8,0.25);}
+    #remoteQRDrop .rq-eyebrow{font-family:"Switzer",sans-serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.35);}
+    body.dark #remoteQRDrop .rq-eyebrow{color:rgba(255,200,200,0.3);}
+    #remoteCode{font-family:"fayte-pixel-hard",sans-serif;font-size:26px;letter-spacing:4px;color:#3d0d14;line-height:1;}
+    body.dark #remoteCode{color:#fff8f8;}
+    #remoteQRDrop .rq-rule{width:100%;height:1px;background:rgba(93,20,30,0.08);align-self:stretch;}
+    #remoteQRDrop img{width:120px;height:120px;display:block;background:#fff;padding:4px;align-self:center;}
+    .rp-pip{width:5px;height:5px;border-radius:50%;background:rgba(93,20,30,0.2);flex-shrink:0;transition:background 0.4s;}
+    .rp-pip.connected{background:#1D9E75;animation:pipblink 2s ease-in-out infinite;}
+    @keyframes pipblink{0%,100%{opacity:1}50%{opacity:.3}}
+    #remoteQRDrop .rq-status{font-family:"Switzer",sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.35);display:flex;align-items:center;gap:5px;}
+    #remoteQRDrop .qr-hint{font-family:"Switzer",sans-serif;font-size:8px;letter-spacing:1px;color:rgba(93,20,30,0.22);line-height:1.7;align-self:center;text-align:center;}
+    #remoteCursorLayer{position:fixed;inset:0;pointer-events:none;z-index:8999;overflow:hidden;}
+    .rc-cursor{position:absolute;top:0;left:0;will-change:transform;display:none;}
+    .rc-cursor img{display:block;object-fit:contain;}
+    .rc-cursor .rc-name{position:absolute;top:calc(100% + 3px);left:0;font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;background:#3d0d14;color:#fff8f8;padding:2px 7px;}
+    .rc-ripple{position:fixed;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(93,20,30,0.4);transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:8998;animation:rcRipple 0.55s ease-out forwards;}
+    @keyframes rcRipple{to{transform:translate(-50%,-50%) scale(2.5);opacity:0;}}
 
-    /* REMOTE CURSOR SYSTEM */
-    .logo-wrap { position:relative; display:inline-block; cursor:url("pngs/cursor.png") 0 0, pointer !important; user-select:none; transition:opacity 0.2s; }
-    .logo-wrap.remote-ready:hover { opacity:0.65; }
-    #remoteQRDrop { position:fixed; top:0; left:0; z-index:8990; background:rgba(255,248,248,0.97); border:1px solid rgba(93,20,30,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); padding:14px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity 0.35s ease, transform 0.35s ease; min-width:200px; }
-    .logo-wrap.remote-open #remoteQRDrop { opacity:1; transform:translateY(0); pointer-events:auto; }
-    body.dark #remoteQRDrop { background:rgba(10,0,0,0.94); border-color:rgba(181,0,8,0.25); }
-    #remoteQRDrop .rq-eyebrow { font-family:"Switzer",sans-serif; font-size:8px; letter-spacing:3px; text-transform:uppercase; color:rgba(93,20,30,0.35); }
-    body.dark #remoteQRDrop .rq-eyebrow { color:rgba(255,200,200,0.3); }
-    #remoteCode { font-family:"fayte-pixel-hard",sans-serif; font-size:26px; letter-spacing:4px; color:#3d0d14; line-height:1; }
-    body.dark #remoteCode { color:#fff8f8; }
-    #remoteQRDrop .rq-rule { width:100%; height:1px; background:rgba(93,20,30,0.08); align-self:stretch; }
-    #remoteQRDrop img { width:120px; height:120px; display:block; background:#fff; padding:4px; align-self:center; }
-    .rp-pip { width:5px; height:5px; border-radius:50%; background:rgba(93,20,30,0.2); flex-shrink:0; transition:background 0.4s; }
-    .rp-pip.connected { background:#1D9E75; animation:pipblink 2s ease-in-out infinite; }
-    @keyframes pipblink { 0%,100%{opacity:1} 50%{opacity:.3} }
-    #remoteQRDrop .rq-status { font-family:"Switzer",sans-serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:rgba(93,20,30,0.35); display:flex; align-items:center; gap:5px; }
-    #remoteQRDrop .qr-hint { font-family:"Switzer",sans-serif; font-size:8px; letter-spacing:1px; color:rgba(93,20,30,0.22); line-height:1.7; align-self:center; text-align:center; }
-    #remoteCursorLayer { position:fixed; inset:0; pointer-events:none; z-index:8999; overflow:hidden; }
-    .rc-cursor { position:absolute; top:0; left:0; will-change:transform; display:none; }
-    .rc-cursor img { display:block; object-fit:contain; }
-    .rc-cursor .rc-name { position:absolute; top:calc(100% + 3px); left:0; font-family:"Switzer",sans-serif; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; white-space:nowrap; background:#3d0d14; color:#fff8f8; padding:2px 7px; }
-    .rc-ripple { position:fixed; width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(93,20,30,0.4); transform:translate(-50%,-50%) scale(0); pointer-events:none; z-index:8998; animation:rcRipple 0.55s ease-out forwards; }
-    @keyframes rcRipple { to { transform:translate(-50%,-50%) scale(2.5); opacity:0; } }
+    /* ══ TUTORIAL OVERLAY ══════════════════════════════════════════ */
+    #tutorialOverlay{
+      position:fixed;inset:0;z-index:9000;
+      opacity:0;
+      transition:opacity 0.55s ease;
+      pointer-events:none;
+    }
+    #tutorialOverlay.tut-visible{ opacity:1; }
+
+    #tutSpotCanvas{
+      position:absolute;inset:0;width:100%;height:100%;
+      pointer-events:none;
+    }
+
+    #tutStage{
+      position:absolute;
+      z-index:9010;
+      display:flex;
+      flex-direction:row;
+      align-items:flex-end;
+      gap:0;
+      pointer-events:none;
+      transition:left 0.5s cubic-bezier(0.34,1.1,0.64,1),
+                  right 0.5s cubic-bezier(0.34,1.1,0.64,1),
+                  top 0.5s cubic-bezier(0.34,1.1,0.64,1),
+                  bottom 0.5s cubic-bezier(0.34,1.1,0.64,1);
+    }
+
+    #tutMascot{
+      display:flex;flex-direction:column;align-items:center;
+      flex-shrink:0;
+      pointer-events:none;
+      /* Sit mascot flush against dialogue with slight overlap */
+      margin-right:-12px;
+      z-index:2;
+      align-self:flex-end;
+    }
+    #tutMascotImg{width:260px;height:260px;display:block;flex-shrink:0;}
+    #tutMascotImg img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block;}
+    #tutMascotImg.tut-jump{animation:tutJump 0.65s cubic-bezier(0.34,1.56,0.64,1);}
+    @keyframes tutJump{
+      0%{transform:translateY(0) rotate(0deg);}
+      35%{transform:translateY(-56px) rotate(-10deg);}
+      65%{transform:translateY(-28px) rotate(7deg);}
+      100%{transform:translateY(0) rotate(0deg);}
+    }
+
+    #tutArrow{
+      position:absolute;width:32px;height:32px;
+      opacity:0;transition:opacity 0.3s;pointer-events:none;
+    }
+    #tutArrow.tut-arrow-show{opacity:1;}
+    @keyframes tut-bounce-right{0%,100%{transform:translateX(0);}50%{transform:translateX(10px);}}
+    @keyframes tut-bounce-up{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+    #tutArrow.tut-dir-right{right:-44px;top:100px;animation:tut-bounce-right 1s ease-in-out infinite;}
+    #tutArrow.tut-dir-up{top:-40px;right:4px;animation:tut-bounce-up 1s ease-in-out infinite;}
+
+    #tutDialogue{
+      position:relative;z-index:9010;width:380px;
+      background:#fff8f8;border:1px solid rgba(93,20,30,0.2);
+      flex-shrink:0;
+      pointer-events:all;
+      margin-bottom:8px;
+    }
+    body.dark #tutDialogue{background:#0a0000;border-color:rgba(181,0,8,0.3);}
+    #tutDlgBar{background:linear-gradient(to right,#ffb4ba,#d4637a,#a8324a);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;}
+    #tutDlgBarTitle{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:20px;color:#fff8f8;letter-spacing:2px;}
+    .tut-dlg-bar-btns{display:flex;gap:4px;}
+    .tut-dlg-bar-btn{width:14px;height:14px;background:#fff8f8;border:1px solid rgba(93,20,30,0.3);font-size:8px;display:flex;align-items:center;justify-content:center;color:#3d0d14;}
+    #tutDlgBody{padding:18px 22px 10px;font-family:"Montserrat",sans-serif;font-size:13px;line-height:1.9;color:#3d0d14;letter-spacing:0.3px;min-height:90px;}
+    body.dark #tutDlgBody{color:rgba(255,248,248,0.86);}
+    #tutDlgEyebrow{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;}
+    body.dark #tutDlgEyebrow{color:rgba(255,200,200,0.35);}
+    #tutDlgText .tut-hl{color:#a8324a;font-weight:600;}
+    body.dark #tutDlgText .tut-hl{color:#ff8a8a;}
+    .tut-dlg-rule{width:30px;height:1px;background:rgba(93,20,30,0.3);margin:0 22px 12px;}
+    body.dark .tut-dlg-rule{background:rgba(181,0,8,0.3);}
+    #tutDlgFooter{padding:8px 20px 16px;display:flex;align-items:center;justify-content:flex-start;border-top:1px solid rgba(93,20,30,0.08);}
+    body.dark #tutDlgFooter{border-top-color:rgba(181,0,8,0.15);}
+    .tut-pips{display:flex;gap:6px;align-items:center;}
+    .tut-pip{width:6px;height:6px;border-radius:50%;background:rgba(93,20,30,0.15);transition:background 0.3s;}
+    .tut-pip.tut-active{background:#a8324a;}
+    .tut-pip.tut-done{background:rgba(93,20,30,0.32);}
+    body.dark .tut-pip{background:rgba(255,200,200,0.15);}
+    body.dark .tut-pip.tut-active{background:#ff8a8a;}
+    body.dark .tut-pip.tut-done{background:rgba(255,200,200,0.32);}
+
+    /* Next button — always hidden, kept in DOM for JS refs */
+    #tutBtnNext{display:none;}
+
+    /* Waiting hint */
+    #tutWaitHint{
+      position:absolute;
+      bottom:calc(100% + 8px);
+      right:0;
+      z-index:9010;
+      font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+      color:rgba(255,248,248,0.45);text-align:right;
+      opacity:0;transition:opacity 0.4s ease;pointer-events:none;
+      white-space:nowrap;
+    }
+    #tutWaitHint.tut-hint-show{opacity:1;}
+
+    /* Skip */
+    #tutSkip{
+      position:fixed;bottom:16px;right:22px;z-index:9011;
+      font-family:"Switzer",sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+      background:none;border:none;color:rgba(255,248,248,0.28);
+      cursor:url("pngs/cursor.png") 0 0,pointer;
+      transition:color 0.2s;pointer-events:all;
+    }
+    #tutSkip:hover{color:rgba(255,248,248,0.6);}
+
+    /* Confetti */
+    .tut-confetti{position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:9020;opacity:0;}
+    .tut-confetti.tut-pop{animation:tutPop 0.9s ease-out forwards;}
+    @keyframes tutPop{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:var(--tut-tx) scale(0.2);}}
   </style>
 </head>
 <body class="landing">
@@ -90,7 +206,7 @@
 
 <div class="modal-overlay" id="loginModal">
   <div class="modal-box">
-    <button class="modal-close" id="closeModal">✕</button>
+    <button class="modal-close" id="closeModal">&#x2715;</button>
     <h2>404</h2>
     <p>This page does not exist yet.<br>Still under some construction i guess.</p>
   </div>
@@ -98,12 +214,51 @@
 
 <div id="remoteCursorLayer"></div>
 
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorialOverlay">
+  <canvas id="tutSpotCanvas"></canvas>
+
+  <div id="tutStage">
+    <div id="tutMascot">
+      <div id="tutMascotImg">
+        <img src="pngs/mascot.png" alt="Guide">
+      </div>
+      <svg id="tutArrow" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="tutArrowPath" d="M6 16 L26 16 M18 8 L26 16 L18 24" stroke="#fff8f8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div id="tutDialogue">
+      <div id="tutDlgBar">
+        <span id="tutDlgBarTitle">Guide</span>
+        <div class="tut-dlg-bar-btns">
+          <div class="tut-dlg-bar-btn">&#8212;</div>
+          <div class="tut-dlg-bar-btn">&#9633;</div>
+          <div class="tut-dlg-bar-btn">&#x2715;</div>
+        </div>
+      </div>
+      <div id="tutDlgBody">
+        <div id="tutDlgEyebrow">Entry &middot; 001</div>
+        <div id="tutDlgText"></div>
+      </div>
+      <div class="tut-dlg-rule"></div>
+      <div id="tutDlgFooter">
+        <div class="tut-pips" id="tutPips"></div>
+        <button id="tutBtnNext">Next</button>
+      </div>
+      <div id="tutWaitHint">Waiting for you to toggle&#8230;</div>
+    </div>
+  </div>
+
+  <button id="tutSkip">Skip tutorial</button>
+</div>
+<!-- end tutorial overlay -->
+
 <header class="topbar">
   <div class="logo-wrap" id="logoWrap">
     <div class="logo">HELLO WORLD</div>
     <div id="remoteQRDrop">
       <div class="rq-eyebrow">Remote</div>
-      <div id="remoteCode">——</div>
+      <div id="remoteCode">&#8212;&#8212;</div>
       <div class="rq-rule"></div>
       <img id="remoteQRImg" src="" alt="QR code">
       <div class="rq-status">
@@ -115,7 +270,7 @@
   </div>
   <label class="switch">
     <input type="checkbox" id="modeToggle">
-    <span class="slider"></span>
+    <span class="slider" id="modeSlider"></span>
   </label>
 </header>
 
@@ -132,10 +287,10 @@
         <img src="svg/flower1.webp" class="dante-layer star star1" data-depth="0.55" alt="">
         <img src="svg/flower2.webp" class="dante-layer star star2" data-depth="0.55" alt="">
       </div>
-      <button class="login">Login</button>
+      <button id="loginBtn" class="login">Login</button>
     </div>
     <p class="text">
-Your name is—is— You are wandering alone through the dark.  You were something before this, somewhere before here, but now…you are being called down. 
+Your name is&#8212;is&#8212; You are wandering alone through the dark. You were something before this, somewhere before here, but now&#8230;you are being called down.
     </p>
   </div>
   <div></div>
@@ -145,12 +300,12 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   <div class="char-card" id="cheryl-card">
     <div class="char-img-wrap" data-tag="Photo"><img src="pngs/cheryl2.png" loading="lazy" alt="Cheryl"></div>
     <div class="char-info">
-      <div class="char-id">Patient · 001</div>
+      <div class="char-id">Patient &middot; 001</div>
       <h2 class="char-name-en">Cheryl</h2>
-      <div class="char-name-sub">Cheryl · Shelley</div>
+      <div class="char-name-sub">Cheryl &middot; Shelley</div>
       <div class="char-rule"></div>
       <div class="char-stats">
-        <div class="char-stat"><div class="stat-label">Last Name</div><div class="stat-value">When you were little you always doodled a seashell next to your name.  Shelley was it? That sounds right to you.</div></div>
+        <div class="char-stat"><div class="stat-label">Last Name</div><div class="stat-value">When you were little you always doodled a seashell next to your name. Shelley was it? That sounds right to you.</div></div>
         <div class="char-stat"><div class="stat-label">First Name</div><div class="stat-value">You seem to recall going by Cheryl. Was that short for something?</div></div>
         <div class="char-stat"><div class="stat-label">Age</div><div class="stat-value">24 no? Have you heard that four is an unlucky number?</div></div>
         <div class="char-stat"><div class="stat-label">Status</div><div class="stat-value">Presumably deceased from the looks of things.</div></div>
@@ -162,18 +317,18 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   <div class="char-card char-card--flip" id="crane-card">
     <div class="char-img-wrap" data-tag="Photo"><img src="pngs/crane2.png" loading="lazy" alt="Crane"></div>
     <div class="char-info">
-      <div class="char-id">Patient · 002</div>
+      <div class="char-id">Patient &middot; 002</div>
       <h2 class="char-name-en">Ms. Crane</h2>
-      <div class="char-name-sub">Crane · T…</div>
+      <div class="char-name-sub">Crane &middot; T&#8230;</div>
       <div class="char-rule"></div>
       <div class="char-stats">
         <div class="char-stat"><div class="stat-label">Last Name</div><div class="stat-value">Crane</div></div>
-        <div class="char-stat"><div class="stat-label">First Name</div><div class="stat-value">T…Ti…Ta…Th… It's on the tip of Cheryl's tongue, but Ms. Crane will have to do for now.</div></div>
+        <div class="char-stat"><div class="stat-label">First Name</div><div class="stat-value">T&#8230;Ti&#8230;Ta&#8230;Th&#8230; It's on the tip of Cheryl's tongue, but Ms. Crane will have to do for now.</div></div>
         <div class="char-stat"><div class="stat-label">Age</div><div class="stat-value">26. Interesting that you remember this. Perhaps numbers come back easier than names, more commonplace and less personal.</div></div>
         <div class="char-stat"><div class="stat-label">Status</div><div class="stat-value">Unknown</div></div>
       </div>
       <div class="char-profile-label">Profile</div>
-      <p class="char-profile-text">Quiet and cautious, but kind.  Trying to remember her brings you a light brush of comfort followed by a deep sadness.  Cranes symbolize longevity and immortality in some places.  A very permanent association for a mostly migratory species.  Although, they do mate for life.  That is part of what makes the crane wife's story so sad.  She leaves when her husband discovers she'd been plucking out her feathers to make silk for their livelihood.  The Crane that you knew had no feathers however, just soft black hair.</p>
+      <p class="char-profile-text">Quiet and cautious, but kind. Trying to remember her brings you a light brush of comfort followed by a deep sadness. Cranes symbolize longevity and immortality in some places. A very permanent association for a mostly migratory species. Although, they do mate for life. That is part of what makes the crane wife's story so sad. She leaves when her husband discovers she'd been plucking out her feathers to make silk for their livelihood. The Crane that you knew had no feathers however, just soft black hair.</p>
     </div>
   </div>
 </section>
@@ -181,6 +336,7 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
 <script>gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="function.js"></script>
+
 <script>
   const cards = document.querySelectorAll('.char-card');
   const cardObserver = new IntersectionObserver((entries) => {
@@ -194,19 +350,14 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   cards.forEach(c => cardObserver.observe(c));
 </script>
 
+<!-- Remote cursor system -->
 <script>
-(function () {
+(function(){
   const isMobile = window.matchMedia('(hover: none), (pointer: coarse)').matches || window.innerWidth < 768;
   if (isMobile) { window.location.replace('phone.html' + location.search); return; }
 
   const RAILWAY = 'https://degree-project-r25d.onrender.com';
-  const socket  = io(RAILWAY, {
-    transports: ['polling'],
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000
-  });
-
+  const socket = io(RAILWAY, { transports:['polling'], reconnection:true, reconnectionAttempts:Infinity, reconnectionDelay:1000 });
   let remoteReady = false;
 
   const logoWrap   = document.getElementById('logoWrap');
@@ -215,178 +366,600 @@ Your name is—is— You are wandering alone through the dark.  You were somethi
   const pip        = document.getElementById('remotePip');
   const statusText = document.getElementById('remoteStatusText');
   const layer      = document.getElementById('remoteCursorLayer');
+  const cursors    = {};
 
-  /* ── Multi-cursor store ─────────────────────────────────── */
-  const cursors = {};
-
-  function getOrCreateCursor(id) {
-    if (cursors[id]) return cursors[id];
+  function getOrCreateCursor(id){
+    if(cursors[id]) return cursors[id];
     const el = document.createElement('div');
     el.className = 'rc-cursor';
     el.innerHTML = '<img src="" alt=""><div class="rc-name">Remote</div>';
     layer.appendChild(el);
-    cursors[id] = { el, x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    cursors[id] = { el, x: window.innerWidth/2, y: window.innerHeight/2 };
     return cursors[id];
   }
+  function removeCursor(id){ if(cursors[id]){ cursors[id].el.remove(); delete cursors[id]; } }
 
-  function removeCursor(id) {
-    if (cursors[id]) {
-      cursors[id].el.remove();
-      delete cursors[id];
-    }
-  }
+  socket.on('connect',   () => socket.emit('desktop:init'));
+  socket.on('reconnect', () => { remoteReady=false; logoWrap.classList.remove('remote-ready'); socket.emit('desktop:init'); });
 
-  /* ── Socket setup ───────────────────────────────────────── */
-  socket.on('connect', () => {
-    console.log('Connected to Render:', socket.id);
-    socket.emit('desktop:init');
-  });
+  logoWrap.addEventListener('click', e => { e.stopPropagation(); if(!remoteReady) return; logoWrap.classList.toggle('remote-open'); });
+  document.addEventListener('click', () => logoWrap.classList.remove('remote-open'));
 
-  socket.on('reconnect', () => {
-    remoteReady = false;
-    logoWrap.classList.remove('remote-ready');
-    socket.emit('desktop:init');
-  });
-
-  socket.on('connect_error', (err) => {
-    console.error('Connection failed:', err.message);
-  });
-
-  logoWrap.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!remoteReady) return;
-    logoWrap.classList.toggle('remote-open');
-  });
-
-  document.addEventListener('click', () => {
-    logoWrap.classList.remove('remote-open');
-  });
-
-  socket.on('room:created', ({ code }) => {
+  socket.on('room:created', ({code}) => {
     sessionStorage.setItem('remoteRoomCode', code);
     codeEl.textContent = code;
     qrImg.src = RAILWAY + '/qr/' + code;
-    if (!remoteReady) {
-      setTimeout(() => { remoteReady = true; logoWrap.classList.add('remote-ready'); }, 5500);
-    } else {
-      remoteReady = true;
-      logoWrap.classList.add('remote-ready');
-    }
+    if (!remoteReady) { setTimeout(() => { remoteReady=true; logoWrap.classList.add('remote-ready'); }, 5500); }
+    else { remoteReady=true; logoWrap.classList.add('remote-ready'); }
   });
+  socket.on('phone:connected',    () => { pip.classList.add('connected'); statusText.textContent='connected'; logoWrap.classList.remove('remote-open'); });
+  socket.on('phone:disconnected', () => { pip.classList.remove('connected'); statusText.textContent='waiting'; Object.keys(cursors).forEach(removeCursor); });
 
-  socket.on('phone:connected', () => {
-    pip.classList.add('connected');
-    statusText.textContent = 'connected';
-    logoWrap.classList.remove('remote-open');
-  });
-
-  socket.on('phone:disconnected', () => {
-    pip.classList.remove('connected');
-    statusText.textContent = 'waiting';
-    /* Remove all cursors when last phone leaves */
-    Object.keys(cursors).forEach(removeCursor);
-  });
-
-  /* ── Multi-cursor events ────────────────────────────────── */
-  socket.on('cursor:set', ({ dataUrl, id }) => {
+  socket.on('cursor:set', ({dataUrl,id}) => {
     const c = getOrCreateCursor(id);
-    const img = c.el.querySelector('img');
-    img.src = dataUrl;
+    c.el.querySelector('img').src = dataUrl;
     c.el.style.display = 'block';
     const tmp = new Image();
-    tmp.onload = () => {
-      const max = 56;
-      const ratio = Math.min(max / tmp.width, max / tmp.height, 1);
-      c.el.style.width  = (tmp.width  * ratio) + 'px';
-      c.el.style.height = (tmp.height * ratio) + 'px';
-    };
+    tmp.onload = () => { const max=56,r=Math.min(max/tmp.width,max/tmp.height,1); c.el.style.width=(tmp.width*r)+'px'; c.el.style.height=(tmp.height*r)+'px'; };
     tmp.src = dataUrl;
   });
-
-  socket.on('cursor:move', ({ dx, dy, id }) => {
+  socket.on('cursor:move', ({dx,dy,id}) => {
     const c = getOrCreateCursor(id);
-    c.x = Math.max(0, Math.min(window.innerWidth  - 20, c.x + dx));
-    c.y = Math.max(0, Math.min(window.innerHeight - 20, c.y + dy));
-    c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px)';
+    c.x = Math.max(0,Math.min(window.innerWidth-20, c.x+dx));
+    c.y = Math.max(0,Math.min(window.innerHeight-20,c.y+dy));
+    c.el.style.transform = `translate(${c.x}px,${c.y}px)`;
   });
-
-  socket.on('cursor:click', ({ id }) => {
+  socket.on('cursor:click', ({id}) => {
     const c = getOrCreateCursor(id);
     const ripple = document.createElement('div');
-    ripple.className  = 'rc-ripple';
-    ripple.style.left = c.x + 'px';
-    ripple.style.top  = c.y + 'px';
-    document.body.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 650);
-
-    layer.style.display = 'none';
+    ripple.className='rc-ripple'; ripple.style.left=c.x+'px'; ripple.style.top=c.y+'px';
+    document.body.appendChild(ripple); setTimeout(()=>ripple.remove(), 650);
+    layer.style.display='none';
     const target = document.elementFromPoint(c.x, c.y);
-    layer.style.display = '';
+    layer.style.display='';
     if (target) {
-      const opts = { bubbles: true, cancelable: true, clientX: c.x, clientY: c.y, view: window };
-      target.dispatchEvent(new MouseEvent('mousedown', opts));
-      target.dispatchEvent(new MouseEvent('mouseup',   opts));
-      target.dispatchEvent(new MouseEvent('click',     opts));
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') target.focus();
+      const opts = {bubbles:true,cancelable:true,clientX:c.x,clientY:c.y,view:window};
+      target.dispatchEvent(new MouseEvent('mousedown',opts));
+      target.dispatchEvent(new MouseEvent('mouseup',opts));
+      target.dispatchEvent(new MouseEvent('click',opts));
+      if (target.tagName==='INPUT'||target.tagName==='TEXTAREA') target.focus();
     }
   });
-
-  socket.on('cursor:remove', ({ id }) => removeCursor(id));
-
-  socket.on('phone:name', ({ name, id }) => {
-    const c = getOrCreateCursor(id);
-    c.el.querySelector('.rc-name').textContent = name || 'Remote';
-  });
-
-  /* ── Shared events (no cursor id needed) ────────────────── */
-  socket.on('phone:type', ({ text }) => {
+  socket.on('cursor:remove', ({id}) => removeCursor(id));
+  socket.on('phone:name', ({name,id}) => { getOrCreateCursor(id).el.querySelector('.rc-name').textContent = name||'Remote'; });
+  socket.on('phone:type', ({text}) => {
     const el = document.activeElement;
-    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-      const start = el.selectionStart ?? el.value.length;
-      const end   = el.selectionEnd   ?? el.value.length;
-      el.value = el.value.slice(0, start) + text + el.value.slice(end);
-      el.selectionStart = el.selectionEnd = start + text.length;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
+    if (el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')) {
+      const s=el.selectionStart??el.value.length, e=el.selectionEnd??el.value.length;
+      el.value = el.value.slice(0,s)+text+el.value.slice(e);
+      el.selectionStart = el.selectionEnd = s+text.length;
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
     }
   });
-
-  socket.on('phone:key', ({ key }) => {
-    const el = document.activeElement || document.body;
-    el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
-    el.dispatchEvent(new KeyboardEvent('keyup',   { key, bubbles: true }));
-    if (key === 'Backspace' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-      const start = el.selectionStart ?? el.value.length;
-      if (start > 0) {
-        el.value = el.value.slice(0, start - 1) + el.value.slice(el.selectionEnd ?? start);
-        el.selectionStart = el.selectionEnd = start - 1;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-      }
+  socket.on('phone:key', ({key}) => {
+    const el = document.activeElement||document.body;
+    el.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}));
+    el.dispatchEvent(new KeyboardEvent('keyup',{key,bubbles:true}));
+    if (key==='Backspace'&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')) {
+      const s=el.selectionStart??el.value.length;
+      if(s>0){ el.value=el.value.slice(0,s-1)+el.value.slice(el.selectionEnd??s); el.selectionStart=el.selectionEnd=s-1; el.dispatchEvent(new Event('input',{bubbles:true})); }
     }
   });
-
-  socket.on('phone:focusinput', ({ id }) => {
-    const c = cursors[id];
-    const cx = c ? c.x : window.innerWidth / 2;
-    const cy = c ? c.y : window.innerHeight / 2;
-    layer.style.display = 'none';
-    const target = document.elementFromPoint(cx, cy);
-    layer.style.display = '';
+  socket.on('phone:focusinput', ({id}) => {
+    const c=cursors[id], cx=c?c.x:window.innerWidth/2, cy=c?c.y:window.innerHeight/2;
+    layer.style.display='none';
+    const target = document.elementFromPoint(cx,cy);
+    layer.style.display='';
     if (target) {
-      let el = target;
-      while (el && el !== document.body) {
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { el.focus(); break; }
-        el = el.parentElement;
+      let el=target;
+      while(el&&el!==document.body){ if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'){el.focus();break;} el=el.parentElement; }
+      if(!el||el===document.body){ const inputs=document.querySelectorAll('input:not([type=hidden]):not([disabled]),textarea'); for(const i of inputs){const r=i.getBoundingClientRect();if(r.width>0&&r.height>0){i.focus();break;}} }
+    }
+  });
+})();
+</script>
+
+<!-- TUTORIAL -->
+<script>
+(function(){
+  /* DEV: remove this line before going live */
+  sessionStorage.removeItem('tutorialDone');
+
+  if (sessionStorage.getItem('tutorialDone')) return;
+
+  const SITE_PINKS = ['#ffb4ba','#ffcacf','#d4637a','#a8324a','#3d0d14','#fff8f8'];
+
+  const overlay   = document.getElementById('tutorialOverlay');
+  const canvas    = document.getElementById('tutSpotCanvas');
+  const ctx       = canvas.getContext('2d');
+  const stage     = document.getElementById('tutStage');
+  const mascotImg = document.getElementById('tutMascotImg');
+  const arrowSvg  = document.getElementById('tutArrow');
+  const arrowPath = document.getElementById('tutArrowPath');
+  const dlgTitle  = document.getElementById('tutDlgBarTitle');
+  const dlgEyebrow= document.getElementById('tutDlgEyebrow');
+  const dlgText   = document.getElementById('tutDlgText');
+  const pipsEl    = document.getElementById('tutPips');
+  const btnNext   = document.getElementById('tutBtnNext');
+  const btnSkip   = document.getElementById('tutSkip');
+  const waitHint  = document.getElementById('tutWaitHint');
+  const loginModal= document.getElementById('loginModal');
+
+  const steps = [
+    /* 0 — shy introduction */
+    {
+      eyebrow: 'Entry \u00b7 001',
+      text: `oh, h-hello\u2026 I\u2019ll be your guide. I wasn\u2019t expecting anyone but it\u2019s okay. You seem lost. Let\u2019s look around together, if that\u2019s alright. <span class="tut-hl">Click the Login button to begin.</span>`,
+      spot: 'login', mode: 'wait-login', pos: 'bottom-left', arrow: null, pip: 0,
+      sprite: 'pngs/mascot.png',
+    },
+    /* 1 — curious, a little nervous */
+    {
+      eyebrow: 'Entry \u00b7 002',
+      text: `oh, um. Looks like we need to know <span class="tut-hl">who this page belongs to</span> before we can go further. I\u2019m not sure either but\u2026 maybe try the fields?`,
+      spot: 'modal-fields', mode: 'wait-field', pos: 'bottom-left', arrow: null, pip: 1,
+      sprite: 'pngs/mascot.png',
+    },
+    /* 2 — gently nudging */
+    {
+      eyebrow: 'Entry \u00b7 003',
+      text: `that\u2019s okay\u2026 we\u2019ll figure it out. Could you close the box for now? There might be something else around here worth looking at.`,
+      spot: 'none', mode: 'wait-modal-close', pos: 'bottom-left', arrow: null, pip: 2,
+      sprite: 'pngs/mascot_sad.png',
+    },
+    /* 3 — quietly excited */
+    {
+      eyebrow: 'Entry \u00b7 003',
+      text: `um\u2026 I noticed something. That little switch in the corner, I think it might help. Would you mind <span class="tut-hl">toggling</span> it\u2026 just to see?`,
+      spot: 'toggle', mode: 'wait-toggle', pos: 'bottom-left-near-toggle', arrow: 'up', pip: 2,
+      sprite: 'pngs/mascot.png',
+    },
+    /* 4 — surprised, flustered */
+    {
+      eyebrow: 'Entry \u00b7 003',
+      text: `oh! <span class="tut-hl">oh wow.</span> I didn\u2019t expect that\u2026 there\u2019s something hidden here. I think you should look more carefully now.`,
+      spot: 'none', mode: 'wait-login2', pos: 'bottom-center', arrow: null, pip: 2,
+      sprite: 'pngs/mascot_angry.png',
+    },
+  ];
+
+  const TOTAL_PIPS = 4;
+  let step = 0;
+  let waitingForToggle = false;
+  let waitingForModalClose = false;
+  let modalObserver = null;
+  let loginClickBound = false;
+  let usernameClickBound = false;
+
+  /* ── Canvas / spotlight ───────────────── */
+  let spotT={x:0,y:0,r:0}, spotC={x:0,y:0,r:0}, rafId=null;
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawAt(spotC.x,spotC.y,spotC.r);
+  }
+
+  function drawAt(cx,cy,r){
+    const W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    /* Don't paint the dark overlay if the tutorial isn't visible yet */
+    if(!overlay.classList.contains('tut-visible'))return;
+    ctx.fillStyle='rgba(61,13,20,0.82)';
+    ctx.fillRect(0,0,W,H);
+    if(r<=0)return;
+    const g=ctx.createRadialGradient(cx,cy,r*0.2,cx,cy,r);
+    g.addColorStop(0,'rgba(61,13,20,1)');
+    g.addColorStop(0.45,'rgba(61,13,20,0.9)');
+    g.addColorStop(1,'rgba(61,13,20,0)');
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=g;ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  function lerpSpot(){
+    const e=0.09;
+    spotC.x+=(spotT.x-spotC.x)*e;
+    spotC.y+=(spotT.y-spotC.y)*e;
+    spotC.r+=(spotT.r-spotC.r)*e;
+    drawAt(spotC.x,spotC.y,spotC.r);
+    const done=Math.abs(spotC.x-spotT.x)<0.5&&Math.abs(spotC.y-spotT.y)<0.5&&Math.abs(spotC.r-spotT.r)<0.5;
+    if(!done){rafId=requestAnimationFrame(lerpSpot);}else{drawAt(spotT.x,spotT.y,spotT.r);}
+  }
+
+  function animateSpotTo(x,y,r){
+    spotT={x,y,r};
+    if(rafId)cancelAnimationFrame(rafId);
+    rafId=requestAnimationFrame(lerpSpot);
+  }
+
+  function applySpot(){
+    const s=steps[step];
+    if(s.spot==='login'){
+      const el=document.getElementById('loginBtn');
+      if(el){const r=el.getBoundingClientRect();animateSpotTo(r.left+r.width/2,r.top+r.height/2,Math.max(r.width,r.height)*3);}
+      return;
+    }
+    if(s.spot==='modal-fields'){
+      const user=document.getElementById('loginUser');
+      const pass=document.getElementById('loginPass');
+      if(user&&pass){
+        const ru=user.getBoundingClientRect();
+        const rp=pass.getBoundingClientRect();
+        const cx=(ru.left+ru.right)/2;
+        const cy=(ru.top+rp.bottom)/2;
+        const radius=Math.max(ru.width, rp.bottom-ru.top)*1.1;
+        animateSpotTo(cx,cy,radius);
+      } else {
+        const box=document.querySelector('#loginModal .modal-box');
+        if(box){const r=box.getBoundingClientRect();animateSpotTo(r.left+r.width/2,r.top+r.height/2,r.width*0.7);}
+        else{animateSpotTo(window.innerWidth/2,window.innerHeight/2,160);}
+        setTimeout(function(){if(steps[step]&&steps[step].spot==='modal-fields')applySpot();},200);
       }
-      if (!el || el === document.body) {
-        const inputs = document.querySelectorAll('input:not([type=hidden]):not([disabled]), textarea');
-        for (const input of inputs) {
-          const rect = input.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) { input.focus(); break; }
+      return;
+    }
+    if(s.spot==='toggle'){
+      const el=document.querySelector('.switch');
+      if(el){const r=el.getBoundingClientRect();animateSpotTo(r.left+r.width/2,r.top+r.height/2,Math.max(r.width,r.height)*4);}
+      return;
+    }
+    animateSpotTo(window.innerWidth/2,window.innerHeight/2,0);
+  }
+
+  /* ── Stage positioning ─────────────────── */
+  function positionStage(pos){
+    stage.style.left='';stage.style.right='';
+    stage.style.top='';stage.style.bottom='';
+    stage.style.transform='';
+    stage.style.flexDirection='row';
+    stage.style.alignItems='flex-end';
+
+    if(pos==='bottom-left'){
+      stage.style.left='24px';
+      stage.style.bottom='24px';
+    } else if(pos==='bottom-left-near-toggle'){
+      stage.style.right='16px';
+      stage.style.bottom='24px';
+      stage.style.flexDirection='row-reverse';
+    } else {
+      stage.style.left='50%';
+      stage.style.bottom='24px';
+      stage.style.transform='translateX(-50%)';
+    }
+  }
+
+  /* ── Arrow ─────────────────────────────── */
+  function setArrow(dir){
+    arrowSvg.className.baseVal='';
+    arrowSvg.style.opacity='0';
+    if(!dir)return;
+    if(dir==='right'){
+      arrowPath.setAttribute('d','M6 16 L26 16 M18 8 L26 16 L18 24');
+      arrowSvg.classList.add('tut-arrow-show','tut-dir-right');
+    }else if(dir==='up'){
+      arrowPath.setAttribute('d','M16 26 L16 6 M8 14 L16 6 L24 14');
+      arrowSvg.classList.add('tut-arrow-show','tut-dir-up');
+    }
+  }
+
+  /* ── Pips ───────────────────────────────── */
+  function buildPips(active){
+    pipsEl.innerHTML='';
+    for(let i=0;i<TOTAL_PIPS;i++){
+      const d=document.createElement('div');
+      d.className='tut-pip'+(i<active?' tut-done':i===active?' tut-active':'');
+      pipsEl.appendChild(d);
+    }
+  }
+
+  /* ── Trigger: login button clicked → advance ── */
+  function bindLoginClick(){
+    if(loginClickBound)return;
+    loginClickBound=true;
+    const el=document.getElementById('loginBtn');
+    if(!el)return;
+    el.addEventListener('click',function onLC(){
+      el.removeEventListener('click',onLC);
+      loginClickBound=false;
+      if(steps[step]&&steps[step].mode==='wait-login'){
+        setTimeout(function(){goNext();},500);
+      }
+    });
+  }
+
+  /* ── Trigger: any input field focused inside modal → advance ── */
+  function bindUsernameClick(){
+    if(usernameClickBound)return;
+    usernameClickBound=true;
+    setTimeout(function(){
+      let attempts=0;
+      const poll=setInterval(function(){
+        const user=document.getElementById('loginUser');
+        const pass=document.getElementById('loginPass');
+        if(user||pass){
+          clearInterval(poll);
+          let fired=false;
+          function onInteract(){
+            if(fired)return;
+            fired=true;
+            user&&user.removeEventListener('mousedown',onInteract);
+            user&&user.removeEventListener('focus',onInteract);
+            pass&&pass.removeEventListener('mousedown',onInteract);
+            pass&&pass.removeEventListener('focus',onInteract);
+            usernameClickBound=false;
+            if(steps[step]&&steps[step].mode==='wait-field'){
+              setTimeout(function(){goNext();},150);
+            }
+          }
+          user&&user.addEventListener('mousedown',onInteract);
+          user&&user.addEventListener('focus',onInteract);
+          pass&&pass.addEventListener('mousedown',onInteract);
+          pass&&pass.addEventListener('focus',onInteract);
+        }
+        if(++attempts>60)clearInterval(poll);
+      },80);
+    },400);
+  }
+
+  /* ── Trigger: modal closed → advance ─────── */
+  function waitForModalClose(){
+    if(!loginModal)return;
+    waitingForModalClose=true;
+    if(modalObserver)modalObserver.disconnect();
+    modalObserver=new MutationObserver(function(){
+      if(!loginModal.classList.contains('open')&&waitingForModalClose){
+        waitingForModalClose=false;
+        modalObserver.disconnect();
+        setTimeout(function(){
+          /* FIX: use class instead of inline style */
+          overlay.classList.add('tut-visible');
+          stage.style.opacity='1';
+          goNext();
+        },350);
+      }
+    });
+    modalObserver.observe(loginModal,{attributes:true,attributeFilter:['class']});
+  }
+
+  /* ── Confetti ───────────────────────────── */
+  window.tutorialSpawnConfetti=function(){
+    const mR=mascotImg.getBoundingClientRect();
+    const cx=mR.left+mR.width/2,cy=mR.top+mR.height/2;
+    for(let i=0;i<28;i++){
+      const dot=document.createElement('div');
+      dot.className='tut-confetti';
+      dot.style.background=SITE_PINKS[i%SITE_PINKS.length];
+      dot.style.left=cx+'px';dot.style.top=cy+'px';
+      const a=Math.random()*Math.PI*2,d=60+Math.random()*110;
+      dot.style.setProperty('--tut-tx',`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`);
+      document.body.appendChild(dot);
+      setTimeout(()=>dot.classList.add('tut-pop'),i*24);
+      setTimeout(()=>dot.remove(),1000+i*24);
+    }
+  };
+
+  /* ── Victory ───────────────────────────── */
+  window.tutorialShowVictory=function(){
+    if(sessionStorage.getItem('tutorialDone'))return;
+    waitingForToggle=false;waitingForModalClose=false;
+    if(modalObserver)modalObserver.disconnect();
+    waitHint.classList.remove('tut-hint-show');
+    /* FIX: use class only, no inline opacity */
+    overlay.style.pointerEvents='all';
+    overlay.classList.add('tut-visible');
+    btnSkip.style.display='none';
+    positionStage('bottom-center');
+    animateSpotTo(window.innerWidth/2,window.innerHeight/2,0);
+    dlgTitle.textContent='Guide';
+    dlgEyebrow.textContent='Entry \u00b7 004';
+    dlgText.innerHTML=`w-wait\u2026 <span class="tut-hl">you found it.</span> The clue was hidden in the dark the whole time. I\u2019m glad you trusted me. The pieces are coming back now.`;
+    /* Swap to happy default sprite for victory */
+    const victSpriteEl = mascotImg.querySelector('img');
+    if (victSpriteEl) victSpriteEl.src = 'pngs/mascot.png';
+    /* Victory is the only moment Next button appears — it navigates away */
+    btnNext.style.display='block';
+    btnNext.textContent='Move on';
+    btnNext.onclick=function(){sessionStorage.setItem('tutorialDone','1');window.location.href='captcha.html';};
+    setArrow(null);buildPips(3);
+    /* Jump on victory too */
+    mascotImg.classList.remove('tut-jump');void mascotImg.offsetWidth;mascotImg.classList.add('tut-jump');
+    window.tutorialSpawnConfetti();
+    setTimeout(()=>{sessionStorage.setItem('tutorialDone','1');window.location.href='captcha.html';},3200);
+  };
+
+  /* ── tutorialOnToggle ───────────────────── */
+  window.tutorialIsWaitingForToggle = function(){ return waitingForToggle; };
+
+  /* Toggle is locked until the tutorial explicitly unlocks it */
+  window.tutorialToggleLocked = true;
+
+  window.tutorialOnToggle=function(){
+    if(!waitingForToggle)return;
+    waitingForToggle=false;
+    waitHint.classList.remove('tut-hint-show');
+    overlay.style.pointerEvents='all';
+    step++;render();
+  };
+
+  /* ── render ─────────────────────────────── */
+  function render(){
+    const s=steps[step];
+    stage.style.opacity='1';
+    stage.style.transition='opacity 0.4s ease';
+    dlgTitle.textContent='Guide';
+    dlgEyebrow.textContent=s.eyebrow;
+    dlgText.innerHTML=s.text;
+    setArrow(s.arrow);
+    buildPips(s.pip);
+    waitHint.classList.remove('tut-hint-show');
+    waitingForToggle=false;
+    positionStage(s.pos);
+    /* FIX: use class only, remove any lingering inline opacity */
+    overlay.style.removeProperty('opacity');
+    overlay.classList.add('tut-visible');
+    /* Repaint canvas now that overlay is visible so spotlight shows immediately */
+    drawAt(spotC.x, spotC.y, spotC.r);
+
+    /* Swap mascot sprite for this step's mood */
+    const spriteEl = mascotImg.querySelector('img');
+    if (spriteEl && s.sprite) spriteEl.src = s.sprite;
+
+    /* Jump mascot on every dialogue change */
+    mascotImg.classList.remove('tut-jump');
+    void mascotImg.offsetWidth;
+    mascotImg.classList.add('tut-jump');
+
+    /* Next button is NEVER shown during normal steps */
+    btnNext.style.display='none';
+    btnNext.onclick=null;
+
+    if(s.mode==='wait-login'){
+      /* Overlay must NEVER block clicks — the login button needs to be clickable */
+      overlay.style.pointerEvents='none';
+      bindLoginClick();
+
+    }else if(s.mode==='wait-field'){
+      overlay.style.pointerEvents='none';
+      setTimeout(function(){if(steps[step]&&steps[step].spot==='modal-fields')applySpot();},500);
+      bindUsernameClick();
+
+      /* Block backdrop clicks so the modal can't be accidentally dismissed */
+      function blockBackdropClick(e){
+        if(steps[step]&&steps[step].mode!=='wait-field')return;
+        /* If click lands on the modal-overlay (the backdrop) but NOT inside the modal-box, swallow it */
+        const box=document.querySelector('#loginModal .modal-box');
+        if(box&&!box.contains(e.target)){
+          e.stopImmediatePropagation();
+          /* Shake the modal-box to hint they can't leave */
+          box.style.transition='transform 0.08s ease';
+          box.style.transform='translateX(-6px)';
+          setTimeout(()=>{box.style.transform='translateX(6px)';},80);
+          setTimeout(()=>{box.style.transform='translateX(0)';},160);
         }
       }
+      document.addEventListener('click',blockBackdropClick,true);
+
+      /* Also watch: if modal somehow closes anyway, reopen it */
+      var fieldModalGuard=new MutationObserver(function(){
+        if(steps[step]&&steps[step].mode==='wait-field'&&loginModal&&!loginModal.classList.contains('open')){
+          loginModal.classList.add('open');
+          document.body.classList.add('modal-open');
+        }
+      });
+      if(loginModal) fieldModalGuard.observe(loginModal,{attributes:true,attributeFilter:['class']});
+
+      /* Clean up guard when step advances */
+      var origGoNext=goNext;
+      goNext=function(){
+        document.removeEventListener('click',blockBackdropClick,true);
+        fieldModalGuard.disconnect();
+        goNext=origGoNext;
+        origGoNext();
+      };
+
+    }else if(s.mode==='wait-modal-close'){
+      overlay.style.pointerEvents='none';
+      /* FIX: hide via class, not inline style */
+      overlay.classList.remove('tut-visible');
+      stage.style.opacity='0';
+      stage.style.transition='opacity 0.3s ease';
+      waitForModalClose();
+
+    }else if(s.mode==='wait-toggle'){
+      /* Unlock the toggle now that the guide is pointing to it */
+      window.tutorialToggleLocked = false;
+      /* Pass through clicks so toggle is reachable */
+      overlay.style.pointerEvents='none';
+      /* Set waiting immediately so first toggle is caught even before hint appears */
+      waitingForToggle=true;
+      setTimeout(function(){
+        waitHint.classList.add('tut-hint-show');
+      },1600);
+
+    }else if(s.mode==='wait-login2'){
+      /* Woah step — dismiss on next click anywhere */
+      overlay.style.pointerEvents='none';
+      function onAnyClick(){
+        document.removeEventListener('click', onAnyClick, true);
+        /* FIX: use class for fade out */
+        overlay.classList.remove('tut-visible');
+        setTimeout(function(){ overlay.style.display='none'; }, 550);
+      }
+      /* Small delay so the click that triggered this step doesn't immediately dismiss */
+      setTimeout(function(){
+        document.addEventListener('click', onAnyClick, true);
+      }, 600);
     }
-  });
+
+    requestAnimationFrame(applySpot);
+  }
+
+  function goNext(){
+    waitingForToggle=false;
+    waitHint.classList.remove('tut-hint-show');
+    overlay.style.pointerEvents='all';
+    if(step<steps.length-1){step++;render();}
+    else{
+      /* FIX: use class for fade out */
+      overlay.classList.remove('tut-visible');
+      setTimeout(function(){overlay.style.pointerEvents='none';},550);
+    }
+  }
+
+  btnSkip.onclick=function(){
+    sessionStorage.setItem('tutorialDone','1');
+    if(modalObserver)modalObserver.disconnect();
+    window.tutorialToggleLocked = false;
+    unlockPage();
+    overlay.classList.remove('tut-visible');
+    setTimeout(function(){overlay.style.display='none';},550);
+  };
+
+  /* ── Pre-guide interaction lock ─────────────────────────────────
+     Block all clicks, scroll, and keydown until the guide appears.
+     This prevents the user from toggling dark mode, clicking login,
+     or scrolling before the first dialogue shows up.
+  ── */
+  function blockAll(e){ e.stopImmediatePropagation(); e.preventDefault(); }
+  function blockScroll(e){ e.preventDefault(); }
+
+  function lockPage(){
+    document.addEventListener('click',    blockAll,   { capture:true, passive:false });
+    document.addEventListener('keydown',  blockAll,   { capture:true, passive:false });
+    document.addEventListener('touchstart',blockAll,  { capture:true, passive:false });
+    document.addEventListener('wheel',    blockScroll,{ capture:true, passive:false });
+    document.addEventListener('touchmove',blockScroll,{ capture:true, passive:false });
+    document.body.style.userSelect = 'none';
+  }
+
+  function unlockPage(){
+    document.removeEventListener('click',    blockAll,   { capture:true });
+    document.removeEventListener('keydown',  blockAll,   { capture:true });
+    document.removeEventListener('touchstart',blockAll,  { capture:true });
+    document.removeEventListener('wheel',    blockScroll,{ capture:true });
+    document.removeEventListener('touchmove',blockScroll,{ capture:true });
+    document.body.style.userSelect = '';
+  }
+
+  /* Lock immediately */
+  lockPage();
+
+  window.addEventListener('resize',function(){resizeCanvas();applySpot();});
+
+  function waitForEntry(){
+    if(document.body.classList.contains('entry-done')){
+      console.log('[Tutorial] entry-done detected, rendering in 1400ms');
+      setTimeout(function(){
+        resizeCanvas();
+        render();
+        /* Unlock the page now that the guide has appeared */
+        unlockPage();
+      },1400);
+    }else{setTimeout(waitForEntry,200);}
+  }
+  waitForEntry();
 
 })();
 </script>
