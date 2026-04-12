@@ -61,14 +61,14 @@
 
   const steps = [
     {
-      eyebrow: 'Entry \u00b7 006',
+      eyebrow: 'Entry \u00b7 007',
       pip: 0,
-      text: `oh! h-hi\u2026 I didn\u2019t realise you are here so soon. Welcome! <span class="bg-hl">This is the blog.</span> I hope you find something nice here.`,
+      text: `oh! h-hi\u2026 I didn\u2019t realise anyone was coming. Welcome! <span class="bg-hl">This is the blog.</span> I hope you find something nice here.`,
     },
     {
-      eyebrow: 'Entry \u00b7 007',
+      eyebrow: 'Entry \u00b7 008',
       pip: 1,
-      text: `it\u2019s really nice to see you\u2026 take your time, look around. <span class="bg-hl">I\u2019m glad you\u2019re here.</span>`,
+      text: `it\u2019s really lovely to see you\u2026 take your time, look around. <span class="bg-hl">I\u2019m glad you\u2019re here.</span>`,
     },
   ];
 
