@@ -23,9 +23,13 @@
     body.dark #loader-bar-track{background:rgba(0,0,0,0.2);}
     #loader-bar-fill{height:100%;width:0%;border-radius:2px;background:linear-gradient(to right,#ffb4ba,#d4637a,#a8324a);transition:width 0.3s ease;}
     body.dark #loader-bar-fill{background:linear-gradient(to right,#ff8a8a,#c0392b,#7a0000);}
+
+    /* ══ PROFILES SECTION ══════════════════════════════════════════ */
     .profiles-section{padding:80px 60px 120px 60px;display:grid;grid-template-columns:1fr 1fr;gap:40px;position:relative;z-index:10;background:linear-gradient(to bottom,#ffebee 0%,#ffffff 100%);}
     body.dark .profiles-section{background:#b50008;}
-    .char-card{display:grid;grid-template-columns:360px 1fr;min-height:0;position:relative;overflow:hidden;border:1px solid rgba(93,20,30,0.1);opacity:0;transform:translateY(28px);transition:opacity 0.8s ease,transform 0.8s ease;}
+
+    /* ══ CHAR CARD ══════════════════════════════════════════════════ */
+    .char-card{display:grid;grid-template-columns:minmax(220px,320px) 1fr;min-height:0;position:relative;overflow:hidden;border:1px solid rgba(93,20,30,0.1);opacity:0;transform:translateY(28px);transition:opacity 0.8s ease,transform 0.8s ease;}
     .char-card.visible{opacity:1;transform:translateY(0);}
     body.dark .char-card{border-color:rgba(0,0,0,0.2);}
     .char-card--flip{direction:ltr;}
@@ -35,24 +39,45 @@
     .char-card:hover .char-img-wrap img{transform:scale(1.04);}
     .char-img-wrap::after{content:attr(data-tag);position:absolute;bottom:20px;right:20px;font-family:"Switzer",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#fff8f8;background:rgba(61,13,20,0.75);padding:4px 12px;backdrop-filter:blur(4px);}
     body.dark .char-img-wrap::after{background:rgba(0,0,0,0.6);color:#ffcacf;}
-    .char-info{padding:20px;display:flex;flex-direction:column;justify-content:flex-start;border-left:1px solid rgba(93,20,30,0.12);position:relative;overflow-y:auto;}
+
+    /* ══ CHAR INFO — key fix: word-break normal so text flows horizontally ══ */
+    .char-info{padding:20px;display:flex;flex-direction:column;justify-content:flex-start;border-left:1px solid rgba(93,20,30,0.12);position:relative;overflow-y:auto;min-width:0;word-break:normal;overflow-wrap:anywhere;hyphens:auto;}
     body.dark .char-info{border-color:rgba(0,0,0,0.2);}
+
     .char-id{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:4px;color:rgba(93,20,30,0.35);margin-bottom:8px;transition:opacity .6s;}
-    .char-name-en{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:54px;line-height:1;color:#3d0d14;margin:0 0 2px 0;letter-spacing:1px;transition:color .6s;overflow:hidden;}
+    .char-name-en{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:clamp(32px,4vw,54px);line-height:1;color:#3d0d14;margin:0 0 2px 0;letter-spacing:1px;transition:color .6s;overflow:hidden;}
     .char-name-sub{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;color:rgba(93,20,30,0.5);margin-bottom:10px;text-transform:uppercase;transition:opacity .6s;}
     .char-rule{width:30px;height:1px;background:rgba(93,20,30,0.3);margin-bottom:10px;transition:opacity .6s;}
     .char-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:12px;border:1px solid rgba(93,20,30,0.1);transition:opacity .6s;}
     .char-stat{padding:6px 10px;border-bottom:1px solid rgba(93,20,30,0.08);border-right:1px solid rgba(93,20,30,0.08);}
     .char-stat:nth-child(even){border-right:none;}
     .stat-label{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:3px;}
-    .stat-value{font-family:"Switzer",sans-serif;font-size:13.5px;color:#3d0d14;letter-spacing:0.5px;}
+    .stat-value{font-family:"Switzer",sans-serif;font-size:clamp(11px,1.1vw,13.5px);color:#3d0d14;letter-spacing:0.5px;line-height:1.65;}
     .char-profile-label{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;transition:opacity .6s;}
     .char-profile-text{font-family:"Montserrat",sans-serif;font-size:12.5px;line-height:1.9;color:#3d0d14;letter-spacing:0.3px;margin:0;transition:color .6s;}
     body.dark .char-id{opacity:0;}body.dark .char-rule{opacity:0;}body.dark .char-stats{opacity:0;}body.dark .char-profile-label{opacity:0;}
     body.dark .char-name-en,body.dark .char-name-sub,body.dark .char-profile-text{color:transparent;}
     body.dark .char-name-en .reveal-name,body.dark .char-name-sub .reveal-name,body.dark .char-profile-text .reveal-name{color:#0d0d0d;}
+
+    /* ══ MAC / MEDIUM DESKTOP: tighten card to stay horizontal ══════ */
+    @media(min-width:901px) and (max-width:1400px){
+      .profiles-section{padding:60px 32px 100px 32px;gap:24px;}
+      .char-card{grid-template-columns:minmax(180px,260px) 1fr;}
+      .char-name-en{font-size:clamp(28px,3.2vw,44px);}
+      .char-stats{grid-template-columns:1fr 1fr;}
+      .stat-value{font-size:clamp(10px,1vw,12.5px);}
+      .char-profile-text{font-size:11.5px;}
+    }
+
     @media(max-width:900px){.profiles-section{grid-template-columns:1fr;padding:40px 20px 80px 20px;gap:24px;position:static;}.char-card{grid-template-columns:1fr;}.char-img-wrap{height:260px;}.char-info{border-left:none;border-top:1px solid rgba(93,20,30,0.12);}body.dark .char-info{border-top-color:rgba(0,0,0,0.2);border-left:none;}.char-name-en{font-size:40px;}}
     @media(max-width:480px){.char-img-wrap{height:200px;}.char-name-en{font-size:32px;}.char-stats{grid-template-columns:1fr;}}
+
+    /* ══ MOBILE: hide flower stars — not used on mobile layout ══ */
+    @media(max-width:1024px){
+      .dante-layer.star1,
+      .dante-layer.star2{ display:none !important; }
+    }
+
     .logo-wrap{position:relative;display:inline-block;cursor:url("pngs/cursor.png") 0 0,pointer !important;user-select:none;transition:opacity 0.2s;}
     .logo-wrap.remote-ready:hover{opacity:0.65;}
     #remoteQRDrop{position:fixed;top:0;left:0;z-index:8990;background:rgba(255,248,248,0.97);border:1px solid rgba(93,20,30,0.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity 0.35s ease,transform 0.35s ease;min-width:200px;}
@@ -98,6 +123,8 @@
       align-items:flex-end;
       gap:0;
       pointer-events:none;
+      max-width:680px;
+      width:calc(100vw - 48px);
       transition:left 0.5s cubic-bezier(0.34,1.1,0.64,1),
                   right 0.5s cubic-bezier(0.34,1.1,0.64,1),
                   top 0.5s cubic-bezier(0.34,1.1,0.64,1),
@@ -114,7 +141,7 @@
     }
     #tutMascotImg{width:260px;height:260px;display:block;flex-shrink:0;}
     #tutMascotImg img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block;}
-    #tutMascotImg.tut-jump{animation:tutJump 0.65s cubic-bezier(0.34,1.56,0.64,1);}
+    #tutMascotImg.tut-jump img{animation:tutJump 0.65s cubic-bezier(0.34,1.56,0.64,1);}
     @keyframes tutJump{
       0%{transform:translateY(0) rotate(0deg);}
       35%{transform:translateY(-56px) rotate(-10deg);}
@@ -133,11 +160,15 @@
     #tutArrow.tut-dir-up{top:-40px;right:4px;animation:tut-bounce-up 1s ease-in-out infinite;}
 
     #tutDialogue{
-      position:relative;z-index:9010;width:380px;
+      position:relative;z-index:9010;
+      width:380px;
+      min-width:0;
+      flex:1 1 auto;
       background:#fff8f8;border:1px solid rgba(93,20,30,0.2);
-      flex-shrink:0;
+      flex-shrink:1;
       pointer-events:all;
       margin-bottom:8px;
+      box-sizing:border-box;
     }
     body.dark #tutDialogue{background:#0a0000;border-color:rgba(181,0,8,0.3);}
 
@@ -177,52 +208,93 @@
     }
     #tutWaitHint.tut-hint-show{opacity:1;}
 
-    #tutSkip{
-      position:fixed;bottom:16px;right:22px;z-index:9011;
-      font-family:"Switzer",sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;
-      background:none;border:none;color:rgba(255,248,248,0.28);
-      cursor:url("pngs/cursor.png") 0 0,pointer;
-      transition:color 0.2s;pointer-events:all;
+    /* ── Responsive tutorial ── */
+    @media (max-height: 950px) {
+      #tutMascotImg { width: 160px; height: 160px; }
+      #tutDialogue  { width: 300px; }
+      #tutDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
+      #tutStage     { bottom: 10px !important; }
     }
-    #tutSkip:hover{color:rgba(255,248,248,0.6);}
 
-    .tut-confetti{position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:9020;opacity:0;}
-    .tut-confetti.tut-pop{animation:tutPop 0.9s ease-out forwards;}
-    @keyframes tutPop{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:var(--tut-tx) scale(0.2);}}
+    @media (max-height: 800px) {
+      #tutMascotImg { width: 120px; height: 120px; }
+      #tutDialogue  { width: 280px; }
+      #tutDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
+      #tutStage     { bottom: 6px !important; }
+    }
 
-/* ── Responsive tutorial for smaller viewports ── */
+    @media (max-height: 650px) {
+      #tutMascotImg { width: 90px; height: 90px; }
+      #tutDialogue  { width: 250px; }
+      #tutDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
+      #tutDlgBar    { padding: 5px 10px; }
+      #tutDlgBarTitle { font-size: 16px; }
+      #tutStage     { bottom: 4px !important; }
+    }
 
-/* Mac 13"/14" sweet spot: ~800–950px tall, modal pushes guide up into Enter btn */
-@media (max-height: 950px) {
-  #tutMascotImg { width: 160px; height: 160px; }
-  #tutDialogue  { width: 300px; }
-  #tutDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
-  #tutStage     { bottom: 10px !important; }
-}
-
-@media (max-height: 800px) {
-  #tutMascotImg { width: 120px; height: 120px; }
-  #tutDialogue  { width: 280px; }
-  #tutDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
-  #tutStage     { bottom: 6px !important; }
-}
-
-@media (max-height: 650px) {
-  #tutMascotImg { width: 90px; height: 90px; }
-  #tutDialogue  { width: 250px; }
-  #tutDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
-  #tutDlgBar    { padding: 5px 10px; }
-  #tutDlgBarTitle { font-size: 16px; }
-  #tutStage     { bottom: 4px !important; }
-}
+    /* ── Mobile: overlay becomes flex col, stage pushed to bottom ── */
+    @media (max-width: 600px) {
+      #tutorialOverlay {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-end;
+      }
+      #tutSpotCanvas {
+        position: absolute;
+        inset: 0;
+      }
+      #tutStage {
+        position: relative;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        top: auto !important;
+        transform: none !important;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 100%;
+        z-index: 9010;
+        transition: none;
+      }
+      #tutMascot {
+        position: absolute;
+        bottom: 100%;
+        left: 12px;
+        margin: 0;
+        z-index: 1;
+        pointer-events: none;
+        align-self: auto;
+      }
+      #tutMascotImg {
+        width: 180px;
+        height: 180px;
+        transform: translateY(50px);
+        transition: none;
+      }
+      #tutDialogue {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+      }
+      #tutDlgBody {
+        padding: 12px 16px 8px;
+        font-size: 12px;
+        min-height: 60px;
+      }
+      #tutDlgBar { padding: 8px 14px; }
+      #tutDlgBarTitle { font-size: 18px; }
+    }
 
     /*
      * FIX: Override design.css .center .login so the button is always
      * pointer-interactive (pointer-events:auto) even while opacity:0.
-     * The JS entry animation fades it in — but the hover/click area must
-     * exist from the start so there is zero delay once it becomes visible.
-     * We also clamp the desktop top-margin so it doesn't push too far down
-     * on shorter Mac viewports, which was breaking the tutorial's overlap check.
      */
     .center .login {
       pointer-events: auto !important;
@@ -230,8 +302,6 @@
 
     @media (min-width: 1025px) {
       .center .login {
-        /* design.css uses 450px which pushes the button off-screen on ~800px tall viewports.
-           Use a viewport-relative value that keeps the button visible. */
         margin-top: clamp(200px, 55vh, 450px) !important;
         margin-right: 0 !important;
         margin-bottom: 0 !important;
@@ -294,7 +364,7 @@
     </div>
   </div>
 
-  <button id="tutSkip">Skip tutorial</button>
+  <!-- Skip tutorial button REMOVED -->
 </div>
 <!-- end tutorial overlay -->
 
@@ -399,7 +469,8 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
 <script>
 (function(){
   const isMobile = window.matchMedia('(hover: none), (pointer: coarse)').matches || window.innerWidth < 768;
-  if (isMobile) { window.location.replace('phone.html' + location.search); return; }
+  /* Mobile stays on this page — no redirect */
+  if (isMobile) return;
 
   const RAILWAY = 'https://degree-project-r25d.onrender.com';
   const socket = io(RAILWAY, { transports:['polling'], reconnection:true, reconnectionAttempts:Infinity, reconnectionDelay:1000 });
@@ -527,7 +598,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
   const dlgText   = document.getElementById('tutDlgText');
   const pipsEl    = document.getElementById('tutPips');
   const btnNext   = document.getElementById('tutBtnNext');
-  const btnSkip   = document.getElementById('tutSkip');
   const waitHint  = document.getElementById('tutWaitHint');
   const loginModal= document.getElementById('loginModal');
 
@@ -622,8 +692,17 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
   function applySpot(){
     const s=steps[step];
     if(s.spot==='login'){
-      const el=document.getElementById('loginBtn');
-      if(el){const r=el.getBoundingClientRect();animateSpotTo(r.left+r.width/2,r.top+r.height/2,Math.max(r.width,r.height)*3);}
+      function trySpotLogin(){
+        const el=document.getElementById('loginBtn');
+        if(!el){ setTimeout(trySpotLogin,120); return; }
+        const r=el.getBoundingClientRect();
+        /* Button hasn't animated into place yet — rect will be tiny or off-screen */
+        if(r.width<2 || r.top<10 || r.bottom>window.innerHeight-10){
+          setTimeout(trySpotLogin,120); return;
+        }
+        animateSpotTo(r.left+r.width/2, r.top+r.height/2, Math.max(r.width,r.height)*4.5);
+      }
+      trySpotLogin();
       return;
     }
     if(s.spot==='modal-fields'){
@@ -717,12 +796,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     }
   }
 
-  /* ── Trigger: login button clicked → advance ──
-     FIX: bind the login click listener immediately (not inside render),
-     so it's ready the moment the entry animation reveals the button.
-     The lockPage() block-all captures clicks at the document level but
-     the login listener is added directly on the element — we need the
-     overlay's pointerEvents:none so the tutorial canvas doesn't intercept. ── */
   function bindLoginClick(){
     if(loginClickBound)return;
     loginClickBound=true;
@@ -737,7 +810,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     });
   }
 
-  /* ── Trigger: any input field focused inside modal → advance ── */
   function bindUsernameClick(){
     if(usernameClickBound)return;
     usernameClickBound=true;
@@ -771,7 +843,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     },400);
   }
 
-  /* ── Trigger: modal closed → advance ─────── */
   function waitForModalClose(){
     if(!loginModal)return;
     waitingForModalClose=true;
@@ -815,7 +886,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     waitHint.classList.remove('tut-hint-show');
     overlay.style.pointerEvents='all';
     overlay.classList.add('tut-visible');
-    btnSkip.style.display='none';
     positionStage('bottom-center');
     animateSpotTo(window.innerWidth/2,window.innerHeight/2,0);
     dlgTitle.textContent='Guide';
@@ -847,8 +917,14 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
   /* ── render ─────────────────────────────── */
   function render(){
     const s=steps[step];
-    stage.style.opacity='1';
+
+    /* Snap position instantly so the jump plays without competing movement */
+    stage.style.transition='none';
+    positionStage(s.pos);
+    void stage.offsetWidth;
     stage.style.transition='opacity 0.4s ease';
+
+    stage.style.opacity='1';
     dlgTitle.textContent='Guide';
     dlgEyebrow.textContent=s.eyebrow;
     dlgText.innerHTML=s.text;
@@ -856,7 +932,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     buildPips(s.pip);
     waitHint.classList.remove('tut-hint-show');
     waitingForToggle=false;
-    positionStage(s.pos);
     overlay.style.removeProperty('opacity');
     overlay.classList.add('tut-visible');
     drawAt(spotC.x, spotC.y, spotC.r);
@@ -872,10 +947,7 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     btnNext.onclick=null;
 
     if(s.mode==='wait-login'){
-      /* Canvas/overlay must not block clicks on the login button */
       overlay.style.pointerEvents='none';
-      /* FIX: bind immediately — the button already has pointer-events:auto
-         from the CSS override so it's clickable the moment it's visible */
       bindLoginClick();
 
     }else if(s.mode==='wait-field'){
@@ -953,15 +1025,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     }
   }
 
-  btnSkip.onclick=function(){
-    sessionStorage.setItem('tutorialDone','1');
-    if(modalObserver)modalObserver.disconnect();
-    window.tutorialToggleLocked = false;
-    unlockPage();
-    overlay.classList.remove('tut-visible');
-    setTimeout(function(){overlay.style.display='none';},550);
-  };
-
   /* ── Page interaction lock ── */
   function blockAll(e){ e.stopImmediatePropagation(); e.preventDefault(); }
   function blockScroll(e){ e.preventDefault(); }
@@ -995,8 +1058,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
         resizeCanvas();
         render();
         unlockPage();
-        /* FIX: pre-bind the login click so it's ready immediately,
-           not after a re-render cycle when the user might already be clicking */
         bindLoginClick();
       },1400);
     }else{setTimeout(waitForEntry,200);}

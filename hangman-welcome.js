@@ -2,11 +2,8 @@
 /* Shows a one-time tutorial dialogue when arriving at hangman.html   */
 
 (function () {
-  /* Always show — no sessionStorage check for testing */
-
   const SITE_PINKS = ['#ffb4ba','#ffcacf','#d4637a','#a8324a','#3d0d14','#fff8f8'];
 
-  /* ── Inject styles ── */
   const style = document.createElement('style');
   style.textContent = `
     #hwOverlay {
@@ -16,11 +13,17 @@
       padding: 24px;
       opacity: 0; transition: opacity 0.55s ease;
       pointer-events: none;
+      box-sizing: border-box;
     }
     #hwOverlay.hw-visible { opacity: 1; pointer-events: all; }
 
     #hwStage {
-      display: flex; flex-direction: row; align-items: flex-end; gap: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 0;
+      width: calc(100vw - 48px);
+      max-width: 680px;
     }
 
     #hwMascot {
@@ -36,7 +39,7 @@
       width: 100%; height: 100%; object-fit: contain;
       object-position: bottom center; display: block;
     }
-    #hwMascotImg.hw-jump {
+    #hwMascotImg.hw-jump img {
       animation: hwJump 0.65s cubic-bezier(0.34,1.56,0.64,1);
     }
     @keyframes hwJump {
@@ -47,9 +50,14 @@
     }
 
     #hwDialogue {
-      position: relative; z-index: 9010; width: 380px;
+      position: relative; z-index: 9010;
+      width: 380px;
+      min-width: 0;
+      flex: 1 1 auto;
       background: #fff8f8; border: 1px solid rgba(93,20,30,0.2);
-      flex-shrink: 0; margin-bottom: 8px;
+      flex-shrink: 1;
+      margin-bottom: 8px;
+      box-sizing: border-box;
     }
     body.dark #hwDialogue { background: #0a0000; border-color: rgba(181,0,8,0.3); }
 
@@ -105,7 +113,6 @@
     }
     body.dark #hwHint { color: rgba(255,200,200,0.25); }
 
-    /* Confetti */
     .hw-confetti {
       position: fixed; width: 7px; height: 7px; border-radius: 50%;
       pointer-events: none; z-index: 9020; opacity: 0;
@@ -115,10 +122,69 @@
       0%   { opacity: 1; transform: translate(0,0) scale(1); }
       100% { opacity: 0; transform: var(--hw-tx) scale(0.2); }
     }
+
+    @media (max-height: 950px) {
+      #hwMascotImg { width: 160px; height: 160px; }
+      #hwDialogue  { width: 300px; }
+      #hwDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
+    }
+    @media (max-height: 800px) {
+      #hwMascotImg { width: 120px; height: 120px; }
+      #hwDialogue  { width: 280px; }
+      #hwDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
+    }
+    @media (max-height: 650px) {
+      #hwMascotImg { width: 90px; height: 90px; }
+      #hwDialogue  { width: 250px; }
+      #hwDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
+      #hwDlgBar    { padding: 5px 10px; }
+      #hwDlgBarTitle { font-size: 16px; }
+    }
+
+    @media (max-width: 600px) {
+      #hwOverlay {
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+      #hwStage {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+      }
+      #hwMascot {
+        position: absolute;
+        bottom: 100%;
+        left: 12px;
+        margin: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      #hwMascotImg {
+        width: 220px;
+        height: 220px;
+        transform: translateY(60px);
+        transition: none;
+      }
+      #hwDialogue {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+      }
+      #hwDlgBody  { padding: 12px 16px 8px; font-size: 12px; min-height: 60px; }
+      #hwDlgBar   { padding: 8px 14px; }
+      #hwDlgBarTitle { font-size: 18px; }
+    }
   `;
   document.head.appendChild(style);
 
-  /* ── Build HTML ── */
   const overlay = document.createElement('div');
   overlay.id = 'hwOverlay';
   overlay.innerHTML = `
@@ -154,7 +220,6 @@
 
   const mascotImg = document.getElementById('hwMascotImg');
 
-  /* ── Spawn confetti ── */
   function spawnConfetti() {
     const mR = mascotImg.getBoundingClientRect();
     const cx = mR.left + mR.width / 2, cy = mR.top + mR.height / 2;
@@ -171,28 +236,23 @@
     }
   }
 
-  /* ── Show ── */
   function show() {
     overlay.classList.add('hw-visible');
     mascotImg.classList.remove('hw-jump');
     void mascotImg.offsetWidth;
     mascotImg.classList.add('hw-jump');
     spawnConfetti();
-
-    /* Dismiss on any click after short delay */
     setTimeout(() => {
       document.addEventListener('click', dismiss, { once: true, capture: true });
     }, 700);
   }
 
-  /* ── Dismiss ── */
   function dismiss() {
     overlay.style.transition = 'opacity 0.45s ease';
     overlay.style.opacity = '0';
     setTimeout(() => overlay.remove(), 500);
   }
 
-  /* Wait for page to be painted before showing */
   if (document.readyState === 'complete') {
     setTimeout(show, 600);
   } else {

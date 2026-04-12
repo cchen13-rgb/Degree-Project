@@ -2,11 +2,8 @@
 /* Shows tutorial dialogue on every arrival at captcha.html (testing) */
 
 (function () {
-  /* Always show — no sessionStorage check for testing */
-
   const SITE_PINKS = ['#ffb4ba','#ffcacf','#d4637a','#a8324a','#3d0d14','#fff8f8'];
 
-  /* ── Inject styles ── */
   const style = document.createElement('style');
   style.textContent = `
     #cwOverlay {
@@ -16,11 +13,17 @@
       padding: 24px;
       opacity: 0; transition: opacity 0.55s ease;
       pointer-events: none;
+      box-sizing: border-box;
     }
     #cwOverlay.cw-visible { opacity: 1; pointer-events: all; }
 
     #cwStage {
-      display: flex; flex-direction: row; align-items: flex-end; gap: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 0;
+      width: calc(100vw - 48px);
+      max-width: 680px;
     }
 
     #cwMascot {
@@ -36,7 +39,7 @@
       width: 100%; height: 100%; object-fit: contain;
       object-position: bottom center; display: block;
     }
-    #cwMascotImg.cw-jump {
+    #cwMascotImg.cw-jump img {
       animation: cwJump 0.65s cubic-bezier(0.34,1.56,0.64,1);
     }
     @keyframes cwJump {
@@ -47,9 +50,14 @@
     }
 
     #cwDialogue {
-      position: relative; z-index: 9010; width: 380px;
+      position: relative; z-index: 9010;
+      width: 380px;
+      min-width: 0;
+      flex: 1 1 auto;
       background: #fff8f8; border: 1px solid rgba(93,20,30,0.2);
-      flex-shrink: 0; margin-bottom: 8px;
+      flex-shrink: 1;
+      margin-bottom: 8px;
+      box-sizing: border-box;
     }
     body.dark #cwDialogue { background: #0a0000; border-color: rgba(181,0,8,0.3); }
 
@@ -114,10 +122,69 @@
       0%   { opacity: 1; transform: translate(0,0) scale(1); }
       100% { opacity: 0; transform: var(--cw-tx) scale(0.2); }
     }
+
+    @media (max-height: 950px) {
+      #cwMascotImg { width: 160px; height: 160px; }
+      #cwDialogue  { width: 300px; }
+      #cwDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
+    }
+    @media (max-height: 800px) {
+      #cwMascotImg { width: 120px; height: 120px; }
+      #cwDialogue  { width: 280px; }
+      #cwDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
+    }
+    @media (max-height: 650px) {
+      #cwMascotImg { width: 90px; height: 90px; }
+      #cwDialogue  { width: 250px; }
+      #cwDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
+      #cwDlgBar    { padding: 5px 10px; }
+      #cwDlgBarTitle { font-size: 16px; }
+    }
+
+    @media (max-width: 600px) {
+      #cwOverlay {
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+      #cwStage {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+      }
+      #cwMascot {
+        position: absolute;
+        bottom: 100%;
+        left: 12px;
+        margin: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      #cwMascotImg {
+        width: 220px;
+        height: 220px;
+        transform: translateY(60px);
+        transition: none;
+      }
+      #cwDialogue {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+      }
+      #cwDlgBody  { padding: 12px 16px 8px; font-size: 12px; min-height: 60px; }
+      #cwDlgBar   { padding: 8px 14px; }
+      #cwDlgBarTitle { font-size: 18px; }
+    }
   `;
   document.head.appendChild(style);
 
-  /* ── Build HTML ── */
   const overlay = document.createElement('div');
   overlay.id = 'cwOverlay';
   overlay.innerHTML = `
@@ -153,7 +220,6 @@
 
   const mascotImg = document.getElementById('cwMascotImg');
 
-  /* ── Spawn confetti ── */
   function spawnConfetti() {
     const mR = mascotImg.getBoundingClientRect();
     const cx = mR.left + mR.width / 2, cy = mR.top + mR.height / 2;
@@ -170,20 +236,14 @@
     }
   }
 
-  /* ── Show ── */
   function show() {
     overlay.classList.add('cw-visible');
-    mascotImg.classList.remove('cw-jump');
-    void mascotImg.offsetWidth;
-    mascotImg.classList.add('cw-jump');
     spawnConfetti();
-
     setTimeout(() => {
       document.addEventListener('click', dismiss, { once: true, capture: true });
     }, 700);
   }
 
-  /* ── Dismiss ── */
   function dismiss() {
     overlay.style.transition = 'opacity 0.45s ease';
     overlay.style.opacity = '0';
