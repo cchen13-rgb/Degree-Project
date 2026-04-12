@@ -370,7 +370,14 @@ function showCaption(i){
   capShown=i;
   capEl.classList.remove('vis');
   phaseLbl.textContent=PHASE_NAMES[i]||'';
-  setTimeout(()=>{ capEl.textContent=CAPTIONS[i]||''; capEl.classList.add('vis'); },280);
+  setTimeout(()=>{
+    if(jumpscaresDone){
+      capEl.innerHTML='<span style="color:#8b0000;font-style:italic;">Why?</span>';
+    } else {
+      capEl.textContent=CAPTIONS[i]||'';
+    }
+    capEl.classList.add('vis');
+  },280);
 }
 
 /* ── Hover tilt ── */
@@ -475,7 +482,7 @@ let hasReachedEnd   = false;
 let jTimer          = null;
 
 const SHOW_9 = 0.83;
-const HIDE_9 = 0.72;
+const HIDE_9 = 0.78;
 
 function cancelJumpscare(){
   if(jTimer){ clearTimeout(jTimer); jTimer=null; }
@@ -488,6 +495,7 @@ function onJumpscareEnd(){
   jumpscaresDone = true;
   body.classList.add('portal-mode');
   unlockScroll();
+  capShown = -1; // force caption to refresh to "Why?"
   l9_1.style.transition = 'transform 0.9s cubic-bezier(0.4,0,1,1)';
   l9_1.style.transform = 'translateY(-110%)';
 
@@ -574,7 +582,7 @@ function onScroll(){
   dots.forEach((d,i)=>{ d.className='dot'+(i===fIdx?' active':''); });
   showCaption(fIdx);
 
-  // Reveal the arch door when player scrolls back to the LAST frame (index 0 = first photo) after jumpscare
+  // Reveal the arch door on the first frame (index 0) after jumpscare — player scrolls back up to find it
   if(jumpscaresDone && fIdx === 0 && endP < 0.05){
     archDoor.classList.add('revealed');
   }
