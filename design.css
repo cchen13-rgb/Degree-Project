@@ -1545,3 +1545,34 @@ display:block;
   transform-style:preserve-3d;
   will-change:transform;
 }
+
+/*
+ * ── PATCH: Add these rules to the END of design.css ──────────────────────────
+ *
+ * FIX 1: .center .login starts at opacity:0 in design.css but has no
+ * pointer-events:none, meaning the invisible button still blocks hover/click
+ * on whatever is behind it — and conversely, when the tutorial tells the user
+ * to click it, there can be a race between the JS reveal and the user's click.
+ * Setting pointer-events:auto explicitly guarantees the button is always
+ * interactive the instant it becomes visible (opacity > 0), with zero delay.
+ *
+ * FIX 2: The desktop @media block uses margin: 450px 0 0 0 !important which
+ * pushes the Login button below the visible fold on shorter displays (~800px
+ * viewport height, e.g. a 13" MacBook). clamp() keeps it on-screen while
+ * still matching the original layout intent on tall displays.
+ */
+
+/* Always keep the login button pointer-interactive, even while fading in */
+.center .login {
+  pointer-events: auto !important;
+}
+
+/* Clamp the top margin so the button stays visible on shorter viewports */
+@media (min-width: 1025px) {
+  .center .login {
+    margin-top: clamp(200px, 55vh, 450px) !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+  }
+}
