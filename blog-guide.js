@@ -63,7 +63,7 @@
     {
       eyebrow: 'Entry \u00b7 007',
       pip: 0,
-      text: `oh! h-hi\u2026 I didn\u2019t realise anyone was coming. Welcome! <span class="bg-hl">This is the blog.</span> I hope you find something nice here.`,
+      text: `oh! h-hi\u2026 I didn\u2019t you are here. Welcome! <span class="bg-hl">This is the blog.</span> I hope you find something nice here.`,
     },
     {
       eyebrow: 'Entry \u00b7 008',
