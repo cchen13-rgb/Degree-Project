@@ -54,7 +54,7 @@
     body.dark #cwDialogue { background: #0a0000; border-color: rgba(181,0,8,0.3); }
 
     #cwDlgBar {
-      background: linear-gradient(to right,#ffb4ba,#d4637a,#a8324a);
+      background: #3d0d14;
       padding: 7px 14px; display: flex; align-items: center;
       justify-content: space-between;
     }

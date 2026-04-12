@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Telescope Memories</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;font-family:'EB Garamond',Georgia,serif;background:#fff;}
@@ -44,7 +45,6 @@ html,body{width:100%;font-family:'EB Garamond',Georgia,serif;background:#fff;}
   transition:opacity 0.6s ease;
 }
 
-/* Portal frame — same wooden border as before, just content inside changes */
 #frame-border.portal{
   background:#f5f0eb;
 }
@@ -54,26 +54,18 @@ html,body{width:100%;font-family:'EB Garamond',Georgia,serif;background:#fff;}
   background:#e8e0d8;transition:background 0.9s ease;
 }
 
-/* Normal photo slots */
 #frame-image img.slot{
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:cover;opacity:0;transition:opacity 0.65s ease;display:block;
 }
 #frame-image img.slot.active{ opacity:1; }
 
-/*
-  After jumpscare done, body gets class "portal-mode".
-  In portal-mode ALL photo slots go dark — the frame shows layer9 content instead.
-  Portal class only added to frame-border when also in frame zone (endP < 0.3).
-*/
 body.portal-mode #frame-image img.slot,
 body.portal-mode #frame-image img.slot.active{
   opacity:0 !important;
   transition:opacity 0.5s ease !important;
 }
 
-
-/* Layer9 content shown inside the frame in portal-mode */
 #frame-portal-0,
 #frame-portal-2{
   position:absolute;inset:0;width:100%;height:100%;
@@ -123,7 +115,7 @@ body.portal-mode #frame-portal-2{ opacity:1; }
 #progress-fill{ height:100%;width:0%;background:rgba(10,5,0,0.32); }
 .dark-ui #progress-fill{ background:rgba(255,240,230,0.38); }
 
-/* ── Layer 9 overlay (the full-screen version during the end scroll) ── */
+/* ── Layer 9 overlay ── */
 #layer9-wrap{
   position:absolute;inset:0;
   display:flex;align-items:center;justify-content:center;
@@ -132,6 +124,7 @@ body.portal-mode #frame-portal-2{ opacity:1; }
 }
 #layer9-stage{
   position:relative;width:min(56vw,500px);aspect-ratio:4/3;
+  overflow:hidden;
 }
 #layer9-0{
   position:absolute;inset:0;width:100%;height:100%;
@@ -139,27 +132,101 @@ body.portal-mode #frame-portal-2{ opacity:1; }
 }
 #layer9-1{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:contain;opacity:0;z-index:2;
+  object-fit:contain;z-index:2;
+  opacity:1;
+  transform:translateY(-110%);
+  -webkit-mask-image:url('parallax/9- Layer 0.png');
+  mask-image:url('parallax/9- Layer 0.png');
+  -webkit-mask-size:contain;
+  mask-size:contain;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
 }
 #layer9-2{
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:contain;opacity:0;z-index:3;transition:opacity 0.7s ease;
 }
 
-/*
-  Jumpscare:
-  - Snaps in INSTANTLY at frame 0 (opacity 0→1, no transition)
-  - Moves UPWARD while visible (slight drift up)
-  - Hangs, then SNAPS upward and gone instantly
-  Uses linear so the 0.01% step registers as a true jump
-*/
+
+
 @keyframes jumpscare{
-  0%    { transform:translateY(0px);   opacity:0; }
-  0.01% { transform:translateY(0px);   opacity:1; }  /* INSTANT snap in */
-  40%   { transform:translateY(-8px);  opacity:1; }  /* creeps upward */
-  55%   { transform:translateY(-8px);  opacity:1; }  /* holds */
-  55.1% { transform:translateY(-200px);opacity:0; }  /* INSTANT snap up & gone */
-  100%  { transform:translateY(-200px);opacity:0; }
+  0%   { transform:translateY(-60px); opacity:0; }
+  18%  { transform:translateY(0px);   opacity:1; }
+  55%  { transform:translateY(-6px);  opacity:1; }
+  72%  { transform:translateY(-6px);  opacity:1; }
+  84%  { transform:translateY(-160px);opacity:1; }
+  94%  { transform:translateY(-340px);opacity:0.6; }
+  100% { transform:translateY(-480px);opacity:0; }
+}
+
+/* ── GLITCH TEXT OVERLAY ── */
+#glitch-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.82);
+  z-index:99999;
+  pointer-events:none;
+  opacity:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:flex-start;
+  padding:0;
+  overflow:hidden;
+  font-family:'Courier New',monospace;
+  font-size:clamp(13px,1.5vw,18px);
+  line-height:1.45;
+  color:#8b0000;
+  letter-spacing:0.04em;
+  transition:opacity 0.15s ease;
+}
+#glitch-overlay.active{
+  opacity:1;
+  pointer-events:all;
+}
+#glitch-lines{
+  width:100%;
+  padding:8px 12px;
+  word-break:break-all;
+  white-space:pre-wrap;
+  flex:1;
+}
+#glitch-bottom{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'fayte-pixel-hard',sans-serif;
+  font-weight:400;
+  font-style:normal;
+  font-size:clamp(48px,10vw,130px);
+  letter-spacing:0.08em;
+  color:#8b0000;
+  text-align:center;
+  opacity:0;
+  transition:opacity 0.4s ease;
+  text-transform:uppercase;
+  line-height:1.1;
+  padding:0 5vw;
+  pointer-events:none;
+  z-index:100000;
+  text-shadow:0 0 40px rgba(139,0,0,0.6);
+}
+#glitch-bottom.show{ opacity:1; }
+
+/* flicker on the text lines */
+@keyframes textFlicker{
+  0%,100%{ opacity:1; }
+  92%{ opacity:1; }
+  93%{ opacity:0.7; }
+  94%{ opacity:1; }
+  97%{ opacity:0.85; }
+  98%{ opacity:1; }
+}
+#glitch-lines{
+  animation:textFlicker 0.8s infinite;
 }
 
 #scroll-driver{height:1400vh;position:relative;z-index:1;pointer-events:none;}
@@ -174,7 +241,6 @@ body.portal-mode #frame-portal-2{ opacity:1; }
   <div id="frame-stage">
     <div id="frame-border">
       <div id="frame-image">
-        <!-- These two live inside the photo frame and show after jumpscare -->
         <img id="frame-portal-0" src="parallax/9- Layer 0.png" alt="">
         <img id="frame-portal-2" src="parallax/9- Layer 2.png" alt="">
       </div>
@@ -185,7 +251,6 @@ body.portal-mode #frame-portal-2{ opacity:1; }
   <div id="dots"></div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 
-  <!-- Full-screen layer9 overlay — only visible during end scroll -->
   <div id="layer9-wrap">
     <div id="layer9-stage">
       <img id="layer9-0" src="parallax/9- Layer 0.png" alt="">
@@ -194,6 +259,13 @@ body.portal-mode #frame-portal-2{ opacity:1; }
     </div>
   </div>
 </div>
+
+<!-- GLITCH TEXT OVERLAY -->
+<div id="glitch-overlay">
+  <div id="glitch-lines"></div>
+  <div id="glitch-bottom">I DON'T REMEMBER</div>
+</div>
+
 <div id="scroll-driver"></div>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -243,6 +315,11 @@ const l9_1        = document.getElementById('layer9-1');
 const l9_2        = document.getElementById('layer9-2');
 const body        = document.body;
 
+/* ── Glitch overlay refs ── */
+const glitchOverlay = document.getElementById('glitch-overlay');
+const glitchLines   = document.getElementById('glitch-lines');
+const glitchBottom  = document.getElementById('glitch-bottom');
+
 /* ── Build dots ── */
 const dots = Array.from({length:N},(_,i)=>{
   const d=document.createElement('div');
@@ -288,37 +365,98 @@ function targetBg(frameP,endP){
   return{r,g,b};
 }
 
+/* ── Scroll lock ── */
+let scrollLocked = false;
+let lockedScrollY = 0;
+
+function lockScroll(){
+  if(scrollLocked) return;
+  scrollLocked = true;
+  lockedScrollY = window.scrollY;
+}
+function unlockScroll(){
+  if(!scrollLocked) return;
+  scrollLocked = false;
+}
+window.addEventListener('scroll', ()=>{
+  if(scrollLocked){
+    window.scrollTo(0, lockedScrollY);
+  }
+}, {passive:false});
+
+/* ── Glitch text sequence ── */
+const QUERY = 'how many times did it happen?';
+let glitchRaf = null;
+let glitchRunning = false;
+
+function startGlitchText(onComplete){
+  if(glitchRunning) return;
+  glitchRunning = true;
+  glitchLines.textContent = '';
+  glitchBottom.classList.remove('show');
+  glitchOverlay.classList.add('active');
+
+  // Fill screen with repeated text very fast
+  const charsPerLine = Math.floor(window.innerWidth / (parseFloat(getComputedStyle(glitchOverlay).fontSize) * 0.6));
+  const lineText = (QUERY + ' ').repeat(Math.ceil(charsPerLine / (QUERY.length + 1))).slice(0, charsPerLine);
+  const linesNeeded = Math.ceil(window.innerHeight / (parseFloat(getComputedStyle(glitchOverlay).fontSize) * 1.45)) + 2;
+
+  let linesAdded = 0;
+  const lineInterval = setInterval(()=>{
+    if(linesAdded >= linesNeeded){
+      clearInterval(lineInterval);
+      // Hold the spam text briefly, then snap it away
+      setTimeout(()=>{
+        // Snap clear spam text instantly
+        glitchLines.textContent = '';
+        // Then show "I DON'T REMEMBER!" alone on the clean screen
+        setTimeout(()=>{
+          glitchBottom.classList.add('show');
+          // Hold, then fade overlay out
+          setTimeout(()=>{
+            glitchBottom.classList.remove('show');
+            setTimeout(()=>{
+              glitchOverlay.classList.remove('active');
+              glitchRunning = false;
+              if(onComplete) onComplete();
+            }, 300);
+          }, 1800);
+        }, 150);
+      }, 800);
+      return;
+    }
+    glitchLines.textContent += lineText + '\n';
+    linesAdded++;
+  }, 28); // fast: ~28ms per line
+}
+
 /* ── State ── */
 let activeIdx       = 0;
 let layer9Showing   = false;
-let layer9EverShown = false;   // first time layer9 appears
-let jumpscaresDone  = false;   // true after first jumpscare finishes → portal-mode
+let layer9EverShown = false;
+let jumpscaresDone  = false;
 let hasReachedEnd   = false;
 let jTimer          = null;
 
-// endP thresholds for layer9 overlay visibility:
-// Frame fades out fully at endP=0.75. Show layer9 at 0.83 (gap of darkness).
-// Hysteresis: hide at 0.46 when scrolling back up.
 const SHOW_9 = 0.83;
 const HIDE_9 = 0.46;
 
-// PORTAL is shown on the frame only when:
-//   jumpscaresDone AND endP < 0.30 (we're in the frame zone, not the end zone)
-// This prevents purple frames appearing during the end-scroll darkness.
-
 function cancelJumpscare(){
   if(jTimer){ clearTimeout(jTimer); jTimer=null; }
-  l9_1.style.animation='none';
-  l9_1.style.opacity='0';
+  l9_1.style.transition='none';
+  l9_1.style.transform='translateY(-110%)';
   void l9_1.offsetWidth;
 }
 
 function onJumpscareEnd(){
-  // Jumpscare animation finished — lock in portal-mode permanently
+  // Glitch text done → unlock scroll, enter portal-mode
   jumpscaresDone = true;
   body.classList.add('portal-mode');
-  // Kill layer9 overlay fade gracefully
-  closeLayer9();
+  unlockScroll();
+  // Keep layer0 and layer2 visible — do NOT close layer9
+  // Just hide layer1 (the jumpscare layer) if still showing
+  l9_1.style.transition = 'opacity 0.5s ease';
+  l9_1.style.opacity = '0';
 }
 
 function openLayer9(firstVisit){
@@ -330,16 +468,30 @@ function openLayer9(firstVisit){
 
   if(firstVisit && !jumpscaresDone){
     cancelJumpscare();
-    jTimer=setTimeout(()=>{
+    // Lock scroll immediately
+    lockScroll();
+
+    // Wait for layer1 ease-in to begin (~500ms), then start glitch text
+    jTimer = setTimeout(()=>{
       void l9_1.offsetWidth;
-      l9_1.style.animation='jumpscare 2.2s linear forwards';
-      // Fire portal-mode after animation duration (2.2s) + small buffer
-      setTimeout(onJumpscareEnd, 2400);
+      // Ease layer1 in from top
+      l9_1.style.transition = 'transform 1.2s cubic-bezier(0.16,1,0.3,1)';
+      l9_1.style.transform = 'translateY(0)';
+
+      // Start glitch text while layer1 is coming in
+      setTimeout(()=>{
+        startGlitchText(()=>{
+          // After glitch completes: shoot layer1 upward out
+          l9_1.style.transition = 'transform 0.9s cubic-bezier(0.4,0,1,1)';
+          l9_1.style.transform = 'translateY(-110%)';
+          setTimeout(onJumpscareEnd, 1000);
+        });
+      }, 400);
     }, 500);
+
   } else {
-    // Already done or second visit — no layer1
-    l9_1.style.animation='none';
-    l9_1.style.opacity='0';
+    l9_1.style.transition='none';
+    l9_1.style.transform='translateY(-110%)';
   }
 }
 
@@ -349,7 +501,7 @@ function closeLayer9(){
   layer9Wrap.style.transition='opacity 0.5s ease';
   layer9Wrap.style.opacity='0';
   setTimeout(()=>{
-    if(!layer9Showing){
+    if(!layer9Showing && !jumpscaresDone){
       l9_0.style.opacity='0';
       l9_2.style.opacity='0';
     }
@@ -367,7 +519,6 @@ function onScroll(){
 
   progFill.style.width=(raw*100)+'%';
 
-  /* Image switch — irrelevant in portal-mode since photos are hidden, but keep for dots/caption */
   const fIdx=Math.min(Math.floor(frameP*N),N-1);
   if(fIdx!==activeIdx){
     slots[activeIdx].classList.remove('active');
@@ -377,18 +528,15 @@ function onScroll(){
   dots.forEach((d,i)=>{ d.className='dot'+(i===fIdx?' active':''); });
   showCaption(fIdx);
 
-  /* Portal frame border: only when jumpscares done AND in frame zone (not end-scroll darkness) */
   const inFrameZone = endP < 0.25;
   frameBorder.classList.toggle('portal', jumpscaresDone && inFrameZone);
 
-  /* Background */
   const bg=targetBg(frameP,endP);
   lerpBg(bg.r,bg.g,bg.b);
 
   const isDark=(bg.r+bg.g+bg.b)/(255*3)<0.4;
   body.classList.toggle('dark-ui',isDark);
 
-  /* UI fade */
   const uiFade  = Math.max(0,1-endP*5);
   const frmFade = endP<0.4?1:Math.max(0,1-(endP-0.4)/0.35);
   dotsEl.style.opacity      = uiFade;
@@ -396,7 +544,6 @@ function onScroll(){
   phaseLbl.style.opacity    = uiFade;
   frameBorder.style.opacity = frmFade;
 
-  /* Layer 9 overlay (full end-scroll version) */
   const wantShow = layer9Showing ? (endP>HIDE_9) : (endP>SHOW_9);
   if(wantShow && !layer9Showing){
     const firstVisit=!layer9EverShown;
