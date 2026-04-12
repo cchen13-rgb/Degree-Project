@@ -60,7 +60,10 @@ html,body{width:100%;font-family:'EB Garamond',Georgia,serif;background:#fff;}
 }
 #frame-image img.slot.active{ opacity:1; }
 
-body.portal-mode #frame-image img.slot,
+body.portal-mode #frame-image img.slot{
+  opacity:0 !important;
+  transition:opacity 0.5s ease !important;
+}
 body.portal-mode #frame-image img.slot.active{
   opacity:0 !important;
   transition:opacity 0.5s ease !important;
@@ -70,11 +73,10 @@ body.portal-mode #frame-image img.slot.active{
 #frame-portal-2{
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:contain;opacity:0;z-index:6;
-  transition:opacity 0.8s ease;
+  transition:opacity 0.5s ease;
   display:block;
 }
-body.portal-mode #frame-portal-0{ opacity:1; }
-body.portal-mode #frame-portal-2{ opacity:1; }
+/* portal image opacity controlled entirely by JS */
 
 /* ── UI ── */
 #caption{
@@ -161,7 +163,32 @@ body.portal-mode #frame-portal-2{ opacity:1; }
   100% { transform:translateY(-480px);opacity:0; }
 }
 
-/* ── GLITCH TEXT OVERLAY ── */
+/* ── Arched door inside frame ── */
+#arch-door{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1.4s ease;
+  z-index:12;
+  cursor:pointer;
+  background:#050005;
+}
+#arch-door.revealed{
+  opacity:1;
+  pointer-events:all;
+}
+#arch-door svg{
+  width:42%;
+  height:auto;
+  filter:drop-shadow(0 0 18px rgba(255,255,255,0.25));
+  transition:filter 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+#arch-door:hover svg{
+  filter:drop-shadow(0 0 38px rgba(255,255,255,0.7));
+  transform:scale(1.05);
+}
 #glitch-overlay{
   position:fixed;inset:0;
   background:rgba(0,0,0,0.82);
@@ -243,6 +270,12 @@ body.portal-mode #frame-portal-2{ opacity:1; }
       <div id="frame-image">
         <img id="frame-portal-0" src="parallax/9- Layer 0.png" alt="">
         <img id="frame-portal-2" src="parallax/9- Layer 2.png" alt="">
+        <!-- Arched door — revealed after jumpscare sequence -->
+        <div id="arch-door">
+          <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10,130 L10,52 A40,44 0 0,1 90,52 L90,130 Z" fill="white"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -263,7 +296,7 @@ body.portal-mode #frame-portal-2{ opacity:1; }
 <!-- GLITCH TEXT OVERLAY -->
 <div id="glitch-overlay">
   <div id="glitch-lines"></div>
-  <div id="glitch-bottom">I DON'T REMEMBER</div>
+  <div id="glitch-bottom">I DON'T REMEMBER!</div>
 </div>
 
 <div id="scroll-driver"></div>
@@ -313,6 +346,9 @@ const layer9Wrap  = document.getElementById('layer9-wrap');
 const l9_0        = document.getElementById('layer9-0');
 const l9_1        = document.getElementById('layer9-1');
 const l9_2        = document.getElementById('layer9-2');
+const archDoor    = document.getElementById('arch-door');
+const fPortal0    = document.getElementById('frame-portal-0');
+const fPortal2    = document.getElementById('frame-portal-2');
 const body        = document.body;
 
 /* ── Glitch overlay refs ── */
@@ -439,7 +475,7 @@ let hasReachedEnd   = false;
 let jTimer          = null;
 
 const SHOW_9 = 0.83;
-const HIDE_9 = 0.46;
+const HIDE_9 = 0.72;
 
 function cancelJumpscare(){
   if(jTimer){ clearTimeout(jTimer); jTimer=null; }
@@ -449,14 +485,24 @@ function cancelJumpscare(){
 }
 
 function onJumpscareEnd(){
-  // Glitch text done → unlock scroll, enter portal-mode
   jumpscaresDone = true;
   body.classList.add('portal-mode');
   unlockScroll();
-  // Keep layer0 and layer2 visible — do NOT close layer9
-  // Just hide layer1 (the jumpscare layer) if still showing
-  l9_1.style.transition = 'opacity 0.5s ease';
-  l9_1.style.opacity = '0';
+  l9_1.style.transition = 'transform 0.9s cubic-bezier(0.4,0,1,1)';
+  l9_1.style.transform = 'translateY(-110%)';
+
+  // Door reveal is triggered by onScroll when player scrolls back to fIdx === 0
+  // Wire click handler now so it's ready
+  archDoor.addEventListener('click', ()=>{
+    // Fade the entire viewport to black, then navigate
+    const blackout = document.createElement('div');
+    blackout.style.cssText = 'position:fixed;inset:0;background:#000;opacity:0;z-index:999999;transition:opacity 0.7s ease;pointer-events:none;';
+    document.body.appendChild(blackout);
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{ blackout.style.opacity = '1'; });
+    });
+    setTimeout(()=>{ window.location.href = 'blog.html'; }, 750);
+  }, { once: true });
 }
 
 function openLayer9(firstVisit){
@@ -528,6 +574,36 @@ function onScroll(){
   dots.forEach((d,i)=>{ d.className='dot'+(i===fIdx?' active':''); });
   showCaption(fIdx);
 
+  // Reveal the arch door when player scrolls back to the LAST frame (index 0 = first photo) after jumpscare
+  if(jumpscaresDone && fIdx === 0 && endP < 0.05){
+    archDoor.classList.add('revealed');
+  }
+
+  // In portal-mode scrolled back into photo zone: show layer9 imagery in frame
+  // fIdx 0 → arch door only; fIdx 1–7 → layer0 + layer2 portal images
+  const inPhotoZone = jumpscaresDone && endP < 0.05;
+  layer9Wrap.style.opacity = inPhotoZone ? '0' : (layer9Showing ? '1' : '0');
+
+  if(inPhotoZone){
+    if(fIdx === 0){
+      // Frame 0: arch door, no portal images
+      fPortal0.style.opacity = '0';
+      fPortal2.style.opacity = '0';
+    } else {
+      // Frames 1–7: show the layer9 imagery inside the frame
+      fPortal0.style.opacity = '1';
+      fPortal2.style.opacity = '1';
+      archDoor.classList.remove('revealed');
+    }
+  } else if(jumpscaresDone){
+    // In end-scroll zone after jumpscare — keep portal images visible
+    fPortal0.style.opacity = '1';
+    fPortal2.style.opacity = '1';
+  } else {
+    fPortal0.style.opacity = '0';
+    fPortal2.style.opacity = '0';
+  }
+
   const inFrameZone = endP < 0.25;
   frameBorder.classList.toggle('portal', jumpscaresDone && inFrameZone);
 
@@ -538,7 +614,10 @@ function onScroll(){
   body.classList.toggle('dark-ui',isDark);
 
   const uiFade  = Math.max(0,1-endP*5);
-  const frmFade = endP<0.4?1:Math.max(0,1-(endP-0.4)/0.35);
+  // After jumpscare: hide frame only in the end-scroll dark zone, show normally when scrolled back up
+  const frmFade = jumpscaresDone
+    ? (endP < 0.05 ? 1 : Math.max(0,1-(endP-0.05)/0.35))
+    : (endP<0.4?1:Math.max(0,1-(endP-0.4)/0.35));
   dotsEl.style.opacity      = uiFade;
   capEl.style.opacity       = uiFade;
   phaseLbl.style.opacity    = uiFade;
