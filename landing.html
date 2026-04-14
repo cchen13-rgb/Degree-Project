@@ -39,7 +39,7 @@
     .char-img-wrap::after{content:attr(data-tag);position:absolute;bottom:20px;right:20px;font-family:"Switzer",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#fff8f8;background:rgba(61,13,20,0.75);padding:4px 12px;backdrop-filter:blur(4px);}
     body.dark .char-img-wrap::after{background:rgba(0,0,0,0.6);color:#ffcacf;}
 
-    /* ══ CHAR INFO — key fix: word-break normal so text flows horizontally ══ */
+    /* ══ CHAR INFO ══ */
     .char-info{padding:20px;display:flex;flex-direction:column;justify-content:flex-start;border-left:1px solid rgba(93,20,30,0.12);position:relative;overflow-y:auto;min-width:0;word-break:normal;overflow-wrap:anywhere;hyphens:auto;}
     body.dark .char-info{border-color:rgba(0,0,0,0.2);}
 
@@ -58,7 +58,7 @@
     body.dark .char-name-en,body.dark .char-name-sub,body.dark .char-profile-text{color:transparent;}
     body.dark .char-name-en .reveal-name,body.dark .char-name-sub .reveal-name,body.dark .char-profile-text .reveal-name{color:#0d0d0d;}
 
-    /* ══ MAC / MEDIUM DESKTOP: tighten card to stay horizontal ══════ */
+    /* ══ MAC / MEDIUM DESKTOP ══ */
     @media(min-width:901px) and (max-width:1400px){
       .profiles-section{padding:60px 32px 100px 32px;gap:24px;}
       .char-card{grid-template-columns:minmax(180px,260px) 1fr;}
@@ -71,7 +71,6 @@
     @media(max-width:900px){.profiles-section{grid-template-columns:1fr;padding:40px 20px 80px 20px;gap:24px;position:static;}.char-card{grid-template-columns:1fr;}.char-img-wrap{height:260px;}.char-info{border-left:none;border-top:1px solid rgba(93,20,30,0.12);}body.dark .char-info{border-top-color:rgba(0,0,0,0.2);border-left:none;}.char-name-en{font-size:40px;}}
     @media(max-width:480px){.char-img-wrap{height:200px;}.char-name-en{font-size:32px;}.char-stats{grid-template-columns:1fr;}}
 
-    /* ══ MOBILE: hide flower stars — not used on mobile layout ══ */
     @media(max-width:1024px){
       .dante-layer.star1,
       .dante-layer.star2{ display:none !important; }
@@ -83,6 +82,7 @@
       opacity:0;
       transition:opacity 0.55s ease;
       pointer-events:none;
+      font-family:"Courier New",Courier,monospace;
     }
     #tutorialOverlay.tut-visible{ opacity:1; }
 
@@ -95,11 +95,11 @@
       position:absolute;
       z-index:9010;
       display:flex;
-      flex-direction:row;
-      align-items:flex-end;
+      flex-direction:column;
+      align-items:stretch;
       gap:0;
       pointer-events:none;
-      max-width:680px;
+      max-width:420px;
       width:calc(100vw - 48px);
       transition:left 0.5s cubic-bezier(0.34,1.1,0.64,1),
                   right 0.5s cubic-bezier(0.34,1.1,0.64,1),
@@ -107,22 +107,23 @@
                   bottom 0.5s cubic-bezier(0.34,1.1,0.64,1);
     }
 
-    #tutMascot{
-      display:flex;flex-direction:column;align-items:center;
-      flex-shrink:0;
-      pointer-events:none;
-      margin-right:-12px;
-      z-index:2;
-      align-self:flex-end;
-    }
-    #tutMascotImg{width:260px;height:260px;display:block;flex-shrink:0;}
-    #tutMascotImg img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block;}
-    #tutMascotImg.tut-jump img{animation:tutJump 0.65s cubic-bezier(0.34,1.56,0.64,1);}
+    /* Floating kaomoji above box — hidden, layout is now inline */
+    #tutKaomoji{ display:none; }
+
     @keyframes tutJump{
       0%{transform:translateY(0) rotate(0deg);}
-      35%{transform:translateY(-56px) rotate(-10deg);}
-      65%{transform:translateY(-28px) rotate(7deg);}
+      35%{transform:translateY(-24px) rotate(-6deg);}
+      65%{transform:translateY(-10px) rotate(4deg);}
       100%{transform:translateY(0) rotate(0deg);}
+    }
+    #tutDialogue.tut-dlg-jump{
+      animation:tutDlgJump 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes tutDlgJump{
+      0%{transform:translateY(0);}
+      35%{transform:translateY(-10px);}
+      65%{transform:translateY(-4px);}
+      100%{transform:translateY(0);}
     }
 
     #tutArrow{
@@ -132,38 +133,117 @@
     #tutArrow.tut-arrow-show{opacity:1;}
     @keyframes tut-bounce-right{0%,100%{transform:translateX(0);}50%{transform:translateX(10px);}}
     @keyframes tut-bounce-up{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-    #tutArrow.tut-dir-right{right:-44px;top:100px;animation:tut-bounce-right 1s ease-in-out infinite;}
+    #tutArrow.tut-dir-right{right:-44px;top:60px;animation:tut-bounce-right 1s ease-in-out infinite;}
     #tutArrow.tut-dir-up{top:-40px;right:4px;animation:tut-bounce-up 1s ease-in-out infinite;}
 
+    /* Main dialogue box */
     #tutDialogue{
       position:relative;z-index:9010;
-      width:380px;
-      min-width:0;
-      flex:1 1 auto;
-      background:#fff8f8;border:1px solid rgba(93,20,30,0.2);
-      flex-shrink:1;
+      width:100%;
+      background:#fff8f8;
+      border:2px solid #3d0d14;
       pointer-events:all;
-      margin-bottom:8px;
       box-sizing:border-box;
     }
-    body.dark #tutDialogue{background:#0a0000;border-color:rgba(181,0,8,0.3);}
+    body.dark #tutDialogue{background:#0a0000;border-color:#b50008;}
 
-    #tutDlgBar{background:#3d0d14;padding:7px 14px;display:flex;align-items:center;justify-content:space-between;}
-    #tutDlgBarTitle{font-family:"fayte-pixel-hard",sans-serif;font-weight:400;font-style:normal;font-size:20px;color:#fff8f8;letter-spacing:2px;}
-    .tut-dlg-bar-btns{display:flex;gap:4px;}
-    .tut-dlg-bar-btn{width:14px;height:14px;background:#fff8f8;border:1px solid rgba(93,20,30,0.3);font-size:8px;display:flex;align-items:center;justify-content:center;color:#3d0d14;}
-    #tutDlgBody{padding:18px 22px 10px;font-family:"Montserrat",sans-serif;font-size:13px;line-height:1.9;color:#3d0d14;letter-spacing:0.3px;min-height:90px;}
+    /* Title bar */
+    #tutDlgBar{
+      background:#3d0d14;
+      padding:6px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    body.dark #tutDlgBar{background:#b50008;}
+
+    #tutDlgBarTitle{
+      font-family:"Courier New",Courier,monospace;
+      font-size:12px;
+      font-weight:700;
+      color:#fff8f8;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .tut-dlg-bar-btns{display:flex;gap:3px;}
+    .tut-dlg-bar-btn{
+      width:12px;height:12px;
+      background:#fff8f8;
+      border:1px solid rgba(255,248,248,0.4);
+      font-size:7px;
+      display:flex;align-items:center;justify-content:center;
+      color:#3d0d14;
+    }
+
+    /* Inner content row: kaomoji left, text right */
+    #tutDlgInner{
+      display:flex;
+      flex-direction:row;
+      align-items:center;
+      gap:0;
+      border-bottom:1px solid rgba(93,20,30,0.12);
+    }
+    body.dark #tutDlgInner{border-bottom-color:rgba(181,0,8,0.2);}
+
+    /* Kaomoji column */
+    #tutDlgFace{
+      flex-shrink:0;
+      width:110px;
+      padding:18px 12px;
+      font-family:"Courier New",Courier,monospace;
+      font-size:22px;
+      line-height:1.3;
+      letter-spacing:-1px;
+      color:#3d0d14;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-right:1px solid rgba(93,20,30,0.12);
+      box-sizing:border-box;
+      word-break:break-all;
+    }
+    body.dark #tutDlgFace{color:#fff8f8;border-right-color:rgba(181,0,8,0.2);}
+
+    /* Text column */
+    #tutDlgBody{
+      flex:1;
+      padding:14px 16px 12px;
+      font-family:"Montserrat",sans-serif;
+      font-size:12px;
+      line-height:1.85;
+      color:#3d0d14;
+      letter-spacing:0.2px;
+      min-height:0;
+      box-sizing:border-box;
+    }
     body.dark #tutDlgBody{color:rgba(255,248,248,0.86);}
-    #tutDlgEyebrow{font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(93,20,30,0.4);margin-bottom:8px;}
+
+    #tutDlgEyebrow{
+      font-family:"Courier New",Courier,monospace;
+      font-size:9px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:rgba(93,20,30,0.45);
+      margin-bottom:6px;
+    }
     body.dark #tutDlgEyebrow{color:rgba(255,200,200,0.35);}
-    #tutDlgText .tut-hl{color:#a8324a;font-weight:600;}
+
+    #tutDlgText .tut-hl{color:#a8324a;font-weight:700;}
     body.dark #tutDlgText .tut-hl{color:#ff8a8a;}
-    .tut-dlg-rule{width:30px;height:1px;background:rgba(93,20,30,0.3);margin:0 22px 12px;}
-    body.dark .tut-dlg-rule{background:rgba(181,0,8,0.3);}
-    #tutDlgFooter{padding:8px 20px 16px;display:flex;align-items:center;justify-content:flex-start;border-top:1px solid rgba(93,20,30,0.08);}
-    body.dark #tutDlgFooter{border-top-color:rgba(181,0,8,0.15);}
-    .tut-pips{display:flex;gap:6px;align-items:center;}
-    .tut-pip{width:6px;height:6px;border-radius:50%;background:rgba(93,20,30,0.15);transition:background 0.3s;}
+
+    .tut-dlg-rule{height:1px;background:rgba(93,20,30,0.15);margin:0 16px;}
+    body.dark .tut-dlg-rule{background:rgba(181,0,8,0.25);}
+
+    #tutDlgFooter{
+      padding:8px 16px 10px;
+      display:flex;align-items:center;justify-content:flex-start;
+      border-top:1px solid rgba(93,20,30,0.12);
+    }
+    body.dark #tutDlgFooter{border-top-color:rgba(181,0,8,0.2);}
+
+    .tut-pips{display:flex;gap:5px;align-items:center;}
+    .tut-pip{width:5px;height:5px;border-radius:50%;background:rgba(93,20,30,0.15);transition:background 0.3s;}
     .tut-pip.tut-active{background:#a8324a;}
     .tut-pip.tut-done{background:rgba(93,20,30,0.32);}
     body.dark .tut-pip{background:rgba(255,200,200,0.15);}
@@ -177,100 +257,64 @@
       bottom:calc(100% + 8px);
       right:0;
       z-index:9010;
-      font-family:"Switzer",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;
-      color:rgba(255,248,248,0.45);text-align:right;
+      font-family:"Courier New",Courier,monospace;
+      font-size:9px;letter-spacing:2px;text-transform:uppercase;
+      color:rgba(255,248,248,0.5);text-align:right;
       opacity:0;transition:opacity 0.4s ease;pointer-events:none;
       white-space:nowrap;
     }
     #tutWaitHint.tut-hint-show{opacity:1;}
 
-    /* ── Responsive tutorial ── */
+    /* Responsive */
     @media (max-height: 950px) {
-      #tutMascotImg { width: 160px; height: 160px; }
-      #tutDialogue  { width: 300px; }
-      #tutDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
-      #tutStage     { bottom: 10px !important; }
+      #tutDlgFace { font-size:18px; width:90px; padding:14px 10px; }
+      #tutDialogue { max-width:360px; }
+      #tutDlgBody { padding:10px 14px 10px; font-size:11px; }
+      #tutStage   { bottom:10px !important; }
     }
-
     @media (max-height: 800px) {
-      #tutMascotImg { width: 120px; height: 120px; }
-      #tutDialogue  { width: 280px; }
-      #tutDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
-      #tutStage     { bottom: 6px !important; }
+      #tutDlgFace { font-size:16px; width:80px; }
+      #tutDialogue { max-width:320px; }
+      #tutDlgBody { padding:8px 12px 8px; font-size:11px; }
+      #tutStage   { bottom:6px !important; }
     }
-
     @media (max-height: 650px) {
-      #tutMascotImg { width: 90px; height: 90px; }
-      #tutDialogue  { width: 250px; }
-      #tutDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
-      #tutDlgBar    { padding: 5px 10px; }
-      #tutDlgBarTitle { font-size: 16px; }
-      #tutStage     { bottom: 4px !important; }
+      #tutDlgFace { display:none; }
+      #tutDlgBody { padding:8px 14px; font-size:11px; }
+      #tutDlgBar  { padding:5px 10px; }
+      #tutDlgBarTitle { font-size:11px; }
+      #tutStage   { bottom:4px !important; }
     }
-
-    /* ── Mobile: overlay becomes flex col, stage pushed to bottom ── */
     @media (max-width: 600px) {
       #tutorialOverlay {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-end;
+        display:flex;flex-direction:column;
+        align-items:stretch;justify-content:flex-end;
       }
-      #tutSpotCanvas {
-        position: absolute;
-        inset: 0;
-      }
+      #tutSpotCanvas { position:absolute;inset:0; }
       #tutStage {
-        position: relative;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        top: auto !important;
-        transform: none !important;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        max-width: 100%;
-        z-index: 9010;
-        transition: none;
-      }
-      #tutMascot {
-        position: absolute;
-        bottom: 100%;
-        left: 12px;
-        margin: 0;
-        z-index: 1;
-        pointer-events: none;
-        align-self: auto;
-      }
-      #tutMascotImg {
-        width: 180px;
-        height: 180px;
-        transform: translateY(50px);
-        transition: none;
+        position:relative;
+        left:auto !important;right:auto !important;
+        bottom:auto !important;top:auto !important;
+        transform:none !important;
+        flex-direction:column;align-items:stretch;
+        width:100%;max-width:100%;
+        z-index:9010;transition:none;
       }
       #tutDialogue {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-        max-width: 100%;
-        margin-bottom: 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
+        position:relative;z-index:2;
+        width:100%;max-width:100%;
+        margin-bottom:0;
+        border-left:none;border-right:none;border-bottom:none;
       }
-      #tutDlgBody {
-        padding: 12px 16px 8px;
-        font-size: 12px;
-        min-height: 60px;
-      }
-      #tutDlgBar { padding: 8px 14px; }
-      #tutDlgBarTitle { font-size: 18px; }
+      #tutDlgFace { width:80px; font-size:16px; padding:14px 8px; }
+      #tutDlgBody { padding:10px 14px; font-size:12px; }
+      #tutDlgBar  { padding:8px 14px; }
+      #tutDlgBarTitle { font-size:12px; }
     }
 
     /*
      * FIX: Override design.css .center .login so the button is always
-     * pointer-interactive (pointer-events:auto) even while opacity:0.
+     * pointer-interactive even while opacity:0.
      */
     .center .login {
       pointer-events: auto !important;
@@ -308,14 +352,9 @@
   <canvas id="tutSpotCanvas"></canvas>
 
   <div id="tutStage">
-    <div id="tutMascot">
-      <div id="tutMascotImg">
-        <img src="pngs/mascot.png" alt="Guide">
-      </div>
-      <svg id="tutArrow" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path id="tutArrowPath" d="M6 16 L26 16 M18 8 L26 16 L18 24" stroke="#fff8f8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
+    <!-- floating kaomoji above box, hidden on mobile -->
+    <div id="tutKaomoji">(&acute;&#xFF65;&omega;&#xFF65;`)</div>
+
     <div id="tutDialogue">
       <div id="tutDlgBar">
         <span id="tutDlgBarTitle">Guide</span>
@@ -325,17 +364,24 @@
           <div class="tut-dlg-bar-btn">&#x2715;</div>
         </div>
       </div>
-      <div id="tutDlgBody">
-        <div id="tutDlgEyebrow">Entry &middot; 001</div>
-        <div id="tutDlgText"></div>
+      <!-- kaomoji left + text right, side by side like reference -->
+      <div id="tutDlgInner">
+        <div id="tutDlgFace">(&acute;&#xFF65;&omega;&#xFF65;`)</div>
+        <div id="tutDlgBody">
+          <div id="tutDlgEyebrow">Entry &middot; 001</div>
+          <div id="tutDlgText"></div>
+        </div>
       </div>
-      <div class="tut-dlg-rule"></div>
       <div id="tutDlgFooter">
         <div class="tut-pips" id="tutPips"></div>
         <button id="tutBtnNext">Next</button>
       </div>
       <div id="tutWaitHint">Waiting for you to toggle&#8230;</div>
     </div>
+
+    <svg id="tutArrow" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path id="tutArrowPath" d="M6 16 L26 16 M18 8 L26 16 L18 24" stroke="#fff8f8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
 </div>
 <!-- end tutorial overlay -->
@@ -434,20 +480,21 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
 
   const SITE_PINKS = ['#ffb4ba','#ffcacf','#d4637a','#a8324a','#3d0d14','#fff8f8'];
 
-  const overlay   = document.getElementById('tutorialOverlay');
-  const canvas    = document.getElementById('tutSpotCanvas');
-  const ctx       = canvas.getContext('2d');
-  const stage     = document.getElementById('tutStage');
-  const mascotImg = document.getElementById('tutMascotImg');
-  const arrowSvg  = document.getElementById('tutArrow');
-  const arrowPath = document.getElementById('tutArrowPath');
-  const dlgTitle  = document.getElementById('tutDlgBarTitle');
-  const dlgEyebrow= document.getElementById('tutDlgEyebrow');
-  const dlgText   = document.getElementById('tutDlgText');
-  const pipsEl    = document.getElementById('tutPips');
-  const btnNext   = document.getElementById('tutBtnNext');
-  const waitHint  = document.getElementById('tutWaitHint');
-  const loginModal= document.getElementById('loginModal');
+  const overlay    = document.getElementById('tutorialOverlay');
+  const canvas     = document.getElementById('tutSpotCanvas');
+  const ctx        = canvas.getContext('2d');
+  const stage      = document.getElementById('tutStage');
+  const kaomoji    = document.getElementById('tutKaomoji');
+  const dlgFace    = document.getElementById('tutDlgFace');
+  const arrowSvg   = document.getElementById('tutArrow');
+  const arrowPath  = document.getElementById('tutArrowPath');
+  const dlgTitle   = document.getElementById('tutDlgBarTitle');
+  const dlgEyebrow = document.getElementById('tutDlgEyebrow');
+  const dlgText    = document.getElementById('tutDlgText');
+  const pipsEl     = document.getElementById('tutPips');
+  const btnNext    = document.getElementById('tutBtnNext');
+  const waitHint   = document.getElementById('tutWaitHint');
+  const loginModal = document.getElementById('loginModal');
 
   const steps = [
     /* 0 — shy introduction */
@@ -455,35 +502,35 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
       eyebrow: 'Entry \u00b7 001',
       text: `oh, h-hello\u2026 I\u2019ll be your guide. I wasn\u2019t expecting anyone but it\u2019s okay. You seem lost. Let\u2019s look around together, if that\u2019s alright. <span class="tut-hl">Click the Login button to begin.</span>`,
       spot: 'login', mode: 'wait-login', pos: 'bottom-left', arrow: null, pip: 0,
-      sprite: 'pngs/mascot.png',
+      kaomoji: '(\u00b4\uff65\u03c9\uff65\u0060)',
     },
     /* 1 — curious, a little nervous */
     {
       eyebrow: 'Entry \u00b7 002',
       text: `oh, um. Looks like we need to know <span class="tut-hl">who this page belongs to</span> before we can go further. I\u2019m not sure either but\u2026 maybe try the fields?`,
       spot: 'modal-fields', mode: 'wait-field', pos: 'bottom-left', arrow: null, pip: 1,
-      sprite: 'pngs/mascot.png',
+      kaomoji: '(\u00b4\uff65\u03c9\uff65\u0060)?',
     },
     /* 2 — gently nudging */
     {
       eyebrow: 'Entry \u00b7 003',
       text: `that\u2019s okay\u2026 we\u2019ll figure it out. Could you close the box for now? There might be something else around here worth looking at.`,
       spot: 'none', mode: 'wait-modal-close', pos: 'bottom-left', arrow: null, pip: 2,
-      sprite: 'pngs/mascot_sad.png',
+      kaomoji: '(\u00b4\uff65_\uff65\u0060)',
     },
     /* 3 — quietly excited */
     {
       eyebrow: 'Entry \u00b7 003',
       text: `um\u2026 I noticed something. That little switch in the corner, I think it might help. Would you mind <span class="tut-hl">toggling</span> it\u2026 just to see?`,
       spot: 'toggle', mode: 'wait-toggle', pos: 'bottom-left-near-toggle', arrow: 'up', pip: 2,
-      sprite: 'pngs/mascot.png',
+      kaomoji: '(\u00b4\uff65\u03c9\uff65\u0060)\u2191',
     },
     /* 4 — surprised, flustered */
     {
       eyebrow: 'Entry \u00b7 003',
       text: `oh! <span class="tut-hl">oh wow.</span> I didn\u2019t expect that\u2026 there\u2019s something hidden here. I think you should look more carefully now.`,
       spot: 'none', mode: 'wait-login2', pos: 'bottom-center', arrow: null, pip: 2,
-      sprite: 'pngs/mascot_angry.png',
+      kaomoji: '(\uff61\u2022\u2039\u2022\uff61)',
     },
   ];
 
@@ -544,7 +591,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
         const el=document.getElementById('loginBtn');
         if(!el){ setTimeout(trySpotLogin,120); return; }
         const r=el.getBoundingClientRect();
-        /* Button hasn't animated into place yet — rect will be tiny or off-screen */
         if(r.width<2 || r.top<10 || r.bottom>window.innerHeight-10){
           setTimeout(trySpotLogin,120); return;
         }
@@ -584,13 +630,12 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     stage.style.left=''; stage.style.right='';
     stage.style.top='';  stage.style.bottom='';
     stage.style.transform='';
-    stage.style.flexDirection='row';
-    stage.style.alignItems='flex-end';
+    stage.style.flexDirection='column';
+    stage.style.alignItems='stretch';
 
     if(pos==='bottom-left-near-toggle'){
       stage.style.right='16px';
       stage.style.bottom='24px';
-      stage.style.flexDirection='row-reverse';
       return;
     }
     if(pos==='bottom-center'){
@@ -600,19 +645,15 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
       return;
     }
 
-    /* bottom-left: check if dialogue would overlap the login button */
     var loginBtn = document.getElementById('loginBtn');
     var safeBottom = 24;
     if(loginBtn){
       var lr = loginBtn.getBoundingClientRect();
-      var mascotH = Math.min(260, window.innerHeight * 0.28);
-      var dlgH    = 220;
-      var stageH  = Math.max(mascotH, dlgH);
-      var stageTop = window.innerHeight - safeBottom - stageH;
+      var dlgH = 220;
+      var stageTop = window.innerHeight - safeBottom - dlgH;
       if(stageTop < lr.bottom + 16){
         stage.style.right  = '24px';
         stage.style.bottom = '24px';
-        stage.style.flexDirection = 'row-reverse';
         return;
       }
     }
@@ -711,17 +752,19 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
 
   /* ── Confetti ───────────────────────────── */
   window.tutorialSpawnConfetti=function(){
-    const mR=mascotImg.getBoundingClientRect();
-    const cx=mR.left+mR.width/2,cy=mR.top+mR.height/2;
+    const dlgR=dlgFace.getBoundingClientRect();
+    const cx=dlgR.left+dlgR.width/2,cy=dlgR.top+dlgR.height/2;
     for(let i=0;i<28;i++){
       const dot=document.createElement('div');
-      dot.className='tut-confetti';
+      dot.style.cssText='position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:9999;transition:transform 0.8s ease,opacity 0.8s ease;';
       dot.style.background=SITE_PINKS[i%SITE_PINKS.length];
       dot.style.left=cx+'px';dot.style.top=cy+'px';
       const a=Math.random()*Math.PI*2,d=60+Math.random()*110;
-      dot.style.setProperty('--tut-tx',`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`);
       document.body.appendChild(dot);
-      setTimeout(()=>dot.classList.add('tut-pop'),i*24);
+      setTimeout(()=>{
+        dot.style.transform=`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`;
+        dot.style.opacity='0';
+      },i*24);
       setTimeout(()=>dot.remove(),1000+i*24);
     }
   };
@@ -739,13 +782,14 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     dlgTitle.textContent='Guide';
     dlgEyebrow.textContent='Entry \u00b7 004';
     dlgText.innerHTML=`w-wait\u2026 <span class="tut-hl">you found it.</span> The clue was hidden in the dark the whole time. I\u2019m glad you trusted me. The pieces are coming back now.`;
-    const victSpriteEl = mascotImg.querySelector('img');
-    if (victSpriteEl) victSpriteEl.src = 'pngs/mascot.png';
+    const victKao = '(\uff61\u25d5\u1d17\u25d5\uff61)';
+    if(kaomoji) kaomoji.textContent = victKao;
+    if(dlgFace) dlgFace.textContent = victKao;
     btnNext.style.display='block';
     btnNext.textContent='Move on';
     btnNext.onclick=function(){sessionStorage.setItem('tutorialDone','1');window.location.href='captcha.html';};
     setArrow(null);buildPips(3);
-    mascotImg.classList.remove('tut-jump');void mascotImg.offsetWidth;mascotImg.classList.add('tut-jump');
+    if(kaomoji){kaomoji.classList.remove('tut-jump');void kaomoji.offsetWidth;kaomoji.classList.add('tut-jump');}
     window.tutorialSpawnConfetti();
     setTimeout(()=>{sessionStorage.setItem('tutorialDone','1');window.location.href='captcha.html';},3200);
   };
@@ -766,7 +810,6 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
   function render(){
     const s=steps[step];
 
-    /* Snap position instantly so the jump plays without competing movement */
     stage.style.transition='none';
     positionStage(s.pos);
     void stage.offsetWidth;
@@ -784,12 +827,14 @@ Your name is&#8212;is&#8212; You are wandering alone through the dark. You were 
     overlay.classList.add('tut-visible');
     drawAt(spotC.x, spotC.y, spotC.r);
 
-    const spriteEl = mascotImg.querySelector('img');
-    if (spriteEl && s.sprite) spriteEl.src = s.sprite;
+    /* kaomoji swap */
+    if(s.kaomoji){
+      if(kaomoji) kaomoji.textContent = s.kaomoji;
+      if(dlgFace) dlgFace.textContent = s.kaomoji;
+    }
 
-    mascotImg.classList.remove('tut-jump');
-    void mascotImg.offsetWidth;
-    mascotImg.classList.add('tut-jump');
+    if(kaomoji){kaomoji.classList.remove('tut-jump');void kaomoji.offsetWidth;kaomoji.classList.add('tut-jump');}
+    const tutDlg=document.getElementById("tutDialogue");if(tutDlg){tutDlg.classList.remove("tut-dlg-jump");void tutDlg.offsetWidth;tutDlg.classList.add("tut-dlg-jump");}
 
     btnNext.style.display='none';
     btnNext.onclick=null;

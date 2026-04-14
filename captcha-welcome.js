@@ -14,173 +14,141 @@
       opacity: 0; transition: opacity 0.55s ease;
       pointer-events: none;
       box-sizing: border-box;
+      font-family: "Courier New", Courier, monospace;
     }
     #cwOverlay.cw-visible { opacity: 1; pointer-events: all; }
 
     #cwStage {
       display: flex;
-      flex-direction: row;
-      align-items: flex-end;
+      flex-direction: column;
+      align-items: stretch;
       gap: 0;
       width: calc(100vw - 48px);
-      max-width: 680px;
-    }
-
-    #cwMascot {
-      flex-shrink: 0;
-      margin-right: -12px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    #cwMascotImg {
-      width: 260px; height: 260px; display: block;
-    }
-    #cwMascotImg img {
-      width: 100%; height: 100%; object-fit: contain;
-      object-position: bottom center; display: block;
-    }
-    #cwMascotImg.cw-jump img {
-      animation: cwJump 0.65s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    @keyframes cwJump {
-      0%   { transform: translateY(0) rotate(0deg); }
-      35%  { transform: translateY(-56px) rotate(-10deg); }
-      65%  { transform: translateY(-28px) rotate(7deg); }
-      100% { transform: translateY(0) rotate(0deg); }
+      max-width: 420px;
     }
 
     #cwDialogue {
       position: relative; z-index: 9010;
-      width: 380px;
-      min-width: 0;
-      flex: 1 1 auto;
-      background: #fff8f8; border: 1px solid rgba(93,20,30,0.2);
-      flex-shrink: 1;
-      margin-bottom: 8px;
+      width: 100%;
+      background: #fff8f8;
+      border: 2px solid #3d0d14;
       box-sizing: border-box;
     }
-    body.dark #cwDialogue { background: #0a0000; border-color: rgba(181,0,8,0.3); }
+    body.dark #cwDialogue { background: #0a0000; border-color: #b50008; }
 
     #cwDlgBar {
       background: #3d0d14;
-      padding: 7px 14px; display: flex; align-items: center;
+      padding: 6px 10px; display: flex; align-items: center;
       justify-content: space-between;
     }
+    body.dark #cwDlgBar { background: #b50008; }
+
     #cwDlgBarTitle {
-      font-family: "fayte-pixel-hard", sans-serif; font-weight: 400;
-      font-size: 20px; color: #fff8f8; letter-spacing: 2px;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 700; font-size: 12px;
+      color: #fff8f8; letter-spacing: 1px; text-transform: uppercase;
     }
-    .cw-bar-btns { display: flex; gap: 4px; }
+    .cw-bar-btns { display: flex; gap: 3px; }
     .cw-bar-btn {
-      width: 14px; height: 14px; background: #fff8f8;
-      border: 1px solid rgba(93,20,30,0.3); font-size: 8px;
+      width: 12px; height: 12px; background: #fff8f8;
+      border: 1px solid rgba(255,248,248,0.4); font-size: 7px;
       display: flex; align-items: center; justify-content: center; color: #3d0d14;
     }
 
+    /* Inner row: kaomoji left, text right */
+    #cwDlgInner {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      border-bottom: 1px solid rgba(93,20,30,0.12);
+    }
+    body.dark #cwDlgInner { border-bottom-color: rgba(181,0,8,0.2); }
+
+    #cwDlgFace {
+      flex-shrink: 0;
+      width: 110px;
+      padding: 18px 12px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 22px;
+      line-height: 1.3;
+      letter-spacing: -1px;
+      color: #3d0d14;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid rgba(93,20,30,0.12);
+      box-sizing: border-box;
+      word-break: break-all;
+    }
+    body.dark #cwDlgFace { color: #fff8f8; border-right-color: rgba(181,0,8,0.2); }
+
     #cwDlgBody {
-      padding: 18px 22px 10px;
-      font-family: "Montserrat", sans-serif; font-size: 13px;
-      line-height: 1.9; color: #3d0d14; letter-spacing: 0.3px; min-height: 90px;
+      flex: 1;
+      padding: 14px 16px 12px;
+      font-family: "Montserrat", sans-serif; font-size: 12px;
+      line-height: 1.85; color: #3d0d14; letter-spacing: 0.2px;
+      box-sizing: border-box;
     }
     body.dark #cwDlgBody { color: rgba(255,248,248,0.86); }
 
     #cwDlgEyebrow {
-      font-family: "Switzer", sans-serif; font-size: 9px;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(93,20,30,0.4); margin-bottom: 8px;
+      font-family: "Courier New", Courier, monospace; font-size: 9px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(93,20,30,0.45); margin-bottom: 6px;
     }
     body.dark #cwDlgEyebrow { color: rgba(255,200,200,0.35); }
 
-    #cwDlgText .cw-hl { color: #a8324a; font-weight: 600; }
+    #cwDlgText .cw-hl { color: #a8324a; font-weight: 700; }
     body.dark #cwDlgText .cw-hl { color: #ff8a8a; }
 
-    .cw-dlg-rule {
-      width: 30px; height: 1px; background: rgba(93,20,30,0.3); margin: 0 22px 12px;
-    }
-    body.dark .cw-dlg-rule { background: rgba(181,0,8,0.3); }
-
     #cwDlgFooter {
-      padding: 8px 20px 16px; display: flex; align-items: center;
-      justify-content: flex-end;
-      border-top: 1px solid rgba(93,20,30,0.08);
+      padding: 8px 16px 10px; display: flex; align-items: center;
+      justify-content: flex-start;
+      border-top: 1px solid rgba(93,20,30,0.12);
     }
-    body.dark #cwDlgFooter { border-top-color: rgba(181,0,8,0.15); }
+    body.dark #cwDlgFooter { border-top-color: rgba(181,0,8,0.2); }
 
     #cwHint {
-      font-family: "Switzer", sans-serif; font-size: 8px;
+      font-family: "Courier New", Courier, monospace; font-size: 8px;
       letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(93,20,30,0.3); margin-right: auto;
+      color: rgba(93,20,30,0.35);
     }
     body.dark #cwHint { color: rgba(255,200,200,0.25); }
 
     .cw-confetti {
       position: fixed; width: 7px; height: 7px; border-radius: 50%;
-      pointer-events: none; z-index: 9020; opacity: 0;
-    }
-    .cw-confetti.cw-pop { animation: cwPop 0.9s ease-out forwards; }
-    @keyframes cwPop {
-      0%   { opacity: 1; transform: translate(0,0) scale(1); }
-      100% { opacity: 0; transform: var(--cw-tx) scale(0.2); }
+      pointer-events: none; z-index: 9020;
+      transition: transform 0.8s ease, opacity 0.8s ease;
     }
 
     @media (max-height: 950px) {
-      #cwMascotImg { width: 160px; height: 160px; }
-      #cwDialogue  { width: 300px; }
-      #cwDlgBody   { padding: 10px 14px 8px; min-height: 60px; font-size: 12px; }
+      #cwDlgFace { font-size: 18px; width: 90px; padding: 14px 10px; }
+      #cwStage   { max-width: 360px; }
+      #cwDlgBody { padding: 10px 14px; font-size: 11px; }
     }
     @media (max-height: 800px) {
-      #cwMascotImg { width: 120px; height: 120px; }
-      #cwDialogue  { width: 280px; }
-      #cwDlgBody   { padding: 8px 14px 6px; min-height: 50px; font-size: 12px; }
+      #cwDlgFace { font-size: 16px; width: 80px; }
+      #cwStage   { max-width: 320px; }
+      #cwDlgBody { padding: 8px 12px; font-size: 11px; }
     }
     @media (max-height: 650px) {
-      #cwMascotImg { width: 90px; height: 90px; }
-      #cwDialogue  { width: 250px; }
-      #cwDlgBody   { padding: 6px 12px 4px; min-height: 40px; font-size: 11px; }
-      #cwDlgBar    { padding: 5px 10px; }
-      #cwDlgBarTitle { font-size: 16px; }
+      #cwDlgFace  { display: none; }
+      #cwDlgBar   { padding: 5px 10px; }
+      #cwDlgBarTitle { font-size: 11px; }
+      #cwDlgBody  { padding: 8px 14px; font-size: 11px; }
     }
-
     @media (max-width: 600px) {
-      #cwOverlay {
-        align-items: flex-end;
-        justify-content: center;
-        padding: 0;
-      }
-      #cwStage {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        max-width: 100%;
-        position: relative;
-      }
-      #cwMascot {
-        position: absolute;
-        bottom: 100%;
-        left: 12px;
-        margin: 0;
-        z-index: 1;
-        pointer-events: none;
-      }
-      #cwMascotImg {
-        width: 220px;
-        height: 220px;
-        transform: translateY(60px);
-        transition: none;
-      }
+      #cwOverlay  { align-items: flex-end; justify-content: center; padding: 0; }
+      #cwStage    { width: 100%; max-width: 100%; }
       #cwDialogue {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-        max-width: 100%;
-        margin-bottom: 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
+        width: 100%; max-width: 100%; margin-bottom: 0;
+        border-left: none; border-right: none; border-bottom: none;
       }
-      #cwDlgBody  { padding: 12px 16px 8px; font-size: 12px; min-height: 60px; }
+      #cwDlgFace  { width: 80px; font-size: 16px; padding: 14px 8px; }
+      #cwDlgBody  { padding: 10px 14px; font-size: 12px; }
       #cwDlgBar   { padding: 8px 14px; }
-      #cwDlgBarTitle { font-size: 18px; }
+      #cwDlgBarTitle { font-size: 12px; }
     }
   `;
   document.head.appendChild(style);
@@ -189,11 +157,6 @@
   overlay.id = 'cwOverlay';
   overlay.innerHTML = `
     <div id="cwStage">
-      <div id="cwMascot">
-        <div id="cwMascotImg">
-          <img src="pngs/mascot_sad.png" alt="Guide">
-        </div>
-      </div>
       <div id="cwDialogue">
         <div id="cwDlgBar">
           <span id="cwDlgBarTitle">Guide</span>
@@ -203,13 +166,15 @@
             <div class="cw-bar-btn">&#x2715;</div>
           </div>
         </div>
-        <div id="cwDlgBody">
-          <div id="cwDlgEyebrow">Entry &middot; 005</div>
-          <div id="cwDlgText">
-            oh, you made it through\u2026 <span class="cw-hl">well done.</span> Honestly, I wasn&rsquo;t sure you would. This place is a bit strange but keep looking. There are still things to find.
+        <div id="cwDlgInner">
+          <div id="cwDlgFace">(&#x0060;&#xFF65;\u03c9&#xFF65;&#x00B4;)</div>
+          <div id="cwDlgBody">
+            <div id="cwDlgEyebrow">Entry &middot; 006</div>
+            <div id="cwDlgText">
+              you&rsquo;re still here&hellip; <span class="cw-hl">good.</span> I was a little worried. This next part is on your own. I won&rsquo;t always be around to help. But I think you can manage from here.
+            </div>
           </div>
         </div>
-        <div class="cw-dlg-rule"></div>
         <div id="cwDlgFooter">
           <span id="cwHint">Click anywhere to continue</span>
         </div>
@@ -218,27 +183,28 @@
   `;
   document.body.appendChild(overlay);
 
-  const mascotImg = document.getElementById('cwMascotImg');
+  const dlgFace = document.getElementById('cwDlgFace');
 
   function spawnConfetti() {
-    const mR = mascotImg.getBoundingClientRect();
-    const cx = mR.left + mR.width / 2, cy = mR.top + mR.height / 2;
+    const fR = dlgFace.getBoundingClientRect();
+    const cx = fR.left + fR.width / 2, cy = fR.top + fR.height / 2;
     for (let i = 0; i < 28; i++) {
       const dot = document.createElement('div');
       dot.className = 'cw-confetti';
       dot.style.background = SITE_PINKS[i % SITE_PINKS.length];
       dot.style.left = cx + 'px'; dot.style.top = cy + 'px';
       const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 110;
-      dot.style.setProperty('--cw-tx', `translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`);
       document.body.appendChild(dot);
-      setTimeout(() => dot.classList.add('cw-pop'), i * 24);
+      setTimeout(() => {
+        dot.style.transform = `translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`;
+        dot.style.opacity = '0';
+      }, i * 24);
       setTimeout(() => dot.remove(), 1000 + i * 24);
     }
   }
 
   function show() {
     overlay.classList.add('cw-visible');
-    spawnConfetti();
     setTimeout(() => {
       document.addEventListener('click', dismiss, { once: true, capture: true });
     }, 700);
