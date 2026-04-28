@@ -46,6 +46,46 @@
       pointer-events: none;
     }
 
+    /* ══ WELCOME BACK TITLE ══ */
+    #welcome-title {
+      position: absolute;
+      top: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      text-align: center;
+      pointer-events: none;
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+
+    #welcome-title span {
+      font-family: "fayte-pixel-hard", "fayte-pixel-soft", "Fayte", monospace;
+      font-size: clamp(2.2rem, 6vw, 5.5rem);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: #ddd5c8;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 18px rgba(184, 22, 42, 0.55),
+        0 0 60px rgba(184, 22, 42, 0.22),
+        0 0 120px rgba(184, 22, 42, 0.08);
+      animation: titleFadeIn 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes titleFadeIn {
+      from {
+        opacity: 0;
+        letter-spacing: 0.28em;
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        letter-spacing: 0.08em;
+        filter: blur(0px);
+      }
+    }
+
     #tilt-card {
       position: relative; z-index: 4;
       display: flex; align-items: center; justify-content: center;
@@ -325,7 +365,6 @@
       isolation: isolate;
     }
 
-    /* Ink blob via pseudo-element: organic border-radius + heavy blur */
     #p4-text .chunk::before {
       content: '';
       position: absolute;
@@ -333,7 +372,6 @@
       z-index: -1;
       background: rgba(0, 0, 0, 0.82);
       filter: blur(18px);
-      /* Each blob gets its own asymmetric shape */
     }
 
     #p4-text .left {
@@ -595,13 +633,20 @@
   <section id="part1">
     <canvas id="ink-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;"></canvas>
     <img class="layer-1-p1" src="revision/part_1/layer_1.png" alt="" />
+
+    <!-- ══ WELCOME BACK TITLE ══ -->
+    <div id="welcome-title">
+      <span>Welcome Back</span>
+    </div>
+
     <div id="tilt-card">
       <div class="text-block">
         <p>
-          Growing up is often described using bird metaphors.<br>
-          <em>"Learning to fly", "leaving the nest"...</em><br>
-          Dogs would've fit<br>
-          you better though, being <span class="red">runt of the litter</span> and all.
+          The funny thing about spending time with strangers <br>
+          <em>is that they do not stay strangers. </em><br>
+         <br>
+         One day you looked at her and thought: 
+ <span class="red">‘You are also like me’. </span> 
         </p>
       </div>
       <img id="eye-img" src="revision/part_1/layer_2.png" alt="eye" />
@@ -725,8 +770,10 @@
   // ── PART 1 ──────────────────────────────────────────────
   const card   = document.getElementById('tilt-card');
   const eyeImg = document.getElementById('eye-img');
+  const welcomeTitle = document.getElementById('welcome-title');
   let tiltT = {rx:0,ry:0}, tiltC = {rx:0,ry:0};
   let eyeT  = {x:0,y:0},  eyeC  = {x:0,y:0};
+  let titleC = {x:0,y:0}, titleT = {x:0,y:0};
 
   (function p1Loop(){
     requestAnimationFrame(p1Loop);
@@ -740,10 +787,18 @@
     eyeC.x += (eyeT.x - eyeC.x)*0.08;
     eyeC.y += (eyeT.y - eyeC.y)*0.08;
     eyeImg.style.transform = `translateX(calc(-50% + ${eyeC.x}px)) translateY(${eyeC.y}px) translateZ(55px)`;
+
+    // Gentle parallax for the welcome title — shallower depth than the eye
+    titleT.x = nx * 10; titleT.y = ny * 6;
+    titleC.x += (titleT.x - titleC.x) * 0.05;
+    titleC.y += (titleT.y - titleC.y) * 0.05;
+    welcomeTitle.style.transform = `translateX(calc(-50% + ${titleC.x}px)) translateY(${titleC.y}px)`;
+
     const p1el = document.getElementById('part1');
     const p1b  = p1el ? p1el.getBoundingClientRect().bottom : window.innerHeight;
     const p1fade = Math.max(0, Math.min(1, (p1b / window.innerHeight - 0.2) / 0.6));
     card.style.opacity = p1fade.toString();
+    welcomeTitle.style.opacity = p1fade.toString();
   })();
 
   // ── INK DISSOLVE on part1 ───────────────────────────
@@ -1220,7 +1275,6 @@
       canvas4r.style.transform = `translate(${cx * 14}px, ${cy * 9}px)`;
       p4l1.style.transform     = `translate(${cx * 24}px, ${cy * 15}px)`;
 
-      // Text follows at a gentle parallax — sits between l3 and l1 depth
       if (p4text) {
         p4text.style.transform = `translate(${cx * 10}px, ${cy * 7}px)`;
       }
@@ -1373,7 +1427,6 @@
       p5l1.style.transform = `translateY(${handY}px)`;
       p5l2.style.transform = `translateY(${frameY}px)`;
 
-      // Text pans with the illustration so it feels embedded in the image
       if (p5text) {
         p5text.style.transform = `translateY(${handY}px)`;
         const fadeIn  = Math.min(1, progress / 0.12);
@@ -1449,7 +1502,6 @@
 
       t += 0.016;
 
-      // Section fade-in + parallax + tilt
       const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
       const ease  = entry < 0.5 ? 4*entry**3 : 1-(-2*entry+2)**3/2;
       const shift = (1 - ease) * 80;
@@ -1462,7 +1514,6 @@
       canvas.style.opacity   = Math.min(1, ease * 1.5).toString();
       canvas.style.transform = `translateY(${shift}px) translate(${cx * 8}px, ${cy * 5}px) perspective(1200px) rotateX(${-cy * 1.2}deg) rotateY(${cx * 1.2}deg)`;
 
-      // Mouse position in canvas-local UV (0..1)
       const mx = mouse.x / window.innerWidth;
       const my = 1.0 - (mouse.y - rect.top) / Math.max(1, rect.height);
       cmx += (mx - cmx) * 0.05;
@@ -1490,7 +1541,6 @@
       const ny = (mouse.y / window.innerHeight - 0.5) * 2;
       cx += (nx - cx) * 0.05;
       cy += (ny - cy) * 0.05;
-      // Subtle scale settle for closing beat
       const scale = 1 + (1 - ease) * 0.04;
       img.style.opacity   = Math.min(1, ease * 1.5).toString();
       img.style.transform = `translateY(${shift}px) translate(${cx * 10}px, ${cy * 6}px) scale(${scale})`;
