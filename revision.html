@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revision</title>
+  <link rel="stylesheet" href="https://use.typekit.net/mjw2tfe.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @font-face {
+      font-family: "Gambarino";
+      src: url("fonts/Gambarino-Regular.woff2") format("woff2"),
+           url("fonts/Gambarino-Regular.woff") format("woff"),
+           url("fonts/Gambarino-Regular.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "Fayte";
+      src: url("fonts/Fayte-Regular.woff2") format("woff2"),
+           url("fonts/Fayte-Regular.woff") format("woff"),
+           url("fonts/Fayte.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { width: 100%; background: #000; overflow-x: hidden; }
+
+    /* ══ PART 1 — full viewport ══ */
+    #part1 {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      isolation: isolate;
+    }
+
+    .layer-1-p1 {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      z-index: 1; opacity: 1;
+      pointer-events: none;
+    }
+
+    #tilt-card {
+      position: relative; z-index: 4;
+      display: flex; align-items: center; justify-content: center;
+      transform-style: preserve-3d; will-change: transform;
+    }
+
+    .text-block { text-align: center; transform: translateZ(30px); }
+    .text-block p {
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+      line-height: 2.1; color: #ddd5c8; letter-spacing: 0.04em;
+    }
+    .text-block em { font-style: italic; color: #f0ebe3; }
+    .red { color: #b8162a; }
+
+    #eye-img {
+      position: absolute; top: calc(100% + 0.8rem); left: 50%;
+      transform: translateX(-50%) translateZ(55px);
+      width: 120px; opacity: 0.9; will-change: transform; pointer-events: none;
+    }
+
+    /* ══ PART 2 — tall scroll section ══ */
+    #part2 {
+      position: relative;
+      width: 100vw;
+      height: 300vh;
+      margin-top: -20vh;
+      z-index: 5;
+      isolation: isolate;
+    }
+
+    #p2-sticky {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .p2-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: auto;
+      display: block;
+      will-change: transform, opacity;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+    #p2-l4 { z-index: 1; }
+    #p2-l3 { z-index: 2; }
+    #p2-l2 { z-index: 3; }
+
+    #p2-l1 {
+      position: absolute;
+      top: 0vh;
+      left: 0;
+      width: 130vw;
+      height: auto;
+      display: block;
+      z-index: 50;
+      opacity: 0;
+      transform-origin: left center;
+      transform: translateX(-130%) rotate(-12deg);
+      will-change: transform, opacity;
+    }
+
+    #p2-text {
+      position: absolute;
+      top: 115vh;
+      left: 4vw;
+      width: 35vw;
+      z-index: 40;
+      opacity: 0;
+      will-change: transform, opacity;
+      transform-style: preserve-3d;
+    }
+
+    #p2-text::before {
+      content: '';
+      position: absolute;
+      inset: -0.9em -1.2em;
+      background: rgba(0, 0, 0, 0.80);
+      border-radius: 58% 42% 72% 28% / 46% 68% 32% 54%;
+      filter: blur(20px);
+      transform: translateZ(-1px) rotate(1deg) scaleX(1.04);
+    }
+
+    #p2-text p {
+      position: relative;
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.75rem, 1.3vw, 0.95rem);
+      line-height: 2.2;
+      color: #ddd5c8;
+      letter-spacing: 0.04em;
+    }
+
+    #p2-text p + p {
+      margin-top: 1.2em;
+    }
+
+    #three-canvas2 {
+      position: absolute; inset: 0; z-index: 4;
+      pointer-events: none; mix-blend-mode: screen;
+      opacity: 0;
+    }
+
+    #p23-transition-text {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 42vh;
+      z-index: 70;
+      pointer-events: none;
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.8rem, 1.35vw, 1rem);
+      line-height: 2.15;
+      color: #ddd5c8;
+      letter-spacing: 0.04em;
+    }
+
+    #p23-transition-text .chunk {
+      position: absolute;
+      max-width: 34vw;
+      padding: 1.1em 1.4em;
+      isolation: isolate;
+    }
+
+    #p23-transition-text .chunk::before {
+      content: '';
+      position: absolute;
+      inset: -0.7em -1em;
+      z-index: -1;
+      background: rgba(0, 0, 0, 0.80);
+      filter: blur(18px);
+    }
+
+    #p23-transition-text .left {
+      left: 10vw;
+      bottom: 16vh;
+    }
+
+    #p23-transition-text .left::before {
+      border-radius: 64% 36% 48% 52% / 58% 42% 70% 30%;
+      transform: rotate(-2deg) scaleY(1.06);
+    }
+
+    #p23-transition-text .right {
+      right: 12vw;
+      bottom: 0;
+    }
+
+    #p23-transition-text .right::before {
+      border-radius: 42% 58% 66% 34% / 36% 62% 38% 64%;
+      transform: rotate(3deg) scaleX(1.05);
+    }
+
+    .redaction {
+      display: inline-block;
+      width: 8.5em;
+      height: 1.25em;
+      transform: translateY(0.22em);
+      color: transparent;
+      background: #b8162a;
+      box-shadow: 0 0 12px rgba(184,22,42,0.75);
+    }
+
+    .vignette {
+      position: fixed; inset: 0; pointer-events: none; z-index: 200;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(40,2,2,0.28) 100%);
+    }
+
+    /* ══ PART 3 ══ */
+    #part3 {
+      position: relative;
+      width: 100vw;
+      margin-top: -70vh;
+      z-index: 6;
+    }
+    #three-canvas3 {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    #p3-l1 {
+      position: relative;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+
+    #p3-text {
+      position: absolute;
+      top: 49vh;
+      right: 14vw;
+      width: 30vw;
+      z-index: 10;
+      pointer-events: none;
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.8rem, 1.3vw, 0.95rem);
+      line-height: 2.15;
+      color: #ddd5c8;
+      letter-spacing: 0.04em;
+      isolation: isolate;
+    }
+
+    #p3-text::before {
+      content: '';
+      position: absolute;
+      inset: -1em -1.3em;
+      z-index: -1;
+      background: rgba(0, 0, 0, 0.78);
+      border-radius: 44% 56% 62% 38% / 65% 35% 58% 42%;
+      filter: blur(22px);
+      transform: rotate(-1deg) scaleX(1.03);
+    }
+
+    #p3-text p + p {
+      margin-top: 1.2em;
+    }
+
+    /* ══ PART 4 ══ */
+    #part4 {
+      position: relative;
+      width: 100vw;
+      margin-top: -20vh;
+      padding-bottom: 10vh;
+      z-index: 7;
+      overflow: visible;
+    }
+
+    #p4-l3 {
+      position: relative !important;
+      z-index: 1;
+      width: 100%;
+      height: auto;
+      display: block;
+      transform-origin: bottom center;
+      will-change: transform;
+    }
+
+    #part4 .p4-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: auto;
+      display: block;
+      will-change: transform;
+    }
+
+    #p4-l2 { z-index: 2; }
+    #p4-l1 { z-index: 3; }
+
+    /* ══ PART 4 TEXT ══ */
+    #p4-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.8rem, 1.3vw, 0.95rem);
+      line-height: 2.15;
+      color: #ddd5c8;
+      letter-spacing: 0.04em;
+    }
+
+    #p4-text .chunk {
+      position: absolute;
+      max-width: 28vw;
+      padding: 1.4em 1.8em;
+      isolation: isolate;
+    }
+
+    /* Ink blob via pseudo-element: organic border-radius + heavy blur */
+    #p4-text .chunk::before {
+      content: '';
+      position: absolute;
+      inset: -0.7em -1em;
+      z-index: -1;
+      background: rgba(0, 0, 0, 0.82);
+      filter: blur(18px);
+      /* Each blob gets its own asymmetric shape */
+    }
+
+    #p4-text .left {
+      top: 26%;
+      left: 7vw;
+    }
+
+    #p4-text .left::before {
+      border-radius: 71% 29% 58% 42% / 52% 66% 34% 48%;
+      transform: rotate(-3deg) scaleX(1.06);
+    }
+
+    #p4-text .right {
+      bottom: 24%;
+      right: 7vw;
+      text-align: right;
+    }
+
+    #p4-text .right::before {
+      border-radius: 38% 62% 44% 56% / 60% 34% 66% 40%;
+      transform: rotate(2deg) scaleY(1.08);
+    }
+
+    /* ══ PLACEHOLDER TEXT — between Part 3 and Part 4 ══ */
+    #placeholder-text-section {
+      position: relative;
+      width: 100vw;
+      margin-top: -35vh;
+      margin-bottom: -25vh;
+      padding: 18vh 0;
+      z-index: 8;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    #placeholder-word {
+      font-family: "fayte-pixel-hard", "fayte-pixel-soft", "Fayte", monospace;
+      font-size: clamp(5rem, 20vw, 24rem);
+      font-weight: 400;
+      color: #c41a2a;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      text-align: center;
+      text-shadow:
+        0 0 40px rgba(184, 22, 42, 0.8),
+        0 0 120px rgba(184, 22, 42, 0.4),
+        0 0 220px rgba(184, 22, 42, 0.15);
+      will-change: transform;
+    }
+
+    /* ══ PART 5 ══ */
+    #part5 {
+      position: relative;
+      width: 100vw;
+      height: 300vh;
+      z-index: 8;
+      margin-top: 30vh;
+      background: #000;
+    }
+
+    #p5-sticky {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #p5-l2 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      z-index: 2;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    #p5-l1 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      z-index: 1;
+      opacity: 0;
+      will-change: transform, opacity;
+      transform: translateY(100vh);
+    }
+
+    #three-canvas5 {
+      position: absolute;
+      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 3;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    /* ══ PART 5 TEXT ══ */
+    #p5-text {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      font-family: "Gambarino", serif;
+      font-size: clamp(0.8rem, 1.3vw, 0.95rem);
+      line-height: 2.15;
+      color: #ddd5c8;
+      letter-spacing: 0.04em;
+    }
+
+    #p5-text .chunk {
+      position: absolute;
+      max-width: 26vw;
+      padding: 1.2em 1.5em;
+      isolation: isolate;
+    }
+
+    #p5-text .chunk::before {
+      content: '';
+      position: absolute;
+      inset: -0.7em -1em;
+      z-index: -1;
+      background: rgba(0, 0, 0, 0.82);
+      filter: blur(20px);
+    }
+
+    #p5-text .top-left {
+      top: 48%;
+      left: 20vw;
+    }
+
+    #p5-text .top-left::before {
+      border-radius: 66% 34% 52% 48% / 44% 60% 40% 56%;
+      transform: rotate(-2deg) scaleX(1.05);
+    }
+
+    #p5-text .top-right {
+      top: 75%;
+      right: 18vw;
+      text-align: right;
+    }
+
+    #p5-text .top-right::before {
+      border-radius: 38% 62% 70% 30% / 56% 42% 58% 44%;
+      transform: rotate(2deg) scaleY(1.06);
+    }
+
+    #p5-text .bottom-left {
+      top: 130%;
+      left: 19vw;
+    }
+
+    #p5-text .bottom-left::before {
+      border-radius: 54% 46% 40% 60% / 62% 36% 64% 38%;
+      transform: rotate(-1deg) scaleX(1.04);
+    }
+
+    #p5-text .bottom-right {
+      top: 215%;
+      right: 19vw;
+      text-align: right;
+    }
+
+    #p5-text .bottom-right::before {
+      border-radius: 48% 52% 36% 64% / 56% 44% 60% 40%;
+      transform: rotate(2deg) scaleX(1.05);
+    }
+
+    .glitch-swap {
+      position: relative;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .glitch-swap .g-a {
+      display: inline-block;
+      color: #ddd5c8;
+      animation: glitchA 4.6s infinite;
+    }
+
+    .glitch-swap .g-b {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      text-align: center;
+      color: #b8162a;
+      animation: glitchB 4.6s infinite;
+    }
+
+    @keyframes glitchA {
+      0%, 42%   { opacity: 1; transform: translateX(0); filter: none; }
+      43%       { opacity: 0.5; transform: translateX(-2px); filter: blur(0.6px); }
+      44%       { opacity: 0.2; transform: translateX(1px); }
+      45%, 90%  { opacity: 0; }
+      91%       { opacity: 0.4; transform: translateX(2px); filter: blur(0.6px); }
+      92%, 100% { opacity: 1; transform: translateX(0); filter: none; }
+    }
+
+    @keyframes glitchB {
+      0%, 42%   { opacity: 0; }
+      43%       { opacity: 0.4; transform: translateX(2px); filter: blur(0.6px); }
+      44%       { opacity: 0.7; transform: translateX(-1px); }
+      45%, 90%  { opacity: 1; transform: translateX(0); filter: none; }
+      91%       { opacity: 0.5; transform: translateX(-2px); filter: blur(0.6px); }
+      92%, 100% { opacity: 0; }
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ══ PART 6 ══ */
+    #part6 {
+      position: relative;
+      width: 100vw;
+      margin-top: -10vh;
+      z-index: 9;
+    }
+
+    #three-canvas6 {
+      display: block;
+      width: 100%;
+      height: auto;
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+
+    /* ══ PART 7 ══ */
+    #part7 {
+      position: relative;
+      width: 100vw;
+      margin-top: -10vh;
+      padding-bottom: 10vh;
+      z-index: 10;
+    }
+
+    #p7-l1 {
+      position: relative;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vignette"></div>
+
+  <!-- ══ PART 1 ══ -->
+  <section id="part1">
+    <canvas id="ink-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;"></canvas>
+    <img class="layer-1-p1" src="revision/part_1/layer_1.png" alt="" />
+    <div id="tilt-card">
+      <div class="text-block">
+        <p>
+          Growing up is often described using bird metaphors.<br>
+          <em>"Learning to fly", "leaving the nest"...</em><br>
+          Dogs would've fit<br>
+          you better though, being <span class="red">runt of the litter</span> and all.
+        </p>
+      </div>
+      <img id="eye-img" src="revision/part_1/layer_2.png" alt="eye" />
+    </div>
+  </section>
+
+  <!-- ══ PART 2 ══ -->
+  <section id="part2">
+    <div id="p2-sticky">
+      <img id="p2-l4" class="p2-bg" src="revision/part_2/layer_4.png" alt="" />
+      <img id="p2-l3" class="p2-bg" src="revision/part_2/layer_3.png" alt="" />
+      <img id="p2-l2" class="p2-bg" src="revision/part_2/layer_2.png" alt="" />
+      <canvas id="three-canvas2"></canvas>
+    </div>
+    <div id="p2-text">
+      <p>
+        Growing up is often described using bird metaphors.<br>
+        <em>&ldquo;Learning to fly&rdquo;, &ldquo;leaving the nest&rdquo;</em>...
+      </p>
+      <p>
+        Dogs would&rsquo;ve fit you better though,<br>
+        being <span class="red">runt of the litter</span> and all.
+      </p>
+    </div>
+    <img id="p2-l1" src="revision/part_2/layer_1.png" alt="" />
+    <div id="p23-transition-text">
+      <p class="chunk left">
+        Poor her, all alone.<br>
+        Poor you, left behind.
+      </p>
+      <p class="chunk right">
+        Silly, and sadly doomed<br>
+        to fail at playing god.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ PART 3 ══ -->
+  <section id="part3">
+    <img id="p3-l1" src="revision/part_3/layer_1.png" alt="" />
+    <div id="p3-text">
+      <p>
+        Arriving at the eleventh hour like<br>
+        a <span class="redaction" aria-label="redacted"></span>.
+      </p>
+      <p>
+        Bearing the one thing you needed,<br>
+        and in the perfect package.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ PLACEHOLDER TEXT — floats between Part 3 and Part 4 ══ -->
+  <div id="placeholder-text-section">
+    <span id="placeholder-word">PlaceHolder</span>
+  </div>
+
+  <!-- ══ PART 4 ══ -->
+  <section id="part4">
+    <img id="p4-l3" src="revision/part_4/layer_3.png" alt="" />
+    <canvas id="three-canvas4r" class="p4-layer" style="z-index:2;"></canvas>
+    <img id="p4-l1" class="p4-layer" src="revision/part_4/layer_1.png" alt="" />
+    <div id="p4-text">
+      <p class="chunk left">
+        Here it&rsquo;s all wire and plastic veins,<br>
+        metal bones, and silicone skin.
+      </p>
+      <p class="chunk right">
+        The marvel of modern medicine.<br>
+        If only it could fix you in time.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ PART 5 ══ -->
+  <section id="part5">
+    <div id="p5-sticky">
+      <img id="p5-l1" src="revision/part_5/layer_1.png" alt="" />
+      <img id="p5-l2" src="revision/part_5/layer_2.png" alt="" />
+      <canvas id="three-canvas5"></canvas>
+      <div id="p5-text">
+        <p class="chunk top-left">
+          You have always resented<br>
+          words like &lsquo;delicate&rsquo;<br>
+          and &lsquo;fragile&rsquo;.
+        </p>
+        <p class="chunk top-right">
+          Perhaps because they aptly<br>
+          described that reflection of yours.
+        </p>
+        <p class="chunk bottom-left">
+          You too were kept on a shelf,<br>
+          lest you be broken irreparably.
+        </p>
+        <p class="chunk bottom-right">
+          With this,
+          <span class="glitch-swap">
+            <span class="g-a">you</span><span class="g-b">I</span>
+          </span>
+          can finally be happy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PART 6 ══ -->
+  <section id="part6">
+    <canvas id="three-canvas6"></canvas>
+  </section>
+
+  <!-- ══ PART 7 ══ -->
+  <section id="part7">
+    <img id="p7-l1" src="revision/part_7/layer_1.png" alt="" />
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+  const mouse = { x: window.innerWidth/2, y: window.innerHeight/2 };
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+  // ── PART 1 ──────────────────────────────────────────────
+  const card   = document.getElementById('tilt-card');
+  const eyeImg = document.getElementById('eye-img');
+  let tiltT = {rx:0,ry:0}, tiltC = {rx:0,ry:0};
+  let eyeT  = {x:0,y:0},  eyeC  = {x:0,y:0};
+
+  (function p1Loop(){
+    requestAnimationFrame(p1Loop);
+    const nx = (mouse.x/window.innerWidth  - 0.5)*2;
+    const ny = (mouse.y/window.innerHeight - 0.5)*2;
+    tiltT.ry = nx*12; tiltT.rx = -ny*12;
+    tiltC.rx += (tiltT.rx - tiltC.rx)*0.07;
+    tiltC.ry += (tiltT.ry - tiltC.ry)*0.07;
+    card.style.transform = `perspective(900px) rotateX(${tiltC.rx}deg) rotateY(${tiltC.ry}deg)`;
+    eyeT.x = nx*22; eyeT.y = ny*22;
+    eyeC.x += (eyeT.x - eyeC.x)*0.08;
+    eyeC.y += (eyeT.y - eyeC.y)*0.08;
+    eyeImg.style.transform = `translateX(calc(-50% + ${eyeC.x}px)) translateY(${eyeC.y}px) translateZ(55px)`;
+    const p1el = document.getElementById('part1');
+    const p1b  = p1el ? p1el.getBoundingClientRect().bottom : window.innerHeight;
+    const p1fade = Math.max(0, Math.min(1, (p1b / window.innerHeight - 0.2) / 0.6));
+    card.style.opacity = p1fade.toString();
+  })();
+
+  // ── INK DISSOLVE on part1 ───────────────────────────
+  (function initInk() {
+    const inkCanvas = document.getElementById('ink-canvas');
+    const ctx = inkCanvas.getContext('2d');
+    const section = document.getElementById('part1');
+
+    function resizeInk() {
+      inkCanvas.width  = section.offsetWidth;
+      inkCanvas.height = section.offsetHeight;
+    }
+    resizeInk();
+    window.addEventListener('resize', resizeInk);
+
+    const drops = [];
+    let covering = false;
+    let revealing = false;
+    let animating = false;
+    let inkTriggered = false;
+    let fullyRevealed = true;
+
+    function spawnDrop(x, y, speed) {
+      drops.push({
+        x, y, r: 0,
+        maxR: Math.hypot(inkCanvas.width, inkCanvas.height) * 0.75,
+        speed: speed || (Math.random() * 8 + 6),
+        alpha: Math.random() * 0.3 + 0.7,
+        wobble: Math.random() * Math.PI * 2,
+        done: false,
+      });
+    }
+
+    function spawnCoverDrops() {
+      drops.length = 0;
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          spawnDrop(
+            Math.random() * inkCanvas.width,
+            Math.random() * inkCanvas.height
+          );
+        }, i * 80);
+      }
+    }
+
+    function drawFrame() {
+      if (!animating) return;
+      requestAnimationFrame(drawFrame);
+      ctx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+
+      if (covering) {
+        drops.forEach(d => {
+          if (d.r < d.maxR) d.r += d.speed;
+          else d.done = true;
+          drawBlob(d, d.alpha);
+        });
+        if (drops.length >= 12 && drops.every(d => d.done)) {
+          animating = false;
+          fullyRevealed = false;
+        }
+      } else if (revealing) {
+        drops.forEach(d => {
+          d.r = Math.max(0, d.r - d.speed * 1.2);
+          if (d.r <= 0) d.done = true;
+          drawBlob(d, d.alpha);
+        });
+        if (drops.every(d => d.done)) {
+          animating = false;
+          fullyRevealed = true;
+          ctx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+          drops.length = 0;
+        }
+      }
+    }
+
+    function drawBlob(d, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      const pts = 10;
+      for (let i = 0; i <= pts; i++) {
+        const angle = (i / pts) * Math.PI * 2;
+        d.wobble += 0.001;
+        const wobR = d.r * (1 + Math.sin(angle*3+d.wobble)*0.12 + Math.cos(angle*5+d.wobble*1.3)*0.08);
+        const px = d.x + Math.cos(angle) * wobR;
+        const py = d.y + Math.sin(angle) * wobR;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    let lastScrollY = 0;
+
+    window.addEventListener('scroll', () => {
+      const rect = section.getBoundingClientRect();
+      const scrollingDown = window.scrollY > lastScrollY;
+      lastScrollY = window.scrollY;
+
+      const exitProgress = 1 - (rect.bottom / window.innerHeight);
+
+      if (exitProgress > 0.1 && !inkTriggered && scrollingDown) {
+        inkTriggered = true;
+        covering  = true;
+        revealing = false;
+        animating = true;
+        spawnCoverDrops();
+        drawFrame();
+      }
+
+      if (exitProgress <= 0.05 && inkTriggered && !scrollingDown) {
+        inkTriggered = false;
+        covering  = false;
+        revealing = true;
+        animating = true;
+        drops.forEach(d => { d.r = d.maxR; d.done = false; });
+        drawFrame();
+      }
+    }, { passive: true });
+  })();
+
+  // ── PART 2 ──────────────────────────────────────────────
+  const part2   = document.getElementById('part2');
+  const sticky  = document.getElementById('p2-sticky');
+  const l1 = document.getElementById('p2-l1');
+  const l2 = document.getElementById('p2-l2');
+  const l3 = document.getElementById('p2-l3');
+  const l4 = document.getElementById('p2-l4');
+  const cv2 = document.getElementById('three-canvas2');
+
+  let mOff = { l2:{x:0,y:0}, l3:{x:0,y:0}, l4:{x:0,y:0} };
+  const p2HandAnim = {
+    state: 'hidden',
+    start: 0,
+    duration: 1200,
+    exitDuration: 1800,
+    raf: null,
+    pose: { tx: -130, rot: -12, opacity: 0 },
+  };
+  let p2LastScrollY = window.scrollY;
+  let p2ScrollingDown = false;
+  let p2ScrollingUp = false;
+
+  function getP2() {
+    const rect = part2.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    const scrollable = part2.offsetHeight - window.innerHeight;
+    const progress   = Math.max(0, Math.min(1, -rect.top / Math.max(1, scrollable)));
+    const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+    return { inView, progress, entry, rectTop: rect.top };
+  }
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function easeOutBack(t) {
+    const c1 = 0.75;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+
+  function setP2HandPose(tx, rot, opacity) {
+    p2HandAnim.pose = { tx, rot, opacity };
+    l1.style.opacity = opacity.toString();
+    l1.style.transform = `translateX(${tx}%) rotate(${rot}deg)`;
+  }
+
+  function animateP2Hand(now) {
+    const elapsed = now - p2HandAnim.start;
+    const rawT = Math.max(0, Math.min(1, elapsed / p2HandAnim.duration));
+    let tx, rot, opacity;
+
+    if (rawT < 0.16) {
+      const t = easeOutCubic(rawT / 0.16);
+      tx = -130 - t * 3;
+      rot = -12 - t * 1;
+      opacity = t * 0.45;
+    } else {
+      const t = easeOutBack((rawT - 0.16) / 0.84);
+      tx = -133 + t * 125;
+      rot = -13 + t * 13;
+      opacity = Math.min(1, 0.45 + t * 0.75);
+    }
+
+    setP2HandPose(tx, rot, opacity);
+
+    if (rawT < 1) {
+      p2HandAnim.raf = requestAnimationFrame(animateP2Hand);
+    } else {
+      p2HandAnim.state = 'shown';
+      p2HandAnim.raf = null;
+      setP2HandPose(-8, 0, 1);
+    }
+  }
+
+  function triggerP2Hand() {
+    if (p2HandAnim.state !== 'hidden') return;
+    p2HandAnim.state = 'entering';
+    p2HandAnim.start = performance.now();
+    if (p2HandAnim.raf) cancelAnimationFrame(p2HandAnim.raf);
+    p2HandAnim.raf = requestAnimationFrame(animateP2Hand);
+  }
+
+  function animateP2HandExit(now) {
+    const elapsed = now - p2HandAnim.start;
+    const rawT = Math.max(0, Math.min(1, elapsed / p2HandAnim.exitDuration));
+    const holdT = 0.35;
+    const tuckT = Math.max(0, Math.min(1, (rawT - holdT) / 0.2));
+    const leaveT = Math.max(0, Math.min(1, (rawT - holdT - 0.2) / 0.45));
+    const tuck = easeOutCubic(tuckT);
+    const leave = leaveT * leaveT * (3 - 2 * leaveT);
+    const tx = -8 + tuck * 5 - leave * 127;
+    const rot = tuck * 2 - leave * 14;
+    const opacity = Math.max(0, 1 - leave * 1.15);
+
+    setP2HandPose(tx, rot, opacity);
+
+    if (rawT < 1) {
+      p2HandAnim.raf = requestAnimationFrame(animateP2HandExit);
+    } else {
+      p2HandAnim.state = 'hidden';
+      p2HandAnim.raf = null;
+      setP2HandPose(-130, -12, 0);
+    }
+  }
+
+  function reverseP2Hand() {
+    if (p2HandAnim.state !== 'shown' && p2HandAnim.state !== 'entering') return;
+    p2HandAnim.state = 'exiting';
+    p2HandAnim.start = performance.now();
+    if (p2HandAnim.raf) cancelAnimationFrame(p2HandAnim.raf);
+    p2HandAnim.raf = requestAnimationFrame(animateP2HandExit);
+  }
+
+  function resetP2Hand() {
+    if (p2HandAnim.raf) cancelAnimationFrame(p2HandAnim.raf);
+    p2HandAnim.state = 'hidden';
+    p2HandAnim.raf = null;
+    setP2HandPose(-130, -12, 0);
+  }
+
+  function applyLayers() {
+    const { inView, progress, entry, rectTop } = getP2();
+    const scrollDelta = window.scrollY - p2LastScrollY;
+    p2ScrollingDown = scrollDelta > 0;
+    p2ScrollingUp = scrollDelta < 0;
+    p2LastScrollY = window.scrollY;
+
+    const part1 = document.getElementById('part1');
+    const p1rect = part1.getBoundingClientRect();
+    const borderFade = Math.max(0, Math.min(1, p1rect.bottom / window.innerHeight));
+    document.querySelector('.layer-1-p1').style.opacity = borderFade;
+
+    const bgFade = inView ? Math.min(1, entry * 1.5) : 0;
+    l4.style.opacity = bgFade;
+    l3.style.opacity = bgFade;
+    l2.style.opacity = bgFade;
+    cv2.style.opacity = bgFade;
+
+    if (bgFade > 0) {
+      const vw = window.innerWidth;
+      const getH = img => img.naturalWidth > 0 ? (img.naturalHeight/img.naturalWidth)*vw : window.innerHeight;
+      const y4 = -progress * Math.max(0, getH(l4)-window.innerHeight) * 0.5  + mOff.l4.y;
+      const y3 = -progress * Math.max(0, getH(l3)-window.innerHeight) * 0.6  + mOff.l3.y;
+      const y2 = -progress * Math.max(0, getH(l2)-window.innerHeight) * 1.0  + mOff.l2.y;
+      const nx2 = (mouse.x/window.innerWidth  - 0.5)*2;
+      const ny2 = (mouse.y/window.innerHeight - 0.5)*2;
+      const focusShift = Math.sqrt(nx2*nx2 + ny2*ny2) * 0.3;
+      l4.style.filter    = `blur(${2.5 + focusShift}px)`;
+      l3.style.filter    = `blur(${1.0 + focusShift * 0.5}px)`;
+      l2.style.filter    = `blur(0px)`;
+      l4.style.transform = `translateY(${y4}px) translateX(${mOff.l4.x}px)`;
+      l3.style.transform = `translateY(${y3}px) translateX(${mOff.l3.x}px)`;
+      l2.style.transform = `translateY(${y2}px) translateX(${mOff.l2.x}px)`;
+    }
+
+    const p2text = document.getElementById('p2-text');
+    if (p2text) {
+      const textT  = Math.max(0, Math.min(1, (progress - 0.2) / 0.4));
+      const textEase = textT < 0.5 ? 4*textT**3 : 1-(-2*textT+2)**3/2;
+      const textOutT = Math.max(0, Math.min(1, (progress - 0.68) / 0.22));
+      const textOutEase = textOutT < 0.5 ? 4*textOutT**3 : 1-(-2*textOutT+2)**3/2;
+      const nx = (mouse.x/window.innerWidth - 0.5)*2;
+      const ny = (mouse.y/window.innerHeight - 0.5)*2;
+      const tiltX = -ny * 8, tiltY = nx * 8;
+      const textOpacity = Math.min(1, textEase * 2) * (1 - textOutEase);
+      p2text.style.opacity = textOpacity.toString();
+      p2text.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    }
+
+    if (entry > 0.18 && p2ScrollingDown) triggerP2Hand();
+    if (progress < 0.07 && p2ScrollingUp && p2HandAnim.state !== 'hidden') reverseP2Hand();
+    if (!inView && rectTop > window.innerHeight * 0.9) resetP2Hand();
+  }
+
+  // ── PART 3: fade in on scroll ─────────────────────────
+  const part3 = document.getElementById('part3');
+  const p3l1  = document.getElementById('p3-l1');
+
+  function applyPart3() {
+    const rect  = part3.getBoundingClientRect();
+    const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+    const ease  = entry < 0.5 ? 4*entry**3 : 1-(-2*entry+2)**3/2;
+    const shift = (1 - ease) * 80;
+    p3l1.style.opacity   = Math.min(1, ease * 1.5).toString();
+    p3l1.style.transform = `translateY(${shift}px)`;
+  }
+
+  window.addEventListener('scroll', applyPart3, { passive: true });
+  window.addEventListener('scroll', applyLayers, { passive: true });
+
+  // Mouse parallax
+  (function p2Mouse(){
+    requestAnimationFrame(p2Mouse);
+    const { inView } = getP2();
+    if (!inView) return;
+    const nx = (mouse.x/window.innerWidth  - 0.5)*2;
+    const ny = (mouse.y/window.innerHeight - 0.5)*2;
+    mOff.l4 = { x: nx*4,  y: ny*2  };
+    mOff.l3 = { x: nx*10, y: ny*6  };
+    mOff.l2 = { x: nx*18, y: ny*10 };
+    applyLayers();
+  })();
+
+  // ── THREE.JS orbs ────────────────────────────────────────
+  const ren2 = new THREE.WebGLRenderer({ canvas: cv2, alpha: true, antialias: true });
+  ren2.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  ren2.setSize(window.innerWidth, window.innerHeight);
+  ren2.setClearColor(0x000000, 0);
+  const sc2  = new THREE.Scene();
+  const cam2 = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+  cam2.position.z = 5;
+  const orbs = [];
+  for (let i = 0; i < 14; i++) {
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(0.07,16,16),
+      new THREE.MeshBasicMaterial({color:0x8a0a0a,transparent:true,opacity:0.15})
+    );
+    m.position.set((Math.random()-0.5)*10,(Math.random()-0.5)*6,(Math.random()-0.5)*3);
+    m.userData={vx:(Math.random()-0.5)*0.003,vy:(Math.random()-0.5)*0.002,phase:Math.random()*Math.PI*2};
+    sc2.add(m); orbs.push(m);
+  }
+  let cam2C={x:0,y:0}, t2=0;
+  (function sc2Loop(){
+    requestAnimationFrame(sc2Loop);
+    t2+=0.01;
+    const {inView}=getP2();
+    if(!inView) return;
+    const nx=(mouse.x/window.innerWidth-0.5)*2;
+    const ny=(mouse.y/window.innerHeight-0.5)*2;
+    orbs.forEach(o=>{
+      o.position.x+=o.userData.vx; o.position.y+=o.userData.vy;
+      o.material.opacity=0.08+Math.sin(t2+o.userData.phase)*0.06;
+      if(o.position.x>5)o.position.x=-5; if(o.position.x<-5)o.position.x=5;
+      if(o.position.y>3)o.position.y=-3; if(o.position.y<-3)o.position.y=3;
+    });
+    cam2C.x+=(-nx*0.3-cam2C.x)*0.04; cam2C.y+=(ny*0.2-cam2C.y)*0.04;
+    cam2.position.x=cam2C.x; cam2.position.y=cam2C.y;
+    cam2.lookAt(sc2.position);
+    ren2.render(sc2,cam2);
+  })();
+
+  window.addEventListener('resize',()=>{
+    ren2.setSize(window.innerWidth,window.innerHeight);
+    cam2.aspect=window.innerWidth/window.innerHeight; cam2.updateProjectionMatrix();
+  });
+
+  // ── PART 3: simple CSS parallax ────────────────────
+  (function initPart3() {
+    const p3img = document.getElementById('p3-l1');
+    let cx = 0, cy = 0, tx = 0, ty = 0;
+    window.addEventListener('mousemove', e => {
+      tx = (e.clientX / window.innerWidth  - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+    (function loop() {
+      requestAnimationFrame(loop);
+      cx += (tx - cx) * 0.05;
+      cy += (ty - cy) * 0.05;
+      const rect = p3img.closest('section').getBoundingClientRect();
+      const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+      const ease  = entry < 0.5 ? 4*entry**3 : 1-(-2*entry+2)**3/2;
+      const shift = (1 - ease) * 80;
+      p3img.style.opacity   = Math.min(1, ease * 1.5).toString();
+      p3img.style.transform = `translateY(${shift}px) translate(${cx * 6}px, ${cy * 4}px) perspective(1200px) rotateX(${-cy * 1.5}deg) rotateY(${cx * 1.5}deg)`;
+    })();
+  })();
+
+  // ── PLACEHOLDER TEXT: always visible, mouse parallax ──
+  (function initPlaceholder() {
+    const el = document.getElementById('placeholder-word');
+    let cx = 0, cy = 0;
+    (function loop() {
+      requestAnimationFrame(loop);
+      const nx = (mouse.x / window.innerWidth  - 0.5) * 2;
+      const ny = (mouse.y / window.innerHeight - 0.5) * 2;
+      cx += (nx - cx) * 0.06;
+      cy += (ny - cy) * 0.06;
+      el.style.transform = `translateX(${cx * 8}px) translateY(${cy * 6}px)`;
+    })();
+  })();
+
+  // ── PART 4: parallax + ripple on layer_2 ───────────
+  (function initPart4() {
+    const p4l1 = document.getElementById('p4-l1');
+    const p4l3 = document.getElementById('p4-l3');
+    const canvas4r = document.getElementById('three-canvas4r');
+    const p4text = document.getElementById('p4-text');
+    let cx = 0, cy = 0, tx = 0, ty = 0;
+    let mx4 = 0.5, my4 = 0.5, cmx4 = 0.5, cmy4 = 0.5;
+
+    window.addEventListener('mousemove', e => {
+      tx = (e.clientX / window.innerWidth  - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      mx4 = e.clientX / window.innerWidth;
+      my4 = 1.0 - e.clientY / window.innerHeight;
+    });
+
+    const ren4r = new THREE.WebGLRenderer({ canvas: canvas4r, alpha: true, antialias: true });
+    ren4r.setClearColor(0x000000, 0);
+    ren4r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const sc4r  = new THREE.Scene();
+    const cam4r = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const vert = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`;
+    const frag = `
+      uniform sampler2D uTex;
+      uniform float uTime;
+      uniform vec2 uMouse;
+      varying vec2 vUv;
+      void main(){
+        float wave = sin(vUv.x*12.0+uTime*0.8)*0.002 + sin(vUv.y*9.0+uTime*0.6)*0.002;
+        vec2 toM = vUv - uMouse;
+        float d = length(toM);
+        float rip = sin(d*28.0 - uTime*3.0)*0.005*exp(-d*5.0);
+        gl_FragColor = texture2D(uTex, vUv + vec2(wave + rip, wave - rip));
+      }
+    `;
+
+    const mat4r = new THREE.ShaderMaterial({
+      uniforms: { uTex:{value:null}, uTime:{value:0}, uMouse:{value:new THREE.Vector2(0.5,0.5)} },
+      vertexShader: vert, fragmentShader: frag, transparent: true,
+    });
+    sc4r.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat4r));
+
+    new THREE.TextureLoader().load('revision/part_4/layer_2.png', tex => {
+      mat4r.uniforms.uTex.value = tex;
+      const imgAspect = tex.image.width / tex.image.height;
+      function syncSize() {
+        const W = window.innerWidth;
+        const H = Math.round(W / imgAspect);
+        ren4r.setSize(W, H);
+        canvas4r.style.width  = '100%';
+        canvas4r.style.height = 'auto';
+      }
+      syncSize();
+      window.addEventListener('resize', syncSize);
+    });
+
+    let t4 = 0;
+    (function loop() {
+      requestAnimationFrame(loop);
+      t4 += 0.016;
+      cx += (tx - cx) * 0.06;
+      cy += (ty - cy) * 0.06;
+      cmx4 += (mx4 - cmx4) * 0.05;
+      cmy4 += (my4 - cmy4) * 0.05;
+
+      p4l3.style.transform     = `translate(${cx * 6}px,  ${cy * 4}px) scaleY(1.35)`;
+      canvas4r.style.transform = `translate(${cx * 14}px, ${cy * 9}px)`;
+      p4l1.style.transform     = `translate(${cx * 24}px, ${cy * 15}px)`;
+
+      // Text follows at a gentle parallax — sits between l3 and l1 depth
+      if (p4text) {
+        p4text.style.transform = `translate(${cx * 10}px, ${cy * 7}px)`;
+      }
+
+      mat4r.uniforms.uTime.value = t4;
+      mat4r.uniforms.uMouse.value.set(cmx4, cmy4);
+      ren4r.render(sc4r, cam4r);
+    })();
+  })();
+
+  // ── PART 5: heat haze shader ─────────────────────────
+  (function initHaze() {
+    const cv5  = document.getElementById('three-canvas5');
+    const ren5 = new THREE.WebGLRenderer({ canvas: cv5, alpha: true, antialias: false });
+    ren5.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    ren5.setSize(window.innerWidth, window.innerHeight);
+    ren5.setClearColor(0x000000, 0);
+
+    const sc5  = new THREE.Scene();
+    const cam5 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const vert5 = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`;
+    const frag5 = `
+      uniform float uTime;
+      uniform vec2  uMouse;
+      uniform vec2  uRes;
+      varying vec2  vUv;
+
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p), f=fract(p);
+        f=f*f*(3.0-2.0*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+                   mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+      }
+      float fbm(vec2 p){
+        float v=0.0,a=0.5;
+        for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.1; a*=0.5; }
+        return v;
+      }
+
+      void main(){
+        vec2 uv = vUv;
+        float t  = uTime * 0.18;
+        float n1 = fbm(uv * 3.0 + vec2(t, t * 0.7));
+        float n2 = fbm(uv * 4.5 - vec2(t * 0.5, t * 1.1));
+
+        vec2 distort = vec2(n1 - 0.5, n2 - 0.5) * 0.012;
+
+        vec2 toM  = uv - uMouse;
+        float d   = length(toM);
+        float rip = sin(d * 20.0 - uTime * 2.5) * 0.004 * exp(-d * 4.0);
+        distort  += normalize(toM + 0.001) * rip;
+
+        vec2 suv = vUv + distort;
+        float heat = fbm(suv * 5.0 + vec2(0.0, -t * 1.5));
+
+        vec3 col = vec3(0.55, 0.04, 0.04) * heat * 0.55;
+        float alpha = heat * 0.32;
+
+        gl_FragColor = vec4(col, alpha);
+      }
+    `;
+
+    const mat5 = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime:  { value: 0 },
+        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+        uRes:   { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      },
+      vertexShader: vert5,
+      fragmentShader: frag5,
+      transparent: true,
+    });
+    sc5.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat5));
+
+    let t5 = 0;
+    let cm5 = { x: 0.5, y: 0.5 };
+
+    (function loop5() {
+      requestAnimationFrame(loop5);
+
+      const section5 = document.getElementById('part5');
+      const rect = section5.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+
+      t5 += 0.016;
+      cm5.x += (mouse.x / window.innerWidth  - cm5.x) * 0.04;
+      cm5.y += (1 - mouse.y / window.innerHeight - cm5.y) * 0.04;
+      mat5.uniforms.uTime.value  = t5;
+      mat5.uniforms.uMouse.value.set(cm5.x, cm5.y);
+      ren5.render(sc5, cam5);
+    })();
+
+    window.addEventListener('resize', () => {
+      ren5.setSize(window.innerWidth, window.innerHeight);
+      mat5.uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
+    });
+  })();
+
+  // ── PART 5: ease in then scroll-pan ──────────────────
+  (function initPart5() {
+    const section5 = document.getElementById('part5');
+    const p5l1     = document.getElementById('p5-l1');
+    const p5l2     = document.getElementById('p5-l2');
+    const p5text   = document.getElementById('p5-text');
+
+    let springY   = window.innerHeight;
+    let springV   = 0;
+    let entryDone = false;
+
+    (function loop() {
+      requestAnimationFrame(loop);
+
+      const rect       = section5.getBoundingClientRect();
+      const scrollable = section5.offsetHeight - window.innerHeight;
+      const progress   = Math.max(0, Math.min(1, -rect.top / Math.max(1, scrollable)));
+
+      const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+
+      if (!entryDone) {
+        const target = entry > 0.05 ? 0 : window.innerHeight;
+        springV += (target - springY) * 0.08;
+        springV *= 0.72;
+        springY += springV;
+        if (Math.abs(springY) < 0.5 && Math.abs(springV) < 0.1) {
+          springY   = 0;
+          entryDone = true;
+        }
+        p5l1.style.opacity   = Math.min(1, (1 - springY / window.innerHeight) * 2).toString();
+        p5l1.style.transform = `translateY(${springY}px)`;
+        if (p5text) p5text.style.opacity = '0';
+        return;
+      }
+
+      const imgH   = p5l1.naturalHeight && p5l1.naturalWidth
+        ? (p5l1.naturalHeight / p5l1.naturalWidth) * window.innerWidth
+        : window.innerHeight * 1.8;
+      const frameH = p5l2.naturalHeight && p5l2.naturalWidth
+        ? (p5l2.naturalHeight / p5l2.naturalWidth) * window.innerWidth
+        : window.innerHeight * 1.8;
+
+      const handPanMax  = Math.max(0, imgH   - window.innerHeight);
+      const framePanMax = Math.max(0, frameH - window.innerHeight);
+
+      const handY  = -progress * handPanMax;
+      const frameY = -progress * framePanMax;
+
+      p5l1.style.opacity   = '1';
+      p5l1.style.transform = `translateY(${handY}px)`;
+      p5l2.style.transform = `translateY(${frameY}px)`;
+
+      // Text pans with the illustration so it feels embedded in the image
+      if (p5text) {
+        p5text.style.transform = `translateY(${handY}px)`;
+        const fadeIn  = Math.min(1, progress / 0.12);
+        const fadeOut = Math.max(0, 1 - (progress - 0.85) / 0.13);
+        p5text.style.opacity = (fadeIn * fadeOut).toString();
+      }
+    })();
+  })();
+
+  // ── PART 6: petal with ripple shader (three.js) ──────
+  (function initPart6() {
+    const section = document.getElementById('part6');
+    const canvas  = document.getElementById('three-canvas6');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const vert = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }`;
+    const frag = `
+      uniform sampler2D uTex;
+      uniform float uTime;
+      uniform vec2  uMouse;
+      varying vec2  vUv;
+      void main(){
+        float wave = sin(vUv.x * 12.0 + uTime * 0.8) * 0.002
+                   + sin(vUv.y *  9.0 + uTime * 0.6) * 0.002;
+        vec2 toM = vUv - uMouse;
+        float d  = length(toM);
+        float rip = sin(d * 28.0 - uTime * 3.0) * 0.005 * exp(-d * 5.0);
+        gl_FragColor = texture2D(uTex, vUv + vec2(wave + rip, wave - rip));
+      }
+    `;
+
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTex:   { value: null },
+        uTime:  { value: 0 },
+        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+      },
+      vertexShader: vert,
+      fragmentShader: frag,
+      transparent: true,
+    });
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+
+    new THREE.TextureLoader().load('revision/part_6/layer_1.png', tex => {
+      mat.uniforms.uTex.value = tex;
+      const imgAspect = tex.image.width / tex.image.height;
+      function syncSize() {
+        const W = window.innerWidth;
+        const H = Math.round(W / imgAspect);
+        renderer.setSize(W, H);
+        canvas.style.width  = '100%';
+        canvas.style.height = 'auto';
+      }
+      syncSize();
+      window.addEventListener('resize', syncSize);
+    });
+
+    let t = 0;
+    let cmx = 0.5, cmy = 0.5;
+    let cx = 0, cy = 0;
+
+    (function loop() {
+      requestAnimationFrame(loop);
+
+      const rect = section.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
+
+      t += 0.016;
+
+      // Section fade-in + parallax + tilt
+      const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+      const ease  = entry < 0.5 ? 4*entry**3 : 1-(-2*entry+2)**3/2;
+      const shift = (1 - ease) * 80;
+
+      const nx = (mouse.x / window.innerWidth  - 0.5) * 2;
+      const ny = (mouse.y / window.innerHeight - 0.5) * 2;
+      cx += (nx - cx) * 0.05;
+      cy += (ny - cy) * 0.05;
+
+      canvas.style.opacity   = Math.min(1, ease * 1.5).toString();
+      canvas.style.transform = `translateY(${shift}px) translate(${cx * 8}px, ${cy * 5}px) perspective(1200px) rotateX(${-cy * 1.2}deg) rotateY(${cx * 1.2}deg)`;
+
+      // Mouse position in canvas-local UV (0..1)
+      const mx = mouse.x / window.innerWidth;
+      const my = 1.0 - (mouse.y - rect.top) / Math.max(1, rect.height);
+      cmx += (mx - cmx) * 0.05;
+      cmy += (my - cmy) * 0.05;
+
+      mat.uniforms.uTime.value = t;
+      mat.uniforms.uMouse.value.set(cmx, cmy);
+      renderer.render(scene, camera);
+    })();
+  })();
+
+  // ── PART 7: fade in + mouse parallax (final beat) ────
+  (function initPart7() {
+    const section = document.getElementById('part7');
+    const img = document.getElementById('p7-l1');
+    let cx = 0, cy = 0;
+    (function loop() {
+      requestAnimationFrame(loop);
+      const rect = section.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
+      const entry = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
+      const ease  = entry < 0.5 ? 4*entry**3 : 1-(-2*entry+2)**3/2;
+      const shift = (1 - ease) * 100;
+      const nx = (mouse.x / window.innerWidth  - 0.5) * 2;
+      const ny = (mouse.y / window.innerHeight - 0.5) * 2;
+      cx += (nx - cx) * 0.05;
+      cy += (ny - cy) * 0.05;
+      // Subtle scale settle for closing beat
+      const scale = 1 + (1 - ease) * 0.04;
+      img.style.opacity   = Math.min(1, ease * 1.5).toString();
+      img.style.transform = `translateY(${shift}px) translate(${cx * 10}px, ${cy * 6}px) scale(${scale})`;
+    })();
+  })();
+
+  </script>
+</body>
+</html>

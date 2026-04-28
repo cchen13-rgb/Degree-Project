@@ -1,1 +1,0 @@
-/* hangman-welcome.js — dialogue removed */

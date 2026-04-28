@@ -407,7 +407,7 @@ function triggerDoorTransition() {
   `;
   document.body.appendChild(overlay);
   requestAnimationFrame(() => { overlay.style.opacity = "1"; });
-  setTimeout(() => { window.location.href = "parallax.html"; }, 850);
+  setTimeout(() => { window.location.href = "revision.html"; }, 850);
 }
 
 /* ===================== RESET ===================== */
